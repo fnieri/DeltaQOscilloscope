@@ -25,8 +25,10 @@ class ObservationPoint:
 
     def get_cdf_and_sorted_values(self):
         """
+        https://stats.stackexchange.com/questions/381588/how-does-this-code-find-the-cdf
+
         Return CDF and sorted values from value points of observation point
-        :return:
+        :return: Cdf and sorted data
         """
         values_copy = self.values.copy()
         sorted_data = np.sort(values_copy)
@@ -35,5 +37,6 @@ class ObservationPoint:
     def get_pdf_and_bin_edges(self, bins=100):
         values_copy = self.values.copy()
         counts, bin_edges = np.histogram(values_copy, bins=bins, density=True)
-        pdf = counts / np.sum(counts)
-        return pdf, bin_edges[:-1]
+        pdf = counts  # Since np.histogram with density=True already normalizes to PDF
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Compute bin centers
+        return pdf, bin_centers
