@@ -4,7 +4,7 @@ import threading
 import numpy as np
 import pyqtgraph as pg
 
-from ObservationPoint import ObservationPoint
+from diagram.ObservationPoint import ObservationPoint
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget

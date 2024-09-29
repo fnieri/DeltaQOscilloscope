@@ -1,9 +1,15 @@
 import numpy as np
 
+from diagram.component import DiagramComponent
+from diagram.sequential import SequentialOperator
+from utils.math_utils import convolve
 
-class ObservationPoint:
-    def __init__(self):
+
+class ObservationPoint(DiagramComponent):
+    def __init__(self, name="default"):
+        super().__init__(name)
         self.values = []
+        self.next: SequentialOperator = None
 
     def get_min_value(self):
         return np.min(self.values)
@@ -40,3 +46,7 @@ class ObservationPoint:
         pdf = counts  # Since np.histogram with density=True already normalizes to PDF
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Compute bin centers
         return pdf, bin_centers
+
+    def calculate_dq(self):
+        return self.next.calculate_dq(*self.get_pdf_and_bin_edges())
+    
