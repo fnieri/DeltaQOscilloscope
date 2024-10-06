@@ -11,7 +11,6 @@ class System:
         self.components[component.name] = component
 
     def add_time(self, name, time):
-        print(self.components)
         self.components[name].add_value(time)
 
     def set_first_component(self, name):
@@ -21,4 +20,5 @@ class System:
         self.last_component = self.components[name]
 
     def calculate_dq(self):
-        self.first_component.calculate_dq()
+        # Use None, None as we will calculate from the first sequential operator and we can't convolute from previous (inexistent)
+        self.first_component.calculate_dq(None, None)

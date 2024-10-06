@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 
-from diagram.ObservationPoint import ObservationPoint
 import numpy as np
 
-def convolve(*args) -> np.ndarray:
+def convolve(*args):
     if len(args) == 2:
         first = args[0]
         second = args[1]
@@ -11,20 +10,23 @@ def convolve(*args) -> np.ndarray:
         pdf1, bins1 = first.get_pdf_and_bin_edges()
         pdf2, bins2 = second.get_pdf_and_bin_edges()
 
-        # Here, we normalize pdf before convoluting
 
-        bin_width1 = bins1[1] - bins1[0]
-        bin_width2 = bins2[1] - bins2[0]
 
-        pdf1_normalized = pdf1 / np.sum(pdf1 * bin_width1)
-        pdf2_normalized = pdf2 / np.sum(pdf2 * bin_width2)
-
-        convolved_pdf = np.convolve(pdf1_normalized, pdf2_normalized, mode='full')
-        convolved_pdf *= bin_width1 * bin_width2  # Scale according to original scale
-
-        return convolved_pdf
     else:
-        pass
+        pdf1, bins1 = args[0], args[1]
+        pdf2, bins2 = args[2], args[3]
+
+    bin_width1 = bins1[1] - bins1[0]
+    bin_width2 = bins2[1] - bins2[0]
+
+    # Here, we normalize pdf before convoluting
+    pdf1_normalized = pdf1 / np.sum(pdf1 * bin_width1)
+    pdf2_normalized = pdf2 / np.sum(pdf2 * bin_width2)
+
+    convolved_pdf = np.convolve(pdf1_normalized, pdf2_normalized, mode='full')
+    convolved_pdf *= bin_width1 * bin_width2  # Scale according to original scale
+    convolved_bins = compute_convolved_bins(bins1, bins2)
+    return convolved_pdf, convolved_bins
 
 def compute_convolved_bins(bins1, bins2) -> np.ndarray:
     """
@@ -48,17 +50,26 @@ def compute_cdf_from_pdf(pdf: np.ndarray) -> np.ndarray:
 def normalize_pdf(pdf, bin_width):
     return pdf / np.sum(pdf * bin_width)
 
+def multiply_cdf(cdf: np.ndarray, constant: int) -> np.ndarray:
+    return constant * cdf
 
-def add_n_pdfs_and_convert_to_cdf(pdfs: list, bin_width):
-    pdf_sum = np.sum(pdfs, axis=0)
-    pdf_normalized = normalize_pdf(pdf_sum, bin_width)
-    cdf = compute_cdf_from_pdf(pdf_normalized)
-    return pdf_normalized, cdf
+def add_cdfs(cdfs):
+    """
+    Add multiple cdfs by interpolating
+    :param cdfs:
+    :return:
+    """
 
+    x_common = np.union1d(cdfs[0][0], cdfs[1][0])
+    for i in range(2, len(cdfs)):
+        x_common = np.union1d(x_common, cdfs[i][0])
 
-def multiply_pdf_and_convert_to_cdf(pdf, constant, bin_width):
-    pdf_scaled = pdf * constant
-    pdf_normalized = normalize_pdf(pdf_scaled, bin_width)
-    cdf = compute_cdf_from_pdf(pdf_normalized)
-    return pdf_normalized, cdf
+    y_interp_list = []
+    for x, y in cdfs:
+        y_interp = np.interp(x_common, x, y)  # Interpolate each CDF
+        y_interp_list.append(y_interp)
 
+    return x_common, np.sum(y_interp_list, axis=0)
+
+import numpy as np
+import matplotlib.pyplot as plt

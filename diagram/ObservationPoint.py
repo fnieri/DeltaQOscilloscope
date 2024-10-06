@@ -3,13 +3,16 @@ import numpy as np
 from diagram.component import DiagramComponent
 from diagram.sequential import SequentialOperator
 from utils.math_utils import convolve
-
+import matplotlib.pyplot as plt
 
 class ObservationPoint(DiagramComponent):
     def __init__(self, name="default"):
         super().__init__(name)
         self.values = []
         self.next: SequentialOperator = None
+
+    def set_next(self, next):
+        self.next = next
 
     def get_min_value(self):
         return np.min(self.values)
@@ -38,6 +41,7 @@ class ObservationPoint(DiagramComponent):
         """
         values_copy = self.values.copy()
         sorted_data = np.sort(values_copy)
+
         return np.arange(1, len(sorted_data) + 1) / len(sorted_data), sorted_data
 
     def get_pdf_and_bin_edges(self, bins=100):
@@ -47,6 +51,7 @@ class ObservationPoint(DiagramComponent):
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Compute bin centers
         return pdf, bin_centers
 
-    def calculate_dq(self):
+    def calculate_dq(self, *args):
+        print(self.values, self.name)
         return self.next.calculate_dq(*self.get_pdf_and_bin_edges())
     
