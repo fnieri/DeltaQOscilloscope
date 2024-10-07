@@ -26,14 +26,14 @@ class CacheSystem:
         is_hit = random.random() < self.hit_probability
         start_time = time.time()
         if is_hit and index in self.cache:
-            print(f"Cache HIT: Returning data for index {index} from cache.")
+        #    print(f"Cache HIT: Returning data for index {index} from cache.")
             ret = self.main_memory[index]
             end_time = time.time()
             delay = end_time - start_time
             self.system.add_time("hit", delay)
             return ret
         else:
-            print(f"Cache MISS: Loading data for index {index} from main memory.")
+          #  print(f"Cache MISS: Loading data for index {index} from main memory.")
             ret = self.load_from_main_memory(index)
             end_time = time.time()
 
@@ -43,11 +43,12 @@ class CacheSystem:
 
     def load_from_main_memory(self, index):
         """Fetch data from main memory and store it in the cache."""
-        start_time = time.time()
+        start_time = time.perf_counter()
         data = self.main_memory[index]
 
         self.cache.append(index)
-        end_time = time.time()
+        end_time = time.perf_counter()
+
         delay = end_time - start_time
         self.system.add_time("main", delay)
         return data
@@ -58,7 +59,6 @@ class CacheSystem:
 
 syst = System()
 
-
 hit = ObservationPoint("hit")
 miss = ObservationPoint("miss")
 main = ObservationPoint("main")
@@ -66,7 +66,6 @@ main = ObservationPoint("main")
 syst.add_component(hit)
 syst.add_component(miss)
 syst.add_component(main)
-
 
 probabilities = {hit: 0.95, miss: 0.05}
 read_prob = ProbabilisticOperator("read_prob", probabilities)
@@ -92,16 +91,14 @@ miss.set_next(main_seq)
 main_seq.set_next_operator(main)
 # Example usage:
 main_memory = [i * 10 for i in range(100)]  # Simulated main memory with 100 elements
-cache_system = CacheSystem(main_memory, 5, syst)
+cache_system = CacheSystem(main_memory, 25, syst)
 
 # Simulate accessing some data
-for i in range(1000):
+for i in range(10000):
     i = random.randint(0, 99)
-    print(f"\nAccessing index {i}:")
+    #print(f"\nAccessing index {i}:")
     result = cache_system.access_cache(i)
-    print(f"Data: {result}")
-    print(f"Cache Status: {cache_system.cache_status()}")
-
-print(cache_system.system.components["miss"].values)
+   # print(f"Data: {result}")
+    #print(f"Cache Status: {cache_system.cache_status()}")
 
 syst.calculate_dq()

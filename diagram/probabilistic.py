@@ -1,6 +1,6 @@
 from diagram.ObservationPoint import ObservationPoint
 from diagram.component import DiagramComponent
-from utils.math_utils import multiply_cdf, add_cdfs, compute_cdf_from_pdf
+from utils.math_utils import multiply_cdf, add_cdfs, compute_cdf_from_pdf, compute_pdf_from_cdf
 import matplotlib.pyplot as plt
 
 class ProbabilisticOperator(DiagramComponent):
@@ -22,11 +22,8 @@ class ProbabilisticOperator(DiagramComponent):
             cdf = compute_cdf_from_pdf(pdf)
             multiplied_cdf = multiply_cdf(cdf, probability)
             cdfs.append((multiplied_cdf, values))
-            plt.plot(values, multiplied_cdf, label=f'Cumulative Probability for {component.name} (p={probability})')
-        final_cdf = add_cdfs(cdfs)
 
-        plt.legend()
-        plt.grid()
-        plt.show()
+        values, cdf = add_cdfs(cdfs)
+        pdf = compute_pdf_from_cdf(cdf, values)
 
-        return final_cdf
+        return pdf, values

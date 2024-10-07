@@ -2,7 +2,7 @@ import numpy as np
 
 from diagram.component import DiagramComponent
 from diagram.sequential import SequentialOperator
-from utils.math_utils import convolve
+from utils.math_utils import convolve_pdf
 import matplotlib.pyplot as plt
 
 class ObservationPoint(DiagramComponent):
@@ -18,7 +18,7 @@ class ObservationPoint(DiagramComponent):
         return np.min(self.values)
 
     def get_max_value(self):
-        return np.max(self.values)
+        return np.max(self. values)
 
     def get_25_percentile(self):
         return np.percentile(self.values, 25)
@@ -52,6 +52,5 @@ class ObservationPoint(DiagramComponent):
         return pdf, bin_centers
 
     def calculate_dq(self, *args):
-        print(self.values, self.name)
         return self.next.calculate_dq(*self.get_pdf_and_bin_edges())
     
