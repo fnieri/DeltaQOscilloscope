@@ -12,9 +12,14 @@ class SequentialOperator():
     def calculate_dq(self, previous_pdf, previous_bins):
         # First operator in system
         if previous_pdf is None and previous_bins is None:
-            pdf, values = self.next.calculate_dq()
+            pdf, bins = self.next.calculate_dq()
+            cdf, bins = compute_cdf_from_pdf(pdf, bins)
+            return cdf, bins
         elif self.next is not None:
             pdf, bins = convolve_pdf(previous_pdf, previous_bins, *self.next.calculate_dq())
             return pdf, bins
         else:
             return previous_pdf, previous_bins
+
+    def is_plottable(self):
+        return False

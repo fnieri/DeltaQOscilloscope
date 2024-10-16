@@ -4,3 +4,6 @@ class DiagramComponent:
 
     def calculate_dq(self, *args):
         pass
+
+    def is_plottable(self):
+        return False

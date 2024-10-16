@@ -15,15 +15,15 @@ class ProbabilisticOperator(DiagramComponent):
         return abs(total_prob - 1) < 1e-6
 
     def calculate_dq(self, *args):
-        plt.figure(figsize=(10, 6))
         cdfs = []
         for component, probability in self.following_components_and_probabilities.items():
             pdf, values = component.calculate_dq()
-            cdf = compute_cdf_from_pdf(pdf)
-            multiplied_cdf = multiply_cdf(cdf, probability)
+            cdf = compute_cdf_from_pdf(pdf, values)
+            multiplied_cdf = multiply_cdf(cdf[0], probability)
             cdfs.append((multiplied_cdf, values))
-
         values, cdf = add_cdfs(cdfs)
-        pdf = compute_pdf_from_cdf(cdf, values)
-
+        pdf, values = compute_pdf_from_cdf(cdf, values)
         return pdf, values
+
+    def is_plottable(self):
+        return False
