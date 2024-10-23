@@ -21,8 +21,13 @@ class ProbabilisticOperator(DiagramComponent):
             cdf = compute_cdf_from_pdf(pdf, values)
             multiplied_cdf = multiply_cdf(cdf[0], probability)
             cdfs.append((multiplied_cdf, values))
+            print(len(cdf[1]    ))
+        print(cdfs)
         values, cdf = add_cdfs(cdfs)
         pdf, values = compute_pdf_from_cdf(cdf, values)
+        cdf = compute_cdf_from_pdf(pdf, values)
+        print()
+        print(cdf)
         return pdf, values
 
     def is_plottable(self):

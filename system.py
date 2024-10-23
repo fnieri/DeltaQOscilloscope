@@ -24,8 +24,6 @@ class System:
     def calculate_dq(self):
         # Use None, None as we will calculate from the first sequential operator and we can't convolute from previous (inexistent)
         pdf, values = self.first_component.calculate_dq(None, None)
-        print(pdf, values)
-        print()
         return pdf, values
 
     def get_all_plottable_components(self) -> list[DiagramComponent]:
