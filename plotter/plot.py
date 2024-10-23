@@ -1,8 +1,11 @@
 import pyqtgraph as pg
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea, QPushButton, QDialog, QTextEdit
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtSvg import QGraphicsSvgItem
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget, QScrollArea, QPushButton, QDialog, QTextEdit, \
+    QTabWidget, QGraphicsView, QGraphicsScene, QGraphicsEllipseItem
 
 
 class RealTimePlotter(QtWidgets.QMainWindow):
@@ -10,6 +13,8 @@ class RealTimePlotter(QtWidgets.QMainWindow):
         super().__init__()
 
         self.info_label = QLabel()
+        self.stats_label = QLabel()
+
         self.plot_widget1 = pg.PlotWidget()
         self.plot_widget_convolution = pg.PlotWidget()
 
@@ -27,9 +32,19 @@ class RealTimePlotter(QtWidgets.QMainWindow):
 
         self.curve1 = self.plot_widget1.plot([], [], pen=pg.mkPen('b', width=2))
         self.convolution_curve = self.plot_widget_convolution.plot([], [], pen=pg.mkPen('r', width=2))
+
         self.timer = QTimer()
         self.set_up_timer()
 
+    def add_system_graph(self):
+        self.graphics_view = QGraphicsView(self)
+        self.scene = QGraphicsScene(self)
+
+        svg_item = QGraphicsSvgItem("system_graph.svg")
+        self.scene.addItem(svg_item)
+
+        self.graphics_view.setScene(self.scene)
+        self.plot_layout.addWidget(self.graphics_view)
 
     def set_up_window(self):
         self.setWindowTitle("PDF, CDF, Convolution")
@@ -57,14 +72,15 @@ class RealTimePlotter(QtWidgets.QMainWindow):
         self.plot_layout = QVBoxLayout()
         self.plot_layout.addWidget(self.plot_widget1)
 
-        right_layout = QVBoxLayout()
+        self.add_system_graph()
 
+        right_layout = QVBoxLayout()
         right_layout.addWidget(self.info_label)
         right_layout.addWidget(self.system_diagram_button)
+        right_layout.addWidget(self.stats_label)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
-
         scroll_content = QWidget()
         scroll_layout = QVBoxLayout(scroll_content)
 
@@ -74,7 +90,6 @@ class RealTimePlotter(QtWidgets.QMainWindow):
             scroll_layout.addWidget(btn)
 
         self.scroll_area.setWidget(scroll_content)
-
         right_layout.addWidget(self.scroll_area)
 
         main_layout.addLayout(self.plot_layout, stretch=3)
@@ -87,20 +102,26 @@ class RealTimePlotter(QtWidgets.QMainWindow):
             return
 
         obs_point = self.plottable_components[self.current_obs_index]
+        sorted_data, cdf = obs_point.get_empirical_cdf().get_plottable_ecdf()
 
-        cdf, sorted_data = obs_point.get_cdf_and_sorted_values()
         self.curve1.setData(sorted_data, cdf)
         self.info_label.setText(f"CDF for {obs_point.name}")
+
+        # Update the statistics label
+        self.update_stats_label(obs_point)
+
+    def update_stats_label(self, obs_point):
+        """
+        Update the statistics label with the important statistics of the current CDF.
+        """
+        ecdf = obs_point.get_empirical_cdf()
+        self.stats_label.setText(str(ecdf))
 
     def plot_observation_point(self, idx):
         self.current_obs_index = idx
         self.update_plot()
 
     def show_system_convolution_diagram(self):
-        """
-        Show the System Convolution Diagram.
-        This will recalculate the system's DQ every second and plot the CDF over time.
-        """
         dialog = QDialog(self)
         dialog.setWindowTitle("System Convolution Diagram")
 
@@ -119,6 +140,5 @@ class RealTimePlotter(QtWidgets.QMainWindow):
         dialog.exec_()
 
     def update_convolution_plot(self, convolution_curve):
-
-        cdf, values = self.system.calculate_dq()
-        convolution_curve.setData(values, cdf)
+        sorted_data, cdf = self.system.calculate_dq().get_plottable_ecdf()
+        convolution_curve.setData(sorted_data, cdf)

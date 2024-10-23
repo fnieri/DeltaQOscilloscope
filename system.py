@@ -1,6 +1,6 @@
 from componentsDict import ComponentsDict
 from diagram.ObservationPoint import ObservationPoint
-from diagram.component import DiagramComponent
+from diagram.DiagramComponent import DiagramComponent
 
 
 class System:
@@ -22,9 +22,8 @@ class System:
         self.last_component = self.components[name]
 
     def calculate_dq(self):
-        # Use None, None as we will calculate from the first sequential operator and we can't convolute from previous (inexistent)
-        pdf, values = self.first_component.calculate_dq(None, None)
-        return pdf, values
+        # Use None as we will calculate from the first sequential operator and we can't convolute from previous (inexistent)
+        return self.first_component.calculate_dq(None)
 
     def get_all_plottable_components(self) -> list[DiagramComponent]:
         plottable_components = []
