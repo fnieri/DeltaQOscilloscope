@@ -1,5 +1,4 @@
 from componentsDict import ComponentsDict
-from diagram.ObservationPoint import ObservationPoint
 from diagram.DiagramComponent import DiagramComponent
 
 
@@ -27,7 +26,7 @@ class System:
 
     def get_all_plottable_components(self) -> list[DiagramComponent]:
         plottable_components = []
-        for component in self.components.values():
+        for component    in self.components.values():
             if component.is_plottable():
                 plottable_components.append(component)
         return plottable_components

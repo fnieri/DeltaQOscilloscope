@@ -1,5 +1,3 @@
-import collections
-
 # https://stackoverflow.com/questions/4999233/how-to-raise-error-if-duplicates-keys-in-dictionary
 class ComponentsDict(dict):
     def __init__(self, inp=None):

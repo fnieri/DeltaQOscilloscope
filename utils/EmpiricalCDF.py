@@ -13,7 +13,6 @@ class EmpiricalCDF:
         """
         self.samples = samples
         self.cdf_map = defaultdict(int)
-        self.ecdf = None
         self.normalized_cdf = []
 
         self.pdf_map = defaultdict(float)
@@ -146,6 +145,12 @@ class EmpiricalCDF:
         self._compute_statistics()
         return self
 
+    def cdf_at(self, t):
+        for value, prob in self.normalized_cdf:
+            if t < value:
+                return prob
+        return 1.0
+
     def _multiply_cdf_by_constant(self, constant):
         """
         Multiply the CDF by a constant.
@@ -169,7 +174,7 @@ class EmpiricalCDF:
         Add multiple empirical CDFs together.
 
         :param other_ecdfs: List of other EmpiricalCDF to be added
-        :return: new EmpiricalCDF instance .
+        :return: new EmpiricalCDF instance
         """
         if not all(isinstance(ecdf, EmpiricalCDF) for ecdf in other_ecdfs):
             raise ValueError("All arguments must be instances of EmpiricalCDF.")
