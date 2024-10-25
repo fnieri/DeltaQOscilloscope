@@ -10,7 +10,7 @@ from utils.EmpiricalCDF import EmpiricalCDF
 
 class ProbabilisticOperator(DiagramComponent):
     def __init__(self, name, following_components):
-        super().__init__(name)
+        super().__init.__(name)
         self.following_components_and_probabilities: dict[ObservationPoint, int] = following_components
         if not self.check_probabilities_sum():
             raise ValueError("The sum of probabilities must equal 1.")
