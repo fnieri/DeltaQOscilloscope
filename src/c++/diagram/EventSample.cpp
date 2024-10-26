@@ -5,7 +5,7 @@
 
 struct EventSample {
     int id;
-    float startTime; // TODO change usage of float as I don't believe this will work after, rather use something like DateTime
+    double startTime; // TODO change usage of float as I don't believe this will work after, rather use something like DateTime
 
     friend std::ostream& operator<<(std::ostream& os, const EventSample& sample) {
         return os << "ID: " << sample.id << ", Start time: " << sample.startTime;

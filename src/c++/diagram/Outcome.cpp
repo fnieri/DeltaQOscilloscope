@@ -1,11 +1,19 @@
 #include "Outcome.h"
 
-std::unordered_map<int, float> Outcome::getOutcomeSamples() {
+std::shared_ptr<Event> Outcome::getStartEvent() {
+    return startEvent;
+}
+
+std::shared_ptr<Event> Outcome::getEndEvent() {
+    return endEvent;
+}
+
+std::vector<double> Outcome::getOutcomeSamples() {
     const std::vector<EventSample> startSamples = startEvent->getSamples();
     const std::vector<EventSample> endSamples = endEvent->getSamples();
 
-    std::unordered_map<int, float> outcomeSamples;
-    std::unordered_map<int, float> endMap;
+    std::vector<double> outcomeSamples;
+    std::unordered_map<int, double> endMap;
 
     for (const EventSample& sample : endSamples) {
         endMap[sample.id] = sample.startTime;
@@ -14,11 +22,10 @@ std::unordered_map<int, float> Outcome::getOutcomeSamples() {
     for (const EventSample& sample : startSamples) {
         auto it = endMap.find(sample.id);
         if (it != endMap.end()) {
-            float elapsedTime = sample.startTime - it->second;
-            outcomeSamples[sample.id] = elapsedTime;
+            double elapsedTime = sample.startTime - it->second;
+            outcomeSamples.push_back(elapsedTime);
         }
     }
 
     return outcomeSamples;
 }
-
