@@ -1,20 +1,23 @@
+/**
+ * @author Francesco Nieri
+ * @date 26/10/2024
+ * Class representing an event in a DeltaQ system with associated samples
+ */
+
 #include <vector>
-
-struct EventSample {
-    int id;
-    float startTime;
-
-    bool operator<(const EventSample& other) const {
-        return startTime < other.startTime;
-    }
-}
+#include "DiagramComponent.h"
+#include "EventSample.cpp"
 
 
-class Event : virtual public Event {
+class Event : virtual public DiagramComponent {
 private:
     std::vector<EventSample> samples;   
 
 public:
     void addSample(const EventSample& sample);
+    /**
+     * Get all samples after a certain time 
+     */
     std::vector<EventSample> getSamplesAfter(float startTime) const;
-}
+    std::vector<EventSample> getSamples() const;
+};

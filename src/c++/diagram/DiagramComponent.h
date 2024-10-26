@@ -5,9 +5,11 @@
  * @date 25/10/2024 
  */
 
-#include <string.h>
+#include <string>
 
-virtual class DiagramComponent { 
+#include "EventSample.cpp"
+
+class DiagramComponent { 
 
 private:
     std::string name;
@@ -20,7 +22,9 @@ public:
      */
     virtual bool isPlottable();
 
-    virtual auto calculateDeltaQ(); // TODO change auto 
+    virtual void calculateDeltaQ(); // TODO change auto 
 
     std::string getName();
-}
+
+    void addEventSample(const EventSample& sample);
+};

@@ -11,10 +11,6 @@ DiagramComponent::DiagramComponent(const std::string name) :
     name{name} {
 }
 
-virtual bool DiagramComponent::isPlottable();
-
-virtual auto DiagramComponent::calculateDeltaQ(); // TODO change auto 
-
 std::string DiagramComponent::getName() {
     return name;
 }
