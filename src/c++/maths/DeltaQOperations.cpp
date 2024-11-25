@@ -14,7 +14,7 @@ DeltaQ convolve(const DeltaQ& lhs, const DeltaQ& rhs) {
     double binWidth = lhs.getBinWidth();
 
     // Calculate the total steps for the resulting PDF
-    double totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize());
+    double totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
 
     std::vector<double> convolutedPdf;
     convolutedPdf.reserve(totalSteps);
@@ -32,5 +32,13 @@ DeltaQ convolve(const DeltaQ& lhs, const DeltaQ& rhs) {
         convolutedPdf.push_back(result * binWidth);
     }
 
-    return DeltaQ(binWidth, convolutedPdf);
+    return DeltaQ(binWidth, convolutedPdf, true);
+}
+
+DeltaQ allToFinish(const std::vector<DeltaQ>& deltaQs) {
+    DeltaQ result = deltaQs[0];
+    for (size_t i = 1; i < deltaQs.size(); ++i) {
+        result = result * deltaQs[i];
+    }
+    return result;
 }

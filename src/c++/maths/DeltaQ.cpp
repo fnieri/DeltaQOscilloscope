@@ -2,11 +2,17 @@
 
 DeltaQ::DeltaQ(double binWidth) : binWidth(binWidth), size(0) {}
 
-DeltaQ::DeltaQ(double binWidth, std::vector<double>& pdfValues) :
+DeltaQ::DeltaQ(double binWidth, std::vector<double>& values, bool isPdf) :
     binWidth(binWidth),
-    pdfValues(pdfValues),
-    size(pdfValues.size())
-    {calculateCDF();}
+    size(values.size())
+    {
+        if (isPdf) {
+            calculateCDF();
+        }
+        else {
+            calculatePDF();
+        }
+    }
 
 void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
     if (outcomeSamples.empty()) return;
@@ -42,10 +48,21 @@ void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
 }
 
 void DeltaQ::calculateCDF() {
+    cdfValues.clear();
     double cumulativeSum = 0;
     for (const double& pdfValue : pdfValues) {
         cumulativeSum += pdfValue;
         cdfValues.push_back(cumulativeSum);
+    }
+}
+
+void DeltaQ::calculatePDF() {
+    pdfValues.clear();
+
+    double previous = 0;
+    for (const double& cdfValue: cdfValues) {
+        pdfValues.push_back(cdfValue - previous);
+        previous = cdfValue;
     }
 }
 
@@ -81,7 +98,7 @@ double DeltaQ::pdfAt(int x) const {
 
 double DeltaQ::cdfAt(int x) const {
     if (x >= size) {
-        return 0.0;
+        return 1.0;
     }
     return cdfValues.at(x);
 }
@@ -116,29 +133,30 @@ DeltaQ operator*(double constant, const DeltaQ& deltaQ) {
 
 
 DeltaQ operator+(const DeltaQ& lhs, const DeltaQ& rhs) {
-    const DeltaQ& highestDeltaQ = (lhs > rhs) ? lhs : rhs;
-    const DeltaQ& otherDeltaQ = (lhs > rhs) ? rhs : lhs;
+    return applyBinaryOperation(lhs, rhs, std::plus<>());
+}
 
-    std::vector<double> resultingPdf;
-    resultingPdf.reserve(highestDeltaQ.getSize());
-    
-    for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
-        resultingPdf.push_back(highestDeltaQ.pdfAt(i) + otherDeltaQ.pdfAt(i));
-    }
-
-    return DeltaQ(highestDeltaQ.getBinWidth(), resultingPdf);
+DeltaQ operator-(const DeltaQ& lhs, const DeltaQ& rhs) {
+    return applyBinaryOperation(lhs, rhs, std::minus<>());
 }
 
 DeltaQ operator*(const DeltaQ& lhs, const DeltaQ& rhs) {
+    return applyBinaryOperation(lhs, rhs, std::multiplies<>());
+}
+
+
+template <typename BinaryOperation>
+DeltaQ applyBinaryOperation(const DeltaQ& lhs, const DeltaQ& rhs, BinaryOperation op) {
     const DeltaQ& highestDeltaQ = (lhs > rhs) ? lhs : rhs;
     const DeltaQ& otherDeltaQ = (lhs > rhs) ? rhs : lhs;
 
-    std::vector<double> resultingPdf;
-    resultingPdf.reserve(highestDeltaQ.getSize());
-
-    for (size_t i = 0; i < highestDeltaQ.getSize(); ++i) {
-        resultingPdf.push_back(highestDeltaQ.pdfAt(i) * otherDeltaQ.pdfAt(i));
+    std::vector<double> resultingCdf;
+    resultingCdf.reserve(highestDeltaQ.getSize());
+    
+    for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
+        double result = op(highestDeltaQ.cdfAt(i), otherDeltaQ.cdfAt(i));
+        resultingCdf.push_back(result);
     }
 
-    return DeltaQ(highestDeltaQ.getBinWidth(), resultingPdf);
+    return DeltaQ(highestDeltaQ.getBinWidth(), resultingCdf, false);
 }

@@ -29,10 +29,15 @@ private:
      * Calculate CDF given PDF values
      */
     void calculateCDF();
+    /**
+     * Calculate PDF from a given CDF
+     */
+    void calculatePDF();
+
 
 public:
     DeltaQ(double binWidth);
-    DeltaQ(double binWidth, std::vector<double>& pdfValues);
+    DeltaQ(double binWidth, std::vector<double>& values, bool isPdf);
     
     /**
      * Processes outcome samples to generate PDF and CDF.
@@ -48,14 +53,14 @@ public:
     double getSize() const;
     double pdfAt(int x) const;
     double cdfAt(int x) const;
-
     /**
      * Operator Overloads
      */
     friend DeltaQ operator*(const DeltaQ& deltaQ, double constant);
     friend DeltaQ operator*(double constant, const DeltaQ& deltaQ);
-
+    friend DeltaQ operator*(const DeltaQ& lhs, const DeltaQ& rhs);
     friend DeltaQ operator+(const DeltaQ& lhs, const DeltaQ& rhs);
+    friend DeltaQ operator-(const DeltaQ& lhs, const DeltaQ& rhs);
     /**
      * Comparison Operators
      */
