@@ -160,3 +160,4 @@ DeltaQ applyBinaryOperation(const DeltaQ& lhs, const DeltaQ& rhs, BinaryOperatio
 
     return DeltaQ(highestDeltaQ.getBinWidth(), resultingCdf, false);
 }
+
