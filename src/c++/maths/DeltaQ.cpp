@@ -14,6 +14,12 @@ DeltaQ::DeltaQ(double binWidth, std::vector<double>& values, bool isPdf) :
         }
     }
 
+DeltaQ::DeltaQ(double binWidth, std::vector<double> outcomeSamples) : 
+    binWidth{binWidth}
+    {
+        processSamples(outcomeSamples);
+    }
+
 void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
     if (outcomeSamples.empty()) return;
 
@@ -80,7 +86,6 @@ const std::vector<double>& DeltaQ::getCdfValues() const {
     return cdfValues;
 }
 
-
 double DeltaQ::getBinWidth() const {
     return binWidth;
 }
@@ -102,7 +107,6 @@ double DeltaQ::cdfAt(int x) const {
     }
     return cdfValues.at(x);
 }
-
 
 bool DeltaQ::operator<(const DeltaQ& other) const {
     return this->size < other.size;

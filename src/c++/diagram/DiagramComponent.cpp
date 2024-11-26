@@ -14,3 +14,4 @@ DiagramComponent::DiagramComponent(const std::string name) :
 std::string DiagramComponent::getName() {
     return name;
 }
+

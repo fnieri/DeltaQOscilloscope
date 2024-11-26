@@ -8,6 +8,7 @@
 #include <string>
 
 #include "EventSample.cpp"
+#include "DeltaQ.h"
 
 class DiagramComponent { 
 
@@ -22,7 +23,7 @@ public:
      */
     virtual bool isPlottable();
 
-    virtual void calculateDeltaQ(); // TODO change auto 
+    virtual DeltaQ calculateDeltaQ(); // TODO change auto 
 
     std::string getName();
 

@@ -6,17 +6,19 @@
 
 #include "Event.h"
 #include "DiagramComponent.h"
+#include "System.h"
 #include <memory>
+#include <cmath>
 
 class Outcome : virtual public DiagramComponent {
 private:
-
+    System system;
     std::shared_ptr<Event> startEvent;
     std::shared_ptr<Event> endEvent;
 
 public:
 
-    Outcome(Event& startEvent, Event& endEvent);
+    Outcome(Event& startEvent, Event& endEvent, System system);
     std::shared_ptr<Event> getStartEvent();
     std::shared_ptr<Event> getEndEvent();
     
@@ -25,4 +27,8 @@ public:
      * //TODO this is just a prototype, it will need to be adjusted to fit time constraints
      */
     std::vector<double> getOutcomeSamples();
+
+    DeltaQ getDeltaQ();
+
+    double getMax();
 };

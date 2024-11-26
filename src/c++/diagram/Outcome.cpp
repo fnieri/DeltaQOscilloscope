@@ -29,3 +29,13 @@ std::vector<double> Outcome::getOutcomeSamples() {
 
     return outcomeSamples;
 }
+
+DeltaQ Outcome::getDeltaQ() {
+    std::vector<double> outcomeSamples = getOutcomeSamples();
+    return DeltaQ(system.getBinWidth(), outcomeSamples);
+}
+
+double Outcome::getMax() {
+    std::vector<double> outcomeSamples = getOutcomeSamples();
+    return *std::max_element(outcomeSamples.begin(), outcomeSamples.end());
+}

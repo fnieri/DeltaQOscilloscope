@@ -16,6 +16,7 @@ class System {
 private:
     std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> components;
     std::shared_ptr<DiagramComponent> firstComponent;
+    double binWidth;
 
 public:
 
@@ -43,4 +44,8 @@ public:
      * Namely, all Outcomes
      */
     std::vector<std::shared_ptr<DiagramComponent>> getAllPlottableComponents();
+
+    void calculateBinWidth();
+
+    double getBinWidth();
 };

@@ -38,7 +38,7 @@ private:
 public:
     DeltaQ(double binWidth);
     DeltaQ(double binWidth, std::vector<double>& values, bool isPdf);
-    
+    DeltaQ(double binWidth, const std::vector<double> outcomeSamples);
     /**
      * Processes outcome samples to generate PDF and CDF.
      */

@@ -28,3 +28,11 @@ void System::setFirstComponent(const std::string& name) {
         throw std::invalid_argument("Component with name " + name + " not found.");
     }
 }
+
+void System::calculateBinWidth() {
+    return;
+}
+
+double System::getBinWidth() {
+    return binWidth;
+}
