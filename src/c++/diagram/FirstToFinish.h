@@ -3,12 +3,11 @@
 
 class FirstToFinish : virtual public DiagramComponent {
 private:
-    std::vector<DiagramComponent> followingComponents;
-    System system;
+    std::vector<std::shared_ptr<DiagramComponent>> followingComponents;
 
 public:
-    FirstToFinish(std::string name, std::vector<DiagramComponent> followingComponents);
-    
+    FirstToFinish(const std::string& name, 
+                const std::vector<std::shared_ptr<DiagramComponent>>& followingComponents);
     /**
      * Assume two independent outcomes with the same start event
      * First-to-finish outcome occurs when at least one end event occurs
@@ -16,5 +15,5 @@ public:
      * First-to-finish is defined as    
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
     */
-    DeltaQ calculateDeltaQ();
+    DeltaQ calculateDeltaQ(const System& system);
 };

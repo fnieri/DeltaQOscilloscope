@@ -1,20 +1,27 @@
 #include "FirstToFinish.h"
 #include "DeltaQOperations.cpp"
 
-DeltaQ FirstToFinish::calculateDeltaQ() {
+FirstToFinish::FirstToFinish(const std::string& name, 
+                const std::vector<std::shared_ptr<DiagramComponent>>& followingComponents)
+        : DiagramComponent(name), 
+          followingComponents(followingComponents)
+          {}
+
+
+DeltaQ FirstToFinish::calculateDeltaQ(const System& system) {
     std::vector<double> resultingCdf;
 
     double sumAtI;
     double productAtI;
-    double resultAtI;
+    double resultAtI;   
 
-    int binWidth = system.getBinWidth();
+    double binWidth = system.getBinWidth();
 
     std::vector<DeltaQ> deltaQs;
     deltaQs.reserve(followingComponents.size());
 
-    for (DiagramComponent component: followingComponents) {
-        deltaQs.push_back(component.calculateDeltaQ());
+    for (std::shared_ptr<DiagramComponent> component: followingComponents) {
+        deltaQs.push_back(component->calculateDeltaQ(system));
     }
     
     int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);

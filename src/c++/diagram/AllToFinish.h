@@ -3,16 +3,15 @@
 
 class AllToFinish : virtual public DiagramComponent {
 private:
-    std::vector<DiagramComponent> followingComponents;
-    System system;
+    std::vector<std::shared_ptr<DiagramComponent>> followingComponents;
 
 public:
-    AllToFinish(std::string name, std::vector<DiagramComponent> followingComponents);
-
+    AllToFinish(const std::string& name, 
+                const std::vector<std::shared_ptr<DiagramComponent>>& followingComponents);
     /**
      * Assume two independent outcomes with the same start event
      * All-to-finish outcome occurs when both end events occur
      * All-to-finish is defined as ΔQ_{LTF(A,B)} ΔQ_A * ΔQ_B
     */
-    DeltaQ calculateDeltaQ();
+    DeltaQ calculateDeltaQ(const System& system);
 };

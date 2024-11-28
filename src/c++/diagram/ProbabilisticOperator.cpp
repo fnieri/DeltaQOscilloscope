@@ -8,7 +8,7 @@
 #include "ProbabilisticOperator.h"
 #include "DeltaQOperations.cpp"
 
-ProbabilisticOperator::ProbabilisticOperator(std::string name, std::map<DiagramComponent, double> followingComponents) :
+ProbabilisticOperator::ProbabilisticOperator(std::string name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents) :
     DiagramComponent{name},
     followingComponentAndProbabilities{followingComponents}
     {}  
@@ -19,10 +19,10 @@ DeltaQ ProbabilisticOperator::calculateDeltaQ() {
     std::vector<DeltaQ> scaledDeltaQs;
     
      for (const auto& entry : followingComponentAndProbabilities) {
-        DiagramComponent component = entry.first;
+        std::shared_ptr<DiagramComponent> component = entry.first;
         double probability = entry.second;
 
-        DeltaQ currentDeltaQ = component.calculateDeltaQ();
+        DeltaQ currentDeltaQ = component->calculateDeltaQ(system);
 
         scaledDeltaQs.push_back(currentDeltaQ * probability);
     }

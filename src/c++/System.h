@@ -37,7 +37,7 @@ public:
      * //TODO return an EmpiricalCDF000
      * 
      */
-    void calculateDeltaQ();
+    DeltaQ calculateDeltaQ();
 
     /**
      * Get all components whose DeltaQ can be plotted
@@ -47,5 +47,5 @@ public:
 
     void calculateBinWidth();
 
-    double getBinWidth();
+    double getBinWidth() const;
 };

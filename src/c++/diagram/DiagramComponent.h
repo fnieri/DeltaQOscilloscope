@@ -23,7 +23,7 @@ public:
      */
     virtual bool isPlottable();
 
-    virtual DeltaQ calculateDeltaQ(); // TODO change auto 
+    virtual DeltaQ calculateDeltaQ(const System& system); // TODO change auto 
 
     std::string getName();
 

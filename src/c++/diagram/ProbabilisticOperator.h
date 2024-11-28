@@ -11,11 +11,11 @@
 
 class ProbabilisticOperator : virtual public DiagramComponent {
 private:
-    std::map<DiagramComponent, double> followingComponentAndProbabilities;
-    System system;
+    std::map<std::shared_ptr<DiagramComponent>, double> followingComponentAndProbabilities;
+
     
 public:
-    ProbabilisticOperator(std::string name, std::map<DiagramComponent, double> followingComponents);
+    ProbabilisticOperator(std::string name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents);
     /**
      *  Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event

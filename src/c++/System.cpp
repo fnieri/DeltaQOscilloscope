@@ -29,10 +29,25 @@ void System::setFirstComponent(const std::string& name) {
     }
 }
 
+std::vector<std::shared_ptr<DiagramComponent>> System::getAllPlottableComponents() {
+    std::vector<std::shared_ptr<DiagramComponent>> plottableComponents;
+    for (auto componentMap: components) {
+        std::shared_ptr<DiagramComponent> component = componentMap.second;
+        if (component->isPlottable()) {
+            plottableComponents.push_back(component);
+        } 
+    }
+    return plottableComponents;
+}
+
 void System::calculateBinWidth() {
     return;
 }
 
-double System::getBinWidth() {
+double System::getBinWidth() const {
     return binWidth;
+}
+
+DeltaQ System::calculateDeltaQ() {
+    return firstComponent->calculateDeltaQ();
 }
