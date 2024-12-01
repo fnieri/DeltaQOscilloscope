@@ -1,7 +1,9 @@
+#pragma once
+
 #include "DiagramComponent.h"
 #include "../System.h"
 
-class AllToFinish : virtual public DiagramComponent {
+class AllToFinish final : virtual public DiagramComponent {
 private:
     std::vector<std::shared_ptr<DiagramComponent>> followingComponents;
 
@@ -13,5 +15,5 @@ public:
      * All-to-finish outcome occurs when both end events occur
      * All-to-finish is defined as ΔQ_{LTF(A,B)} ΔQ_A * ΔQ_B
     */
-    DeltaQ calculateDeltaQ(const System& system);
+    DeltaQ calculateDeltaQ(const System& system) override;
 };

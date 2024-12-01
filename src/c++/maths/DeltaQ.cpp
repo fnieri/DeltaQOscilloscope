@@ -1,8 +1,14 @@
 #include "DeltaQ.h"
 
+
+#include <algorithm>
+#include <map>
+#include <cmath>
+#include <functional>
+
 DeltaQ::DeltaQ(double binWidth) : binWidth(binWidth), size(0) {}
 
-DeltaQ::DeltaQ(double binWidth, std::vector<double>& values, bool isPdf) :
+DeltaQ::DeltaQ(double binWidth, const std::vector<double>& values, const bool isPdf) :
     binWidth(binWidth),
     size(values.size())
     {
@@ -14,7 +20,7 @@ DeltaQ::DeltaQ(double binWidth, std::vector<double>& values, bool isPdf) :
         }
     }
 
-DeltaQ::DeltaQ(double binWidth, std::vector<double> outcomeSamples) : 
+DeltaQ::DeltaQ(const double binWidth, std::vector<double> outcomeSamples) :
     binWidth{binWidth}
     {
         processSamples(outcomeSamples);
@@ -24,11 +30,11 @@ void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
     if (outcomeSamples.empty()) return;
 
     std::sort(outcomeSamples.begin(), outcomeSamples.end());
-    double minSample = outcomeSamples.front();
-    double maxSample = outcomeSamples.back();
+    const double minSample = outcomeSamples.front();
+    const double maxSample = outcomeSamples.back();
 
     // Dynamically determine bins based on the range of samples and binWidth
-    int numBins = static_cast<int>(std::ceil((maxSample - minSample) / binWidth));
+    const int numBins = static_cast<int>(std::ceil((maxSample - minSample) / binWidth));
     std::map<double, double> histogram;
 
     // Initialize histogram bins
@@ -44,7 +50,7 @@ void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
     }
 
     // Calculate discrete PDF
-    double outcomesSize = static_cast<double>(outcomeSamples.size());
+    auto outcomesSize = static_cast<double>(outcomeSamples.size());
     for (const auto& bin : histogram) {
         pdfValues.push_back(bin.second / outcomesSize);
     }
@@ -131,6 +137,23 @@ DeltaQ operator*(const DeltaQ& deltaQ, double constant) {
     return result;
 }
 
+
+template <typename BinaryOperation>
+DeltaQ applyBinaryOperation(const DeltaQ& lhs, const DeltaQ& rhs, BinaryOperation op) {
+    const DeltaQ& highestDeltaQ = (lhs > rhs) ? lhs : rhs;
+    const DeltaQ& otherDeltaQ = (lhs > rhs) ? rhs : lhs;
+
+    std::vector<double> resultingCdf;
+    resultingCdf.reserve(highestDeltaQ.getSize());
+
+    for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
+        double result = op(highestDeltaQ.cdfAt(i), otherDeltaQ.cdfAt(i));
+        resultingCdf.push_back(result);
+    }
+
+    return {highestDeltaQ.getBinWidth(), resultingCdf, false};
+}
+
 DeltaQ operator*(double constant, const DeltaQ& deltaQ) {
     return deltaQ * constant;
 }
@@ -148,20 +171,4 @@ DeltaQ operator*(const DeltaQ& lhs, const DeltaQ& rhs) {
     return applyBinaryOperation(lhs, rhs, std::multiplies<>());
 }
 
-
-template <typename BinaryOperation>
-DeltaQ applyBinaryOperation(const DeltaQ& lhs, const DeltaQ& rhs, BinaryOperation op) {
-    const DeltaQ& highestDeltaQ = (lhs > rhs) ? lhs : rhs;
-    const DeltaQ& otherDeltaQ = (lhs > rhs) ? rhs : lhs;
-
-    std::vector<double> resultingCdf;
-    resultingCdf.reserve(highestDeltaQ.getSize());
-    
-    for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
-        double result = op(highestDeltaQ.cdfAt(i), otherDeltaQ.cdfAt(i));
-        resultingCdf.push_back(result);
-    }
-
-    return DeltaQ(highestDeltaQ.getBinWidth(), resultingCdf, false);
-}
 

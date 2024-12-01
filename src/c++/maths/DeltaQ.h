@@ -8,17 +8,13 @@
 #define DELTAQ_H
 
 #include <vector>
-#include <algorithm>
-#include <map>
-#include <cmath>
-#include <functional>
 
 class DeltaQ {
 private:
     double binWidth;
     std::vector<double> pdfValues;
     std::vector<double> cdfValues;
-    int size;
+    int size{};
 
     /**
      * Calculate PDF and CDF values given samples from an outcome
@@ -37,7 +33,7 @@ private:
 
 public:
     DeltaQ(double binWidth);
-    DeltaQ(double binWidth, std::vector<double>& values, bool isPdf);
+    DeltaQ(double binWidth, const std::vector<double>& values, bool isPdf);
     DeltaQ(double binWidth, const std::vector<double> outcomeSamples);
     /**
      * Processes outcome samples to generate PDF and CDF.

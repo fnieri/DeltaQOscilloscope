@@ -6,21 +6,23 @@
 
 
 #include "ProbabilisticOperator.h"
+
+#include <utility>
 #include "DeltaQOperations.cpp"
 
-ProbabilisticOperator::ProbabilisticOperator(std::string name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents) :
+ProbabilisticOperator::ProbabilisticOperator(const std::string& name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents) :
     DiagramComponent{name},
-    followingComponentAndProbabilities{followingComponents}
+    followingComponentAndProbabilities{std::move(followingComponents)}
     {}  
 
 
-DeltaQ ProbabilisticOperator::calculateDeltaQ() {
+DeltaQ ProbabilisticOperator::calculateDeltaQ(const System& system) {
     std::vector<double> resultingCdf;
     std::vector<DeltaQ> scaledDeltaQs;
     
      for (const auto& entry : followingComponentAndProbabilities) {
-        std::shared_ptr<DiagramComponent> component = entry.first;
-        double probability = entry.second;
+        const std::shared_ptr<DiagramComponent> component = entry.first;
+        const double probability = entry.second;
 
         DeltaQ currentDeltaQ = component->calculateDeltaQ(system);
 
@@ -28,7 +30,7 @@ DeltaQ ProbabilisticOperator::calculateDeltaQ() {
     }
 
     DeltaQ result = scaledDeltaQs[0];
-    for (size_t i = 1; i < scaledDeltaQs.size(); ++i) {
+    for (std::size_t i = 1; i < scaledDeltaQs.size(); ++i) {
         result = result + scaledDeltaQs[i];
     }
     return result;

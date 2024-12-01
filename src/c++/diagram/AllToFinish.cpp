@@ -13,12 +13,12 @@ DeltaQ AllToFinish::calculateDeltaQ(const System& system) {
     std::vector<DeltaQ> deltaQs;
     deltaQs.reserve(followingComponents.size());
 
-    for (std::shared_ptr<DiagramComponent> component: followingComponents) {
+    for (const std::shared_ptr<DiagramComponent>& component: followingComponents) {
         deltaQs.push_back(component->calculateDeltaQ(system));
     }
 
     DeltaQ result = deltaQs[0];
-    for (size_t i = 1; i < deltaQs.size(); ++i) {
+    for (std::size_t i = 1; i < deltaQs.size(); ++i) {
         result = result * deltaQs[i];
     }
     return result;

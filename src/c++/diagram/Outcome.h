@@ -3,6 +3,7 @@
  * @date 25/10/2024
  * Class representing an outcome O_n in a system
  */
+#pragma once
 
 #include "Event.h"
 #include "DiagramComponent.h"
@@ -10,8 +11,7 @@
 #include <memory>
 #include <cmath>
 
-class Outcome : virtual public DiagramComponent {
-private:
+class Outcome final : virtual public DiagramComponent {
     System system;
     std::shared_ptr<Event> startEvent;
     std::shared_ptr<Event> endEvent;
@@ -26,9 +26,9 @@ public:
      * Get the samples associated to an outcome
      * //TODO this is just a prototype, it will need to be adjusted to fit time constraints
      */
-    std::vector<double> getOutcomeSamples();
+    std::vector<double> getOutcomeSamples() const;
 
-    DeltaQ getDeltaQ();
+    DeltaQ getDeltaQ() const;
 
-    double getMax();
+    double getMax() const;
 };

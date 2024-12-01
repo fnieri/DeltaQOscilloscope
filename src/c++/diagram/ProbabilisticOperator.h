@@ -3,19 +3,20 @@
  * @date 25/10/2024
  * Class representing a probabilstic operator in a DeltaQ system
  */
+#pragma once
 
 #include "Outcome.h"
-#include "../maths/DeltaQ.h"
+#include "DiagramComponent.h"
 
+#include "../maths/DeltaQ.h"
+#include "../System.h"
 #include <map>
 
-class ProbabilisticOperator : virtual public DiagramComponent {
-private:
+class ProbabilisticOperator final : virtual public DiagramComponent {
     std::map<std::shared_ptr<DiagramComponent>, double> followingComponentAndProbabilities;
 
-    
 public:
-    ProbabilisticOperator(std::string name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents);
+    ProbabilisticOperator(const std::string& name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents);
     /**
      *  Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event
@@ -24,7 +25,7 @@ public:
      * Therefore:
      * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
     */
-    DeltaQ calculateDeltaQ();
+    DeltaQ calculateDeltaQ(const System& system) override;
 
-    bool isPlottable();
+    bool isPlottable() override;
 };

@@ -16,7 +16,6 @@ void System::addComponent(const std::shared_ptr<DiagramComponent>& component) {
     } else {
         throw ComponentAlreadyExists("Component with name \"" + name + "\" already exists");
     }
-
     components[component->getName()] = component;
 }
 

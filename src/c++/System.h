@@ -3,8 +3,8 @@
  * @date 26/10/2024
  * Class representing a DeltaQ system
  */
+#pragma once
 
-#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -12,11 +12,14 @@
 #include "diagram/DiagramComponent.h"
 
 
+class Outcome;
+
 class System {
 private:
     std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> components;
+    std::vector<std::shared_ptr<Outcome>> outcomes;
     std::shared_ptr<DiagramComponent> firstComponent;
-    double binWidth;
+    double binWidth{0};
 
 public:
 

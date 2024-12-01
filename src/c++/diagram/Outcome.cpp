@@ -1,5 +1,7 @@
 #include "Outcome.h"
 
+#include <algorithm>
+
 std::shared_ptr<Event> Outcome::getStartEvent() {
     return startEvent;
 }
@@ -8,7 +10,7 @@ std::shared_ptr<Event> Outcome::getEndEvent() {
     return endEvent;
 }
 
-std::vector<double> Outcome::getOutcomeSamples() {
+std::vector<double> Outcome::getOutcomeSamples() const {
     const std::vector<EventSample> startSamples = startEvent->getSamples();
     const std::vector<EventSample> endSamples = endEvent->getSamples();
 
@@ -30,12 +32,12 @@ std::vector<double> Outcome::getOutcomeSamples() {
     return outcomeSamples;
 }
 
-DeltaQ Outcome::getDeltaQ() {
+DeltaQ Outcome::getDeltaQ() const {
     std::vector<double> outcomeSamples = getOutcomeSamples();
-    return DeltaQ(system.getBinWidth(), outcomeSamples);
+    return {system.getBinWidth(), outcomeSamples};
 }
 
-double Outcome::getMax() {
+double Outcome::getMax() const {
     std::vector<double> outcomeSamples = getOutcomeSamples();
     return *std::max_element(outcomeSamples.begin(), outcomeSamples.end());
 }

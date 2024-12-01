@@ -5,6 +5,8 @@
  * @date 25/10/2024 
  */
 
+#pragma once
+
 #include <string>
 
 #include "EventSample.cpp"
@@ -17,7 +19,9 @@ private:
     std::string name;
 
 public:
-    DiagramComponent(std::string name);
+    virtual ~DiagramComponent() = default;
+
+    explicit DiagramComponent(const std::string& name);
 
     /**
      * Return true only if the component's CDF can be plotted 
