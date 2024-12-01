@@ -5,3 +5,7 @@
  */
 
 #include "Event.h"
+
+DeltaQ Event::calculateDeltaQ(const System& system) {
+    return next->calculateDeltaQ(system);
+}

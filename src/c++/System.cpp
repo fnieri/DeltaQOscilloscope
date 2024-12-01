@@ -49,5 +49,5 @@ double System::getBinWidth() const {
 }
 
 DeltaQ System::calculateDeltaQ() {
-    return firstComponent->calculateDeltaQ();
+    return firstComponent->calculateDeltaQ(*this);
 }

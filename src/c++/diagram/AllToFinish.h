@@ -1,5 +1,5 @@
 #include "DiagramComponent.h"
-#include "System.h"
+#include "../System.h"
 
 class AllToFinish : virtual public DiagramComponent {
 private:

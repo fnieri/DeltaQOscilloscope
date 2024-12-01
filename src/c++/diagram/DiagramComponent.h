@@ -8,7 +8,8 @@
 #include <string>
 
 #include "EventSample.cpp"
-#include "DeltaQ.h"
+#include "../maths/DeltaQ.h"
+#include "../System.h"
 
 class DiagramComponent { 
 

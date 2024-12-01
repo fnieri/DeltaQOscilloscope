@@ -5,7 +5,7 @@
  */
 
 #include "Outcome.h"
-#include "DeltaQ.h"
+#include "../maths/DeltaQ.h"
 
 #include <map>
 

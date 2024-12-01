@@ -12,7 +12,7 @@
 class Event : virtual public DiagramComponent {
 private:
     std::vector<EventSample> samples;   
-
+    std::shared_ptr<DiagramComponent> next;
 public:
     void addSample(const EventSample& sample);
     /**
@@ -20,4 +20,6 @@ public:
      */
     std::vector<EventSample> getSamplesAfter(float startTime) const;
     std::vector<EventSample> getSamples() const;
+    
+    DeltaQ calculateDeltaQ(const System& system);
 };

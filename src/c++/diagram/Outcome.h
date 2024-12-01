@@ -6,7 +6,7 @@
 
 #include "Event.h"
 #include "DiagramComponent.h"
-#include "System.h"
+#include "../System.h"
 #include <memory>
 #include <cmath>
 

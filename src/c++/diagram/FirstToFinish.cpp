@@ -1,5 +1,5 @@
 #include "FirstToFinish.h"
-#include "DeltaQOperations.cpp"
+#include "../maths/DeltaQOperations.cpp"
 
 FirstToFinish::FirstToFinish(const std::string& name, 
                 const std::vector<std::shared_ptr<DiagramComponent>>& followingComponents)
