@@ -9,28 +9,26 @@
 
 #include <string>
 
-#include "EventSample.cpp"
+#include "EventSample.h"
 #include "../maths/DeltaQ.h"
 #include "../System.h"
 
-class DiagramComponent { 
+class DiagramComponent {
 
-private:
+protected:
     std::string name;
-
-public:
-    virtual ~DiagramComponent() = default;
-
     explicit DiagramComponent(const std::string& name);
 
-    /**
-     * Return true only if the component's CDF can be plotted 
-     */
-    virtual bool isPlottable();
+public:
 
-    virtual DeltaQ calculateDeltaQ(const System& system); // TODO change auto 
+    virtual ~DiagramComponent() = default;
+
+    /**
+     * Return true only if the component's CDF can be plotted
+     */
+    virtual bool isPlottable() = 0;
+
+    virtual DeltaQ calculateDeltaQ(const System& system, const DeltaQ& deltaQ) = 0;
 
     std::string getName();
-
-    void addEventSample(const EventSample& sample);
 };

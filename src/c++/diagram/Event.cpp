@@ -5,7 +5,36 @@
  */
 
 #include "Event.h"
+#include <utility>
 
-DeltaQ Event::calculateDeltaQ(const System& system) {
-    return next->calculateDeltaQ(system);
+#include "maths/DeltaQOperations.h"
+
+Event::Event(const std::string& name): DiagramComponent(name) {
 }
+
+
+DeltaQ Event::calculateDeltaQ(const System& system, const DeltaQ& deltaQ) {
+    // Case where this is the first event in the system
+    if (deltaQ == DeltaQ()) {
+        return next->calculateDeltaQ(system, deltaQ);
+    }
+    // General case
+    if (next) {
+        return convolve(deltaQ, next->calculateDeltaQ(system, deltaQ));
+    }
+    // Last event in system
+    return deltaQ;
+}
+
+void Event::addSample(const EventSample &sample) {
+    samples.push_back(sample);
+}
+
+std::vector<EventSample> Event::getSamples() const {
+    return samples;
+}
+
+void Event::setNext(std::shared_ptr<DiagramComponent> nextComponent) {
+    next = std::move(nextComponent);
+}
+

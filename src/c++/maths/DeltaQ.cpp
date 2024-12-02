@@ -1,3 +1,5 @@
+
+
 #include "DeltaQ.h"
 
 
@@ -5,17 +7,21 @@
 #include <map>
 #include <cmath>
 #include <functional>
+#include <iomanip>
+#include <iostream>
 
-DeltaQ::DeltaQ(double binWidth) : binWidth(binWidth), size(0) {}
+DeltaQ::DeltaQ(const double binWidth) : binWidth(binWidth), size(0) {}
 
-DeltaQ::DeltaQ(double binWidth, const std::vector<double>& values, const bool isPdf) :
+DeltaQ::DeltaQ(const double binWidth, const std::vector<double>& values, const bool isPdf) :
     binWidth(binWidth),
     size(values.size())
     {
         if (isPdf) {
+            pdfValues = values;
             calculateCDF();
         }
         else {
+            cdfValues = values;
             calculatePDF();
         }
     }
@@ -28,13 +34,12 @@ DeltaQ::DeltaQ(const double binWidth, std::vector<double> outcomeSamples) :
 
 void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
     if (outcomeSamples.empty()) return;
-
     std::sort(outcomeSamples.begin(), outcomeSamples.end());
     const double minSample = outcomeSamples.front();
     const double maxSample = outcomeSamples.back();
 
     // Dynamically determine bins based on the range of samples and binWidth
-    const int numBins = static_cast<int>(std::ceil((maxSample - minSample) / binWidth));
+    const int numBins = 10;
     std::map<double, double> histogram;
 
     // Initialize histogram bins
@@ -96,7 +101,7 @@ double DeltaQ::getBinWidth() const {
     return binWidth;
 }
 
-double DeltaQ::getSize() const {
+int DeltaQ::getSize() const {
     return size;
 }
 
@@ -121,6 +126,11 @@ bool DeltaQ::operator<(const DeltaQ& other) const {
 bool DeltaQ::operator>(const DeltaQ& other) const {
     return this->size > other.size;
 }
+
+bool DeltaQ::operator==(const DeltaQ &deltaQ) const {
+    return pdfValues == deltaQ.getPdfValues();
+}
+
 
 DeltaQ operator*(const DeltaQ& deltaQ, double constant) {
     DeltaQ result(deltaQ.binWidth);
@@ -171,4 +181,20 @@ DeltaQ operator*(const DeltaQ& lhs, const DeltaQ& rhs) {
     return applyBinaryOperation(lhs, rhs, std::multiplies<>());
 }
 
+std::string DeltaQ::toString() const {
+    std::ostringstream oss;
+    oss << "<";
 
+    // Iterate through CDF values to construct the string
+    for (size_t i = 0; i < cdfValues.size(); ++i) {
+        const double bin = i * binWidth;
+        oss << "(" << std::fixed << std::setprecision(3) << bin << ", "
+            << std::setprecision(6) << cdfValues[i] << ")";
+        if (i < cdfValues.size() - 1) {
+            oss << ", ";
+        }
+    }
+
+    oss << ">";
+    return oss.str();
+}

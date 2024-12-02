@@ -18,14 +18,15 @@ class ProbabilisticOperator final : virtual public DiagramComponent {
 public:
     ProbabilisticOperator(const std::string& name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents);
     /**
-     *  Assume there are two possible outcomes OA and OB and
+     * Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event
      * O_A occurs with probability p/(p+q)
      * O_B occurs with probability q/(p+q)
      * Therefore:
      * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
     */
-    DeltaQ calculateDeltaQ(const System& system) override;
+    DeltaQ calculateDeltaQ(const System& system, const DeltaQ& deltaQ) override;
 
-    bool isPlottable() override;
+    bool isPlottable() override {return false;};
+
 };

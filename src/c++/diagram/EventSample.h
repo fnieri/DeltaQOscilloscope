@@ -9,13 +9,13 @@ struct EventSample {
     int id;
     double startTime; // Use double for simplicity; consider std::chrono for DateTime-like precision
 
-    // Overload operator<< for printing EventSample objects
-    friend std::ostream& operator<<(std::ostream& os, const EventSample& sample);
 };
 
 // Comparison functions for EventSample
 bool compareSamplesByStartTime(const EventSample& a, const EventSample& b);
 bool compareSamplesById(const EventSample& a, const EventSample& b);
+
+std::ostream& operator<<(std::ostream& os, const EventSample& sample);
 
 // Specialization of std::hash for EventSample
 template<>

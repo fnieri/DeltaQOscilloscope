@@ -12,13 +12,12 @@
 #include <cmath>
 
 class Outcome final : virtual public DiagramComponent {
-    System system;
     std::shared_ptr<Event> startEvent;
     std::shared_ptr<Event> endEvent;
 
 public:
 
-    Outcome(Event& startEvent, Event& endEvent, System system);
+    Outcome(const std::string& name, std::shared_ptr<Event> startEvent, std::shared_ptr<Event> endEvent);
     std::shared_ptr<Event> getStartEvent();
     std::shared_ptr<Event> getEndEvent();
     
@@ -28,7 +27,11 @@ public:
      */
     std::vector<double> getOutcomeSamples() const;
 
-    DeltaQ getDeltaQ() const;
+    DeltaQ getDeltaQ(const System &system) const;
 
+    DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override; ;
     double getMax() const;
+
+    bool isPlottable() override {return true;};
+
 };

@@ -1,5 +1,5 @@
 #include "FirstToFinish.h"
-#include "../maths/DeltaQOperations.cpp"
+#include "../maths/DeltaQOperations.h"
 
 FirstToFinish::FirstToFinish(const std::string& name, 
                 const std::vector<std::shared_ptr<DiagramComponent>>& followingComponents)
@@ -8,7 +8,7 @@ FirstToFinish::FirstToFinish(const std::string& name,
           {}
 
 
-DeltaQ FirstToFinish::calculateDeltaQ(const System& system) {
+DeltaQ FirstToFinish::calculateDeltaQ(const System& system, const DeltaQ& deltaQ) {
     std::vector<double> resultingCdf;
 
     const double binWidth = system.getBinWidth();
@@ -17,7 +17,7 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System& system) {
     deltaQs.reserve(followingComponents.size());
 
     for (const std::shared_ptr<DiagramComponent>& component: followingComponents) {
-        deltaQs.push_back(component->calculateDeltaQ(system));
+        deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
     }
 
     const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
@@ -25,8 +25,8 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System& system) {
     for (std::size_t i = 0; i < largestDeltaQSize; i++) {
         double sumAtI = 0;
         double productAtI = 0;
-        for (const DeltaQ& deltaQ: deltaQs) {
-            const double cdfAtI = deltaQ.cdfAt(i);
+        for (const DeltaQ& probDeltaQ: deltaQs) {
+            const double cdfAtI = probDeltaQ.cdfAt(i);
             sumAtI += cdfAtI;
             productAtI *= cdfAtI;
         }

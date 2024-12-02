@@ -7,10 +7,13 @@
 #ifndef DELTAQ_H
 #define DELTAQ_H
 
+#pragma once
+
+#include <ostream>
 #include <vector>
 
 class DeltaQ {
-private:
+
     double binWidth;
     std::vector<double> pdfValues;
     std::vector<double> cdfValues;
@@ -32,6 +35,7 @@ private:
 
 
 public:
+    DeltaQ() = default;
     DeltaQ(double binWidth);
     DeltaQ(double binWidth, const std::vector<double>& values, bool isPdf);
     DeltaQ(double binWidth, const std::vector<double> outcomeSamples);
@@ -46,7 +50,7 @@ public:
     const std::vector<double>& getPdfValues() const;
     const std::vector<double>& getCdfValues() const;
     double getBinWidth() const;
-    double getSize() const;
+    int getSize() const;
     double pdfAt(int x) const;
     double cdfAt(int x) const;
     /**
@@ -57,11 +61,17 @@ public:
     friend DeltaQ operator*(const DeltaQ& lhs, const DeltaQ& rhs);
     friend DeltaQ operator+(const DeltaQ& lhs, const DeltaQ& rhs);
     friend DeltaQ operator-(const DeltaQ& lhs, const DeltaQ& rhs);
+
+    friend std::ostream& operator<<(std::ostream& os, const DeltaQ& deltaQ);
+
     /**
      * Comparison Operators
      */
     bool operator<(const DeltaQ& other) const;
     bool operator>(const DeltaQ& other) const;
+
+    bool operator==(const DeltaQ & deltaQ) const;
+    std::string toString() const;
 };
 
 #endif // DELTAQ_H

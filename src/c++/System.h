@@ -5,24 +5,25 @@
  */
 #pragma once
 
+#include "maths/DeltaQ.h"
+
 #include <memory>
 #include <string>
 #include <unordered_map>
-
-#include "diagram/DiagramComponent.h"
-
+#include <vector>
 
 class Outcome;
+class DiagramComponent;
 
 class System {
-private:
+
     std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> components;
     std::vector<std::shared_ptr<Outcome>> outcomes;
     std::shared_ptr<DiagramComponent> firstComponent;
     double binWidth{0};
 
 public:
-
+    System() = default;
     /**
      * Add a component to the list of components of the system
      * @throws ComponentAlreadyExists if a component with the same name exists
@@ -46,7 +47,7 @@ public:
      * Get all components whose DeltaQ can be plotted
      * Namely, all Outcomes
      */
-    std::vector<std::shared_ptr<DiagramComponent>> getAllPlottableComponents();
+    std::vector<std::shared_ptr<DiagramComponent>> getAllPlottableComponents() const;
 
     void calculateBinWidth();
 

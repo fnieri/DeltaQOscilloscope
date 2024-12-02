@@ -1,12 +1,18 @@
 #include "DeltaQ.h"
+#include "DeltaQOperations.h"
+
 #include <iostream>
 #include <vector>
-#include <memory>
 
-/**
- * Perform discrete convolution between two DeltaQs
- */
 DeltaQ convolve(const DeltaQ& lhs, const DeltaQ& rhs) {
+    // If one of the two DeltaQs is empty, return the other DeltaQ
+    if (lhs == DeltaQ()) {
+        return rhs;
+    }
+    if (rhs == DeltaQ()) {
+        return lhs;
+    }
+
     // Determine the "higher" and "lower" DeltaQ objects based on their maximum values
     const DeltaQ& highestDeltaQ = (lhs > rhs) ? lhs : rhs;
     const DeltaQ& otherDeltaQ = (lhs > rhs) ? rhs : lhs;
@@ -14,11 +20,10 @@ DeltaQ convolve(const DeltaQ& lhs, const DeltaQ& rhs) {
     double binWidth = lhs.getBinWidth();
 
     // Calculate the total steps for the resulting PDF
-    double totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
+    const int totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
 
     std::vector<double> convolutedPdf;
     convolutedPdf.reserve(totalSteps);
-
     // Perform convolution
     for (size_t i = 0; i < totalSteps; ++i) {
         double result = 0.0;
@@ -28,18 +33,13 @@ DeltaQ convolve(const DeltaQ& lhs, const DeltaQ& rhs) {
             result += highestDeltaQ.pdfAt(j) * otherDeltaQ.pdfAt(i - j);
         }
 
-        // Normalize by bin width
-        convolutedPdf.push_back(result * binWidth);
-    }
 
-    return DeltaQ(binWidth, convolutedPdf, true);
+        // Normalize by bin width
+        convolutedPdf.push_back(result);
+    }
+    return {binWidth, convolutedPdf, true};
 }
 
-/**
- * Assume two independent outcomes with the same start event
- * All-to-finish outcome occurs when both end events occur
- * All-to-finish is defined as ΔQ_{LTF(A,B)} ΔQ_A * ΔQ_B
-*/
 DeltaQ allToFinish(const std::vector<DeltaQ>& deltaQs) {
     DeltaQ result = deltaQs[0];
     for (size_t i = 1; i < deltaQs.size(); ++i) {
@@ -48,54 +48,32 @@ DeltaQ allToFinish(const std::vector<DeltaQ>& deltaQs) {
     return result;
 }
 
-/**
- * Assume two independent outcomes with the same start event
- * First-to-finish outcome occurs when at least one end event occurs
- * We compute the probability that there are zero end events
- * First-to-finish is defined as    
- * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
-*/
 DeltaQ firstToFinish(const std::vector<DeltaQ>& deltaQs) {
     std::vector<double> resultingCdf;
 
-    double sumAtI;
-    double productAtI;
-    double resultAtI;
-
-    int binWidth = deltaQs[0].getBinWidth();
-    int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
-
+    const double binWidth = deltaQs[0].getBinWidth();
+    const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
 
     for (size_t i = 0; i < largestDeltaQSize; i++) {
-        sumAtI = 0;
-        productAtI = 0;
-        for (DeltaQ deltaQ: deltaQs) {
-            double cdfAtI = deltaQ.cdfAt(i);
+        double sumAtI = 0;
+        double productAtI = 0;
+        for (const DeltaQ& deltaQ: deltaQs) {
+            const double cdfAtI = deltaQ.cdfAt(i);
             sumAtI += cdfAtI;
             productAtI *= cdfAtI;
         }
-        resultAtI = sumAtI - productAtI;
+        double resultAtI = sumAtI - productAtI;
         resultingCdf.push_back(resultAtI);
     }
-    return DeltaQ(binWidth, resultingCdf, false);
+    return {binWidth, resultingCdf, false};
 }
 
-/**
- *  Assume there are two possible outcomes OA and OB and
- * exactly one outcome is chosen during each occurrence of a start event
- * O_A occurs with probability p/(p+q)
- * O_B occurs with probability q/(p+q)
- * Therefore:
- * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
-*/
 DeltaQ probabilisticChoice(const std::vector<double>& probabilities, const std::vector<DeltaQ>& deltaQs) {
     std::vector<double> resultingCdf;
 
-    double sumAtI;
-    int binWidth = deltaQs[0].getBinWidth();
+    double binWidth = deltaQs[0].getBinWidth();
     
-    int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
-    int noOfDeltaQs = deltaQs.size();
+    const int noOfDeltaQs = deltaQs.size();
     std::vector<DeltaQ> scaledDeltaQs;
 
     for (size_t i = 0; i < noOfDeltaQs; i++) {
@@ -106,14 +84,12 @@ DeltaQ probabilisticChoice(const std::vector<double>& probabilities, const std::
     for (size_t i = 1; i < noOfDeltaQs; ++i) {
         result = result + deltaQs[i];
     }
+    return {binWidth, resultingCdf, true};
 }
 
-/**
- * Choose the highest size from a list of DeltaQs
-*/
 int chooseLongestDeltaQSize(const std::vector<DeltaQ>& deltaQs) {
     int highestSize = 0;
-    for (DeltaQ deltaQ: deltaQs) {
+    for (const DeltaQ& deltaQ: deltaQs) {
         if (deltaQ.getSize() > highestSize) {
             highestSize = deltaQ.getSize();
         }

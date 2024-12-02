@@ -12,9 +12,9 @@
 
 class Event final : virtual public DiagramComponent {
     std::vector<EventSample> samples;
-    std::shared_ptr<DiagramComponent> next;
+    std::shared_ptr<DiagramComponent> next = nullptr;
 public:
-    Event();
+    explicit Event(const std::string& name);
     void addSample(const EventSample& sample);
     /**
      * Get all samples after a certain time 
@@ -22,5 +22,8 @@ public:
     std::vector<EventSample> getSamplesAfter(float startTime) const;
     std::vector<EventSample> getSamples() const;
     
-    DeltaQ calculateDeltaQ(const System& system) override;
+    DeltaQ calculateDeltaQ(const System& system, const DeltaQ& deltaQ) override;
+
+    bool isPlottable() override {return false;}
+    void setNext(std::shared_ptr<DiagramComponent> nextComponent);
 };

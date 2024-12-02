@@ -16,5 +16,7 @@ public:
      * First-to-finish is defined as    
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
     */
-    DeltaQ calculateDeltaQ(const System& system) override;
+    DeltaQ calculateDeltaQ(const System& system, const DeltaQ& deltaQ) override;
+
+    bool isPlottable() override {return false;}
 };
