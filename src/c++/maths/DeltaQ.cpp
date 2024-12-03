@@ -32,46 +32,38 @@ DeltaQ::DeltaQ(const double binWidth, std::vector<double> outcomeSamples) :
         processSamples(outcomeSamples);
     }
 
-void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
-    if (outcomeSamples.empty()) return;
-    std::sort(outcomeSamples.begin(), outcomeSamples.end());
-    const double minSample = outcomeSamples.front();
-    const double maxSample = outcomeSamples.back();
+    void DeltaQ::calculateDeltaQ(std::vector<double>& outcomeSamples) {
+        if (outcomeSamples.empty()) return;
+        std::sort(outcomeSamples.begin(), outcomeSamples.end());
 
-    // Dynamically determine bins based on the range of samples and binWidth
-    const int numBins = 10;
-    std::map<double, double> histogram;
+        const int numBins = 10;
+        std::vector<double> histogram(numBins);
 
-    // Initialize histogram bins
-    for (int i = 0; i <= numBins; ++i) {
-        double binStart = minSample + i * binWidth;
-        histogram[binStart] = 0;
+
+        // Add samples to corresponding bins
+        for (const double& sample : outcomeSamples) {
+            const int bin = std::floor(sample / binWidth);
+            histogram[bin]++;
+        }
+
+        // Calculate discrete PDF
+        const auto outcomesSize = static_cast<double>(outcomeSamples.size());
+        for (const double& binValue : histogram) {
+            pdfValues.push_back(binValue / outcomesSize);
+        }
+
+        calculateCDF();
+        size = pdfValues.size();
     }
 
-    // Add samples to corresponding bins
-    for (const double& sample : outcomeSamples) {
-        double currentBin = std::floor((sample - minSample) / binWidth) * binWidth + minSample;
-        ++histogram[currentBin];
+    void DeltaQ::calculateCDF() {
+        cdfValues.clear();
+        double cumulativeSum = 0;
+        for (const double& pdfValue : pdfValues) {
+            cumulativeSum += pdfValue;
+            cdfValues.push_back(cumulativeSum);
+        }
     }
-
-    // Calculate discrete PDF
-    auto outcomesSize = static_cast<double>(outcomeSamples.size());
-    for (const auto& bin : histogram) {
-        pdfValues.push_back(bin.second / outcomesSize);
-    }
-
-    calculateCDF();
-    size = pdfValues.size();
-}
-
-void DeltaQ::calculateCDF() {
-    cdfValues.clear();
-    double cumulativeSum = 0;
-    for (const double& pdfValue : pdfValues) {
-        cumulativeSum += pdfValue;
-        cdfValues.push_back(cumulativeSum);
-    }
-}
 
 void DeltaQ::calculatePDF() {
     pdfValues.clear();
@@ -189,7 +181,7 @@ std::string DeltaQ::toString() const {
     for (size_t i = 0; i < cdfValues.size(); ++i) {
         const double bin = i * binWidth;
         oss << "(" << std::fixed << std::setprecision(3) << bin << ", "
-            << std::setprecision(6) << cdfValues[i] << ")";
+            << std::setprecision(6) << pdfValues[i] << ")";
         if (i < cdfValues.size() - 1) {
             oss << ", ";
         }
