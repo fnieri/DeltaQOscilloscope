@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+# Code adapted from: https://invent.kde.org/graphics/okular/-/blob/master/hooks/pre-commit
+
+readonly output=$(git clang-format -v --diff)
+
+[[ "$output" == *"no modified files to format"* ]] && exit 0
+[[ "$output" == *"clang-format did not modify any files"* ]] && exit 0
+
+echo "Files are not formatted correctly."
+echo -e "Reformat with :\n\tgit clang-format -v -f"
+exit 1

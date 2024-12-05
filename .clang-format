@@ -1,0 +1,35 @@
+---
+# Style for C++
+Language: Cpp
+
+# Base is WebKit coding style: https://webkit.org/code-style-guidelines/
+BasedOnStyle: WebKit
+
+# 4 spaces indent
+TabWidth: 4
+
+# 2 * 80 wide lines
+ColumnLimit: 160
+
+# Sort includes inside line separated groups
+SortIncludes: true
+
+# Format C++11 braced lists like function calls
+Cpp11BracedListStyle: true
+
+# No single line functions
+AllowShortFunctionsOnASingleLine: None
+
+# Break before braces on function, namespace and class definitions.
+BreakBeforeBraces: Linux
+
+# CrlInstruction *a;
+PointerAlignment: Right
+
+# Always break after template declaration
+AlwaysBreakTemplateDeclarations: true
+
+AlignArrayOfStructures: Left
+
+---
+Language: JavaScript
