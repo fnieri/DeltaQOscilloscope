@@ -6,13 +6,14 @@
  */
 
 #include "DiagramComponent.h"
-
+#include <iostream>
 DiagramComponent::DiagramComponent(const std::string &name)
+
     : name {name}
 {
 }
 
 std::string DiagramComponent::getName()
 {
-    return name;
+    return this->name;
 }

@@ -10,12 +10,14 @@
 #include "../maths/DeltaQOperations.h"
 
 Event::Event(const std::string &name)
-    : DiagramComponent(name)
+    : DiagramComponent {name}
 {
+    std::cout << name;
 }
 
 DeltaQ Event::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
 {
+    /*
     // Case where this is the first event in the system
     if (deltaQ == DeltaQ()) {
         return next->calculateDeltaQ(system, deltaQ);
@@ -25,7 +27,8 @@ DeltaQ Event::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
         return convolve(deltaQ, next->calculateDeltaQ(system, deltaQ));
     }
     // Last event in system
-    return deltaQ;
+    */
+    return DeltaQ();
 }
 
 void Event::addSample(const EventSample &sample)
@@ -38,7 +41,3 @@ std::vector<EventSample> Event::getSamples() const
     return samples;
 }
 
-void Event::setNext(std::shared_ptr<DiagramComponent> nextComponent)
-{
-    next = std::move(nextComponent);
-}

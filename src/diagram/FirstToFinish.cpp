@@ -1,9 +1,15 @@
 #include "FirstToFinish.h"
 #include "../maths/DeltaQOperations.h"
 
-FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &followingComponents)
+FirstToFinish::FirstToFinish(const std::string &name)
     : DiagramComponent(name)
-    , followingComponents(followingComponents)
+    , Operator(name)
+{
+}
+
+FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
+    : Operator(name, nextComponents)
+    , DiagramComponent(name)
 {
 }
 
@@ -14,9 +20,9 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ
     const double binWidth = system.getBinWidth();
 
     std::vector<DeltaQ> deltaQs;
-    deltaQs.reserve(followingComponents.size());
+    deltaQs.reserve(nextComponents.size());
 
-    for (const std::shared_ptr<DiagramComponent> &component : followingComponents) {
+    for (const std::shared_ptr<DiagramComponent> &component : nextComponents) {
         deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
     }
 

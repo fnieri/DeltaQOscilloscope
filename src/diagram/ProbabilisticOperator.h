@@ -6,18 +6,18 @@
 #pragma once
 
 #include "DiagramComponent.h"
-#include "Outcome.h"
 
 #include "../maths/DeltaQ.h"
+#include "Operator.h"
 #include "System.h"
-#include <map>
 
-class ProbabilisticOperator final : virtual public DiagramComponent
+class ProbabilisticOperator final : virtual public Operator
 {
-    std::map<std::shared_ptr<DiagramComponent>, double> followingComponentAndProbabilities;
 
 public:
-    ProbabilisticOperator(const std::string &name, std::map<std::shared_ptr<DiagramComponent>, double> followingComponents);
+    ProbabilisticOperator(const std::string &name);
+
+    ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents);
     /**
      * Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event
@@ -27,9 +27,4 @@ public:
      * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
      */
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
-
-    bool isPlottable() override
-    {
-        return false;
-    };
 };

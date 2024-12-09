@@ -7,47 +7,43 @@
 
 #include "../maths/DeltaQ.h"
 
+#include "DiagramComponent.h"
+#include "Event.h"
+#include "Operator.h"
 #include <memory>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 class Outcome;
 class DiagramComponent;
+class Event;
+class Operator;
 
-class System {
+class System
+{
+    std::unordered_map<std::string, std::shared_ptr<Event>> events;
+    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
+    std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
 
-    std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> components;
-    std::vector<std::shared_ptr<Outcome>> outcomes;
     std::shared_ptr<DiagramComponent> firstComponent;
-    double binWidth{0};
+    double binWidth {0};
 
 public:
     System() = default;
-    /**
-     * Add a component to the list of components of the system
-     * @throws ComponentAlreadyExists if a component with the same name exists
-     */
-    void addComponent(const std::shared_ptr<DiagramComponent>& component);
 
-    /**
-     * Set component with the name passed as parameter as first component
-     * @throws std::invalid_argument if name does not exist in the list of components
-     */
-    void setFirstComponent(const std::string& name);
-    
+    void setFirstComponent(std::shared_ptr<DiagramComponent> component);
+
+    void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
+
+    void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
+
+    void setEvents(std::unordered_map<std::string, std::shared_ptr<Event>> eventsMap);
+
+    std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
+
     /**
      * Calculate the resulting DeltaQ for the whole system
-     * //TODO return an EmpiricalCDF000
-     * 
      */
     DeltaQ calculateDeltaQ();
-
-    /**
-     * Get all components whose DeltaQ can be plotted
-     * Namely, all Outcomes
-     */
-    std::vector<std::shared_ptr<DiagramComponent>> getAllPlottableComponents() const;
 
     void calculateBinWidth();
 

@@ -1,9 +1,13 @@
 #include "AllToFinish.h"
-#include "../maths/DeltaQOperations.h"
 
-AllToFinish::AllToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &followingComponents)
+AllToFinish::AllToFinish(const std::string &name)
     : DiagramComponent(name)
-    , followingComponents(followingComponents)
+    , Operator(name)
+{
+}
+AllToFinish::AllToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
+    : DiagramComponent(name)
+    , Operator(name, nextComponents)
 {
 }
 
@@ -12,9 +16,9 @@ DeltaQ AllToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
     std::vector<double> resultingCdf;
 
     std::vector<DeltaQ> deltaQs;
-    deltaQs.reserve(followingComponents.size());
+    deltaQs.reserve(nextComponents.size());
 
-    for (const std::shared_ptr<DiagramComponent> &component : followingComponents) {
+    for (const std::shared_ptr<DiagramComponent> &component : nextComponents) {
         deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
     }
 

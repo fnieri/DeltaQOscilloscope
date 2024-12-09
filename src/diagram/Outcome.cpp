@@ -1,8 +1,9 @@
 #include "Outcome.h"
+#include "DiagramComponent.h"
 
 #include <algorithm>
 
-Outcome::Outcome(const std::string &name, std::shared_ptr<Event> startEvent, std::shared_ptr<Event> endEvent)
+Outcome::Outcome(const std::string &name, std::shared_ptr<Event> &startEvent, std::shared_ptr<Event> &endEvent)
     : DiagramComponent(name)
     , startEvent {std::move(startEvent)}
     , endEvent {std::move(endEvent)}
@@ -47,6 +48,16 @@ DeltaQ Outcome::getDeltaQ(const System &system) const
     return {system.getBinWidth(), outcomeSamples};
 }
 
+void Outcome::setNext(std::shared_ptr<DiagramComponent> next)
+{
+    nextComponent = std::move(next);
+}
+
+/*void Outcome::setNext(std::shared_ptr<DiagramComponent> &&next)
+{
+    nextComponent = std::move(next);
+}
+*/
 double Outcome::getMax() const
 {
     std::vector<double> outcomeSamples = getOutcomeSamples();

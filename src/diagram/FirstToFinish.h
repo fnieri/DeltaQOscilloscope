@@ -1,14 +1,17 @@
 #pragma once
 
 #include "DiagramComponent.h"
+#include "Operator.h"
 #include "System.h"
+#include <vector>
 
-class FirstToFinish final : virtual public DiagramComponent
+class FirstToFinish final : virtual public Operator
 {
-    std::vector<std::shared_ptr<DiagramComponent>> followingComponents;
 
 public:
-    FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &followingComponents);
+    FirstToFinish(const std::string &name);
+
+    FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents);
     /**
      * Assume two independent outcomes with the same start event
      * First-to-finish outcome occurs when at least one end event occurs
@@ -17,9 +20,4 @@ public:
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
      */
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
-
-    bool isPlottable() override
-    {
-        return false;
-    }
 };

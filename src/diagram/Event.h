@@ -7,12 +7,12 @@
 
 #include "DiagramComponent.h"
 #include "EventSample.h"
+#include <memory>
 #include <vector>
 
-class Event final : virtual public DiagramComponent
+class Event final : public DiagramComponent
 {
     std::vector<EventSample> samples;
-    std::shared_ptr<DiagramComponent> next = nullptr;
 
 public:
     explicit Event(const std::string &name);
@@ -24,10 +24,4 @@ public:
     std::vector<EventSample> getSamples() const;
 
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
-
-    bool isPlottable() override
-    {
-        return false;
-    }
-    void setNext(std::shared_ptr<DiagramComponent> nextComponent);
 };

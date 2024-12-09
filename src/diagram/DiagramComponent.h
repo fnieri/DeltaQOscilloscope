@@ -7,11 +7,9 @@
 
 #pragma once
 
-#include <string>
-
 #include "../maths/DeltaQ.h"
-#include "EventSample.h"
-#include "System.h"
+
+class System;
 
 class DiagramComponent
 {
@@ -22,11 +20,6 @@ protected:
 
 public:
     virtual ~DiagramComponent() = default;
-
-    /**
-     * Return true only if the component's CDF can be plotted
-     */
-    virtual bool isPlottable() = 0;
 
     virtual DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) = 0;
 

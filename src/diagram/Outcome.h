@@ -15,13 +15,19 @@ class Outcome final : virtual public DiagramComponent
 {
     std::shared_ptr<Event> startEvent;
     std::shared_ptr<Event> endEvent;
+    std::shared_ptr<DiagramComponent> nextComponent;
 
 public:
-    Outcome(const std::string &name, std::shared_ptr<Event> startEvent, std::shared_ptr<Event> endEvent);
+    Outcome(const std::string &name, std::shared_ptr<Event> &startEvent, std::shared_ptr<Event> &endEvent);
+
     std::shared_ptr<Event> getStartEvent();
     std::shared_ptr<Event> getEndEvent();
 
+    void setNext(std::shared_ptr<DiagramComponent> next);
+
+    // void setNext(std::shared_ptr<DiagramComponent> &&next);
     /**
+     *
      * Get the samples associated to an outcome
      * //TODO this is just a prototype, it will need to be adjusted to fit time constraints
      */
@@ -30,11 +36,6 @@ public:
     DeltaQ getDeltaQ(const System &system) const;
 
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
-    ;
-    double getMax() const;
 
-    bool isPlottable() override
-    {
-        return true;
-    };
+    double getMax() const;
 };

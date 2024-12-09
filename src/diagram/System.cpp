@@ -4,48 +4,41 @@
  * Class representing a DeltaQ system
  */
 
-
 #include "System.h"
+
+#include <utility>
 
 #include "Outcome.h"
 #define N_OF_BINS 10.0
 
-void System::addComponent(const std::shared_ptr<DiagramComponent>& component) {
-    const std::string name = component->getName();
-    auto it = components.find(name);
-    if (it == components.end()) {
-        components[component->getName()] = component;
-    }
-    std::shared_ptr<Outcome> outcomePtr = std::dynamic_pointer_cast<Outcome>(component);
-    if (outcomePtr) {
-        outcomes.push_back(outcomePtr);
-    }
-    components[component->getName()] = component;
+void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
+{
+    firstComponent = std::move(component);
 }
 
-void System::setFirstComponent(const std::string& name) {
-    const auto it = components.find(name);
-    if (it != components.end()) {
-        firstComponent = it->second;
-    } else {
-        throw std::invalid_argument("Component with name " + name + " not found.");
-    }
+void System::setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap)
+{
+    outcomes = outcomesMap;
 }
 
-std::vector<std::shared_ptr<DiagramComponent>> System::getAllPlottableComponents() const {
-    std::vector<std::shared_ptr<DiagramComponent>> plottableComponents;
-    for (const auto& componentMap: components) {
-        std::shared_ptr<DiagramComponent> component = componentMap.second;
-        if (component->isPlottable()) {
-            plottableComponents.push_back(component);
-        } 
-    }
-    return plottableComponents;
+void System::setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap)
+{
+    operators = operatorsMap;
 }
 
-void System::calculateBinWidth() {
+void System::setEvents(std::unordered_map<std::string, std::shared_ptr<Event>> eventsMap)
+{
+    events = eventsMap;
+}
+
+std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
+{
+    return outcomes[name];
+}
+void System::calculateBinWidth()
+{
     double max = 0;
-    for (const std::shared_ptr<Outcome>& outcome: outcomes) {
+    for (const auto &[name, outcome] : outcomes) {
         const double outcomeMax = outcome->getMax();
         if (outcomeMax > max) {
             max = outcomeMax;
@@ -54,11 +47,13 @@ void System::calculateBinWidth() {
     binWidth = max / N_OF_BINS;
 }
 
-double System::getBinWidth() const {
+double System::getBinWidth() const
+{
     return binWidth;
 }
 
-DeltaQ System::calculateDeltaQ() {
+DeltaQ System::calculateDeltaQ()
+{
     calculateBinWidth();
     return firstComponent->calculateDeltaQ(*this, DeltaQ());
 }

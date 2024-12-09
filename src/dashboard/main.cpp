@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
     chart->createDefaultAxes();
 
-     QChartView* chartView = new QChartView(chart);
+    QChartView* chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
     QMainWindow window;

@@ -11,17 +11,22 @@ add_library(${PREFIX}_diagram
     FirstToFinish.cpp
     Outcome.h
     Outcome.cpp
+    Operator.h
+    Operator.cpp
     ProbabilisticOperator.h
     ProbabilisticOperator.cpp
     Probe.h
     Probe.cpp
     System.h
     System.cpp
+    SystemParser.cpp
+    SystemParser.h
 )
 
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
+        nlohmann_json
 )
 
 
