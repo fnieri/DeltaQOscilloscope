@@ -9,10 +9,9 @@
 
 #include "../maths/DeltaQOperations.h"
 
-Event::Event(const std::string &name)
+Event::Event(const std::string name)
     : DiagramComponent {name}
 {
-    std::cout << name;
 }
 
 DeltaQ Event::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
@@ -40,4 +39,3 @@ std::vector<EventSample> Event::getSamples() const
 {
     return samples;
 }
-

@@ -18,7 +18,7 @@ class Outcome final : virtual public DiagramComponent
     std::shared_ptr<DiagramComponent> nextComponent;
 
 public:
-    Outcome(const std::string &name, std::shared_ptr<Event> &startEvent, std::shared_ptr<Event> &endEvent);
+    Outcome(const std::string &name, std::shared_ptr<Event> startEvent, std::shared_ptr<Event> endEvent);
 
     std::shared_ptr<Event> getStartEvent();
     std::shared_ptr<Event> getEndEvent();

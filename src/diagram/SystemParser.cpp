@@ -33,16 +33,10 @@ OutcomesMap parseOutcomes(const json &systemJson, System &system)
         std::string name = outcomeJson["name"];
         std::string startEventName = outcomeJson["start"];
         std::string endEventName = outcomeJson["end"];
-        std::cout << startEventName << " " << endEventName << std::endl;
+
         auto startEvent = std::make_shared<Event>(startEventName);
-        if (startEvent) {
-            std::cout << "startEvent created successfully" << std::endl;
-        } else {
-            std::cout << "Failed to create startEvent" << std::endl;
-        }
         auto endEvent = std::make_shared<Event>(endEventName);
         auto outcome = std::make_shared<Outcome>(name, startEvent, endEvent);
-        std::cout << startEvent->getName();
         events[startEvent->getName()] = startEvent;
         events[endEvent->getName()] = endEvent;
 

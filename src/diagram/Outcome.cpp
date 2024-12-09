@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-Outcome::Outcome(const std::string &name, std::shared_ptr<Event> &startEvent, std::shared_ptr<Event> &endEvent)
+Outcome::Outcome(const std::string &name, std::shared_ptr<Event> startEvent, std::shared_ptr<Event> endEvent)
     : DiagramComponent(name)
     , startEvent {std::move(startEvent)}
     , endEvent {std::move(endEvent)}

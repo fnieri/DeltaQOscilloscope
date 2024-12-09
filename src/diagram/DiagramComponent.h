@@ -16,7 +16,7 @@ class DiagramComponent
 
 protected:
     std::string name;
-    explicit DiagramComponent(const std::string &name);
+    explicit DiagramComponent(const std::string name);
 
 public:
     virtual ~DiagramComponent() = default;

@@ -6,10 +6,9 @@
  */
 
 #include "DiagramComponent.h"
-#include <iostream>
-DiagramComponent::DiagramComponent(const std::string &name)
+DiagramComponent::DiagramComponent(const std::string name)
 
-    : name {name}
+    : name {std::move(name)}
 {
 }
 

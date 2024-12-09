@@ -15,7 +15,7 @@ class Event final : public DiagramComponent
     std::vector<EventSample> samples;
 
 public:
-    explicit Event(const std::string &name);
+    explicit Event(const std::string name);
     void addSample(const EventSample &sample);
     /**
      * Get all samples after a certain time
