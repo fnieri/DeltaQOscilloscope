@@ -1,26 +1,22 @@
 {
-  "outcomes" : [
+    components: [    
     {
       "name" : "O1",
+      "type" : "O",
       "start" : "a",
       "end": "b"
     },
     {
       "name" : "02",
-      "start": "c",
+      "type" : "O",
+        "start": "c",
       "end": "d"
     }
-  ],
-  "operators" : [
     {
       "type": "F",
       "name": "F1",
-      "next" : [
-        "O1", "O2"
-      ],
       "start" : "sf1",
       "end" : "ef1"
     }
-  ],
-    "first" : "O1"
+  ]
 }

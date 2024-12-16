@@ -272,6 +272,30 @@ DeltaQHelpers.cpp.s:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/DeltaQHelpers.cpp.s
 .PHONY : DeltaQHelpers.cpp.s
 
+JsonComponent.o: JsonComponent.cpp.o
+.PHONY : JsonComponent.o
+
+# target to build an object file
+JsonComponent.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/JsonComponent.cpp.o
+.PHONY : JsonComponent.cpp.o
+
+JsonComponent.i: JsonComponent.cpp.i
+.PHONY : JsonComponent.i
+
+# target to preprocess a source file
+JsonComponent.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/JsonComponent.cpp.i
+.PHONY : JsonComponent.cpp.i
+
+JsonComponent.s: JsonComponent.cpp.s
+.PHONY : JsonComponent.s
+
+# target to generate assembly for a file
+JsonComponent.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/JsonComponent.cpp.s
+.PHONY : JsonComponent.cpp.s
+
 Plot.o: Plot.cpp.o
 .PHONY : Plot.o
 
@@ -367,6 +391,9 @@ help:
 	@echo "... DeltaQHelpers.o"
 	@echo "... DeltaQHelpers.i"
 	@echo "... DeltaQHelpers.s"
+	@echo "... JsonComponent.o"
+	@echo "... JsonComponent.i"
+	@echo "... JsonComponent.s"
 	@echo "... Plot.o"
 	@echo "... Plot.i"
 	@echo "... Plot.s"
