@@ -11,7 +11,10 @@
 #include <qboxlayout.h>
 #include <qlabel.h>
 #include <qwidget.h>
+
+#include <QFileDialog>
 Dashboard::~Dashboard()
+
 {
 }
 
@@ -48,6 +51,15 @@ Dashboard::Dashboard(QWidget *parent)
 
     // Connect the add button
     connect(addButton, &QPushButton::clicked, this, &Dashboard::onAdd);
+
+    QPushButton *saveButton = new QPushButton("Save");
+    QPushButton *loadButton = new QPushButton("Load");
+    mainLayout->addWidget(saveButton);
+    mainLayout->addWidget(loadButton);
+
+    // Connect signals
+    connect(saveButton, &QPushButton::clicked, this, &Dashboard::saveToFile);
+    connect(loadButton, &QPushButton::clicked, this, &Dashboard::loadFromFile);
 }
 
 void Dashboard::addComboBox()
@@ -77,6 +89,7 @@ void Dashboard::setUpComponentTree()
     componentTree->setSelectionMode(QAbstractItemView::SingleSelection);
     connect(componentTree, &QTreeWidget::itemDoubleClicked, this, &Dashboard::onEditItem);
 }
+
 void Dashboard::setUpLineEdits()
 {
     QVBoxLayout *nameLayout = new QVBoxLayout;
@@ -157,7 +170,7 @@ void Dashboard::onAdd()
         auto *childItem = new QTreeWidgetItem(parentCategory, QStringList(QString::fromStdString(name.toStdString())));
         parentCategory->addChild(childItem);
     }
-
+    isModified = true;
     // Success and reset
     QMessageBox::information(this, "Success", "Component added successfully!");
     nameLineEdit->clear();
@@ -183,6 +196,7 @@ void Dashboard::onEditItem(QTreeWidgetItem *item, int column)
 
     JsonComponent &component = *it;
     std::string oldName = component.name;
+
     // Open the edit dialog
     ComponentEditDialog dialog(this);
     dialog.setFields(component);
@@ -233,7 +247,7 @@ void Dashboard::onEditItem(QTreeWidgetItem *item, int column)
                 newCategory->addChild(item);
             }
         }
-
+        isModified = true;
         // Update the item's text (name may have changed)
         item->setText(0, QString::fromStdString(editedComponent.name));
 
@@ -279,4 +293,177 @@ bool Dashboard::areFieldsValid(const std::string &name)
     }
 
     return isValid;
+}
+
+void Dashboard::saveToFile()
+{
+    // Check if the file is already saved, otherwise prompt for a filename
+    if (currentFileName.isEmpty()) {
+        currentFileName = QFileDialog::getSaveFileName(this, "Save File", "", "JSON Files (*.json)");
+        if (currentFileName.isEmpty()) {
+            return; // User canceled the dialog
+        }
+    }
+
+    // Convert components to JSON
+    nlohmann::json jsonData;
+    jsonData["components"] = nlohmann::json::array();
+    for (const auto &component : componentsJson) {
+        jsonData["components"].push_back(component.toJson());
+    }
+
+    // Write JSON to the file
+    try {
+        std::ofstream file(currentFileName.toStdString());
+        if (!file.is_open()) {
+            throw std::ios::failure("Failed to open file");
+        }
+        file << jsonData.dump(4); // Pretty-print with 4 spaces
+        file.close();
+
+        isModified = false; // Mark as saved
+        updateWindowTitle();
+        QMessageBox::information(this, "Success", "File saved successfully!");
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Error", "Failed to save file: " + QString::fromStdString(e.what()));
+    }
+}
+
+void Dashboard::loadFromFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Open JSON File", "", "JSON Files (*.json)");
+    if (fileName.isEmpty())
+        return;
+
+    std::ifstream file(fileName.toStdString());
+    if (!file.is_open()) {
+        QMessageBox::critical(this, "Error", "Failed to open the file.");
+        return;
+    }
+
+    try {
+        nlohmann::json json;
+        file >> json;
+
+        if (!json.contains("components") || !json["components"].is_array()) {
+            QMessageBox::warning(this, "Invalid File", "The selected file does not have a valid components array.");
+            return;
+        }
+
+        componentsJson.clear();
+        componentTree->clear();
+
+        // Add all categories before loading
+        addAllCategoriesToTree();
+
+        for (const auto &componentJson : json["components"]) {
+            JsonComponent component;
+            component.name = componentJson.at("name").get<std::string>();
+            component.type = componentJson.at("type").get<std::string>();
+            component.startEvent = componentJson.at("start").get<std::string>();
+            component.endEvent = componentJson.at("end").get<std::string>();
+
+            componentsJson.push_back(component);
+            addComponentToTree(component);
+        }
+
+        currentFileName = fileName;
+        setWindowTitle(QFileInfo(currentFileName).fileName());
+        file.close();
+
+        isModified = false; // Reset modification state
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Error", QString("An error occurred while loading the file: %1").arg(e.what()));
+    }
+}
+
+void Dashboard::closeEvent(QCloseEvent *event)
+{
+    if (isModified) {
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "Unsaved Changes", "You have unsaved changes. Do you want to save them before exiting?",
+            QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes) {
+            saveToFile();
+            event->accept();
+        } else if (reply == QMessageBox::No) {
+            event->accept();
+        } else {
+            event->ignore(); // Cancel the close
+        }
+    } else {
+        event->accept(); // No changes, proceed with close
+    }
+}
+
+void Dashboard::updateWindowTitle()
+{
+    QString title = currentFileName.isEmpty() ? "[Untitled system]" : QFileInfo(currentFileName).fileName();
+    setWindowTitle(title + " - Component Dashboard");
+}
+
+void Dashboard::addComponentToTree(const JsonComponent &component)
+{
+    // Determine the parent item based on the component type
+    QString typeCategory;
+    if (component.type == "O") {
+        typeCategory = "Outcome";
+    } else if (component.type == "F") {
+        typeCategory = "First-to-finish";
+    } else if (component.type == "P") {
+        typeCategory = "Probabilistic choice";
+    } else if (component.type == "A") {
+        typeCategory = "All-to-finish";
+    } else {
+        typeCategory = "Unknown"; // Fallback for unexpected types
+    }
+
+    // Find the parent item in the tree
+    QTreeWidgetItem *parentItem = nullptr;
+    for (int i = 0; i < componentTree->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *item = componentTree->topLevelItem(i);
+        if (item->text(0) == typeCategory) {
+            parentItem = item;
+            break;
+        }
+    }
+
+    // If the parent item doesn't exist, create it
+    if (!parentItem) {
+        parentItem = new QTreeWidgetItem(componentTree);
+        parentItem->setText(0, typeCategory);
+        componentTree->addTopLevelItem(parentItem);
+    }
+
+    // Create a new item for the component and add it to the parent
+    QTreeWidgetItem *componentItem = new QTreeWidgetItem();
+    componentItem->setText(0, QString::fromStdString(component.name)); // Display the name
+    componentItem->setData(0, Qt::UserRole, QVariant::fromValue(static_cast<int>(componentsJson.size() - 1)));
+    parentItem->addChild(componentItem);
+
+    // Expand the parent item to make the new component visible
+    parentItem->setExpanded(true);
+}
+
+void Dashboard::addAllCategoriesToTree()
+{
+    const QStringList categories = {"Outcome", "First-to-finish", "All-to-finish", "Probabilistic choice"};
+
+    for (const QString &category : categories) {
+        // Check if the category already exists in the tree
+        bool categoryExists = false;
+        for (int i = 0; i < componentTree->topLevelItemCount(); ++i) {
+            if (componentTree->topLevelItem(i)->text(0) == category) {
+                categoryExists = true;
+                break;
+            }
+        }
+
+        // Add the category if it doesn't exist
+        if (!categoryExists) {
+            QTreeWidgetItem *categoryItem = new QTreeWidgetItem(componentTree);
+            categoryItem->setText(0, category);
+            componentTree->addTopLevelItem(categoryItem);
+        }
+    }
 }

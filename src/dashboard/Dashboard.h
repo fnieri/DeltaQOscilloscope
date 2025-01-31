@@ -1,6 +1,4 @@
 //
-// Created by francy on 04/12/24.
-//
 
 #ifndef DASHBOARD_H
 #define DASHBOARD_H
@@ -22,6 +20,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 #include <QVector>
+#include <qevent.h>
 #include <qpushbutton.h>
 #include <qwidget.h>
 class Dashboard : public QMainWindow
@@ -31,6 +30,7 @@ private:
     QWidget *centralWidget;
     QComboBox *operatorChoice;
 
+    // Components used to add a component
     QWidget *nameWidget;
     QLabel *nameLabel;
     QLineEdit *nameLineEdit;
@@ -47,14 +47,23 @@ private:
 
     QTreeWidget *componentTree;
 
-    std::vector<JsonComponent> componentsJson; // Store components as JSON
+    std::vector<JsonComponent> componentsJson;
+
+    // For file saving and keeping track of modifications
+    QString currentFileName;
+    bool isModified = false;
 
     void addComboBox();
     void setUpLineEdits();
     void setupAddButton();
     void setUpComponentTree();
-    void saveToFile();
     bool areFieldsValid(const std::string &name);
+    void updateWindowTitle();
+    void closeEvent(QCloseEvent *event) override;
+    void saveToFile();
+    void loadFromFile();
+    void addComponentToTree(const JsonComponent &component);
+    void addAllCategoriesToTree();
 private slots:
     void onAdd();
     void onEditItem(QTreeWidgetItem *item, int column);
