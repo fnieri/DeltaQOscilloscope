@@ -6,9 +6,9 @@
 
 #include "System.h"
 
-#include <utility>
-
 #include "Outcome.h"
+#include <iostream>
+#include <utility>
 #define N_OF_BINS 10.0
 
 void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
@@ -35,6 +35,7 @@ std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
 {
     return outcomes[name];
 }
+
 void System::calculateBinWidth()
 {
     double max = 0;
@@ -47,6 +48,20 @@ void System::calculateBinWidth()
     binWidth = max / N_OF_BINS;
 }
 
+void System::addSample(std::string &componentName, std::pair<long long, long long> sample)
+{
+    auto findOutcome = outcomes.find(componentName);
+    if (findOutcome != outcomes.end()) {
+        auto component = outcomes[componentName];
+        component->addSample(sample);
+    }
+    auto findProbe = probes.find(componentName);
+    if (findProbe != probes.end()) {
+        auto component = probes[componentName];
+        component->addSample(sample);
+    }
+}
+
 double System::getBinWidth() const
 {
     return binWidth;
@@ -56,4 +71,34 @@ DeltaQ System::calculateDeltaQ()
 {
     calculateBinWidth();
     return firstComponent->calculateDeltaQ(*this, DeltaQ());
+}
+
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> System::getOutcomes()
+{
+    return outcomes;
+}
+
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> System::getProbes()
+{
+    return probes;
+}
+
+bool System::containsOutcome(std::string &name)
+{
+    return outcomes.find(name) != outcomes.end();
+}
+
+bool System::containsProbe(std::string &name)
+{
+    return probes.find(name) != probes.end();
+}
+
+std::shared_ptr<Probe> System::getProbe(std::string &name)
+{
+    return probes[name];
+}
+
+void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap)
+{
+    probes = probesMap;
 }

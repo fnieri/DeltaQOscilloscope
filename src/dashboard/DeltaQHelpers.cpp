@@ -9,12 +9,11 @@ QLineSeries *toQSeries(const DeltaQ &deltaQ)
 
     const double binWidth = deltaQ.getBinWidth();
 
-    const std::vector<double>& cdfValues = deltaQ.getCdfValues();
+    const std::vector<long double> &cdfValues = deltaQ.getCdfValues();
 
     double current = 0;
-    for (const double cdfValue : cdfValues) {
-        series->append(current, cdfValue);
-        current += binWidth;
+    for (int i = 0; i < deltaQ.getSize(); i++) {
+        series->append(deltaQ.getBinWidth() * i, deltaQ.cdfAt(i));
     }
     return series;
 }

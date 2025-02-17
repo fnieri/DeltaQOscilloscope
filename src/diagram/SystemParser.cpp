@@ -5,7 +5,6 @@
 #include "SystemParser.h"
 #include "AllToFinish.h"
 #include "DiagramComponent.h"
-#include "Event.h"
 #include "FirstToFinish.h"
 #include "Operator.h"
 #include "Outcome.h"
@@ -20,7 +19,6 @@ using json = nlohmann::json;
 
 using OutcomesMap = std::unordered_map<std::string, std::shared_ptr<Outcome>>;
 using OperatorsMap = std::unordered_map<std::string, std::shared_ptr<Operator>>;
-using EventsMap = std::unordered_map<std::string, std::shared_ptr<Event>>;
 
 namespace
 {
@@ -28,21 +26,11 @@ namespace
 OutcomesMap parseOutcomes(const json &systemJson, System &system)
 {
     OutcomesMap outcomes;
-    EventsMap events;
     for (const auto &outcomeJson : systemJson["outcomes"]) {
         std::string name = outcomeJson["name"];
-        std::string startEventName = outcomeJson["start"];
-        std::string endEventName = outcomeJson["end"];
-
-        auto startEvent = std::make_shared<Event>(startEventName);
-        auto endEvent = std::make_shared<Event>(endEventName);
-        auto outcome = std::make_shared<Outcome>(name, startEvent, endEvent);
-        events[startEvent->getName()] = startEvent;
-        events[endEvent->getName()] = endEvent;
-
+        auto outcome = std::make_shared<Outcome>(name);
         outcomes[name] = outcome;
     }
-    system.setEvents(events);
     return outcomes;
 }
 
@@ -86,6 +74,7 @@ void setFirstComponent(const json &systemJson, System &system, OutcomesMap outco
     }
 }
 }
+
 System parseSystemJson(const std::string &fileName)
 {
     System system;

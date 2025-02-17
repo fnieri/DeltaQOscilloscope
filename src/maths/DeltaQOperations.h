@@ -8,6 +8,8 @@
  */
 DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs);
 
+DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs);
+
 /**
  * Assume two independent outcomes with the same start event
  * All-to-finish outcome occurs when both end events occur

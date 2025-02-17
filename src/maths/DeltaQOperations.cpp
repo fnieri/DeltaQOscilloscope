@@ -19,11 +19,9 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
     const DeltaQ &otherDeltaQ = (lhs > rhs) ? rhs : lhs;
 
     double binWidth = lhs.getBinWidth();
-
-    // Calculate the total steps for the resulting PDF
     const int totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
 
-    std::vector<double> convolutedPdf;
+    std::vector<long double> convolutedPdf;
     convolutedPdf.reserve(totalSteps);
     // Perform convolution
     for (size_t i = 0; i < totalSteps; ++i) {
@@ -40,8 +38,22 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
     return {binWidth, convolutedPdf, true};
 }
 
+DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
+{
+    if (deltaQs.empty())
+        return DeltaQ();
+
+    DeltaQ result = deltaQs[0];
+
+    for (size_t i = 1; i < deltaQs.size(); ++i) {
+        result = convolve(result, deltaQs[i]);
+    }
+    return result;
+}
+
 DeltaQ allToFinish(const std::vector<DeltaQ> &deltaQs)
 {
+
     DeltaQ result = deltaQs[0];
     for (size_t i = 1; i < deltaQs.size(); ++i) {
         result = result * deltaQs[i];
@@ -51,7 +63,7 @@ DeltaQ allToFinish(const std::vector<DeltaQ> &deltaQs)
 
 DeltaQ firstToFinish(const std::vector<DeltaQ> &deltaQs)
 {
-    std::vector<double> resultingCdf;
+    std::vector<long double> resultingCdf;
 
     const double binWidth = deltaQs[0].getBinWidth();
     const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
@@ -72,7 +84,7 @@ DeltaQ firstToFinish(const std::vector<DeltaQ> &deltaQs)
 
 DeltaQ probabilisticChoice(const std::vector<double> &probabilities, const std::vector<DeltaQ> &deltaQs)
 {
-    std::vector<double> resultingCdf;
+    std::vector<long double> resultingCdf;
 
     double binWidth = deltaQs[0].getBinWidth();
 

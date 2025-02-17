@@ -1,0 +1,81 @@
+#include "Server.h"
+#include <arpa/inet.h>
+#include <cstring>
+#include <iostream>
+#include <regex>
+#include <unistd.h>
+
+Server::Server(int port, std::shared_ptr<System> system)
+    : port(port)
+    , server_fd(0)
+    , new_socket(0)
+    , system {system}
+{
+}
+
+Server::~Server()
+{
+    close(new_socket);
+    close(server_fd);
+    if (serverThread.joinable())
+        serverThread.join();
+}
+
+void Server::start()
+{
+    serverThread = std::thread(&Server::run, this);
+}
+
+void Server::run()
+{
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == 0) {
+        perror("Socket failed");
+        return;
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Bind failed");
+        return;
+    }
+
+    if (listen(server_fd, 3) < 0) {
+        perror("Listen failed");
+        return;
+    }
+
+    std::cout << "Server running on port " << port << std::endl;
+
+    int addrlen = sizeof(address);
+    new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
+    if (new_socket < 0) {
+        perror("Accept failed");
+        return;
+    }
+
+    char buffer[1024] = {0};
+    std::regex pattern(R"((\w+): Start=(-?\d+) End=(-?\d+))");
+    std::smatch match;
+
+    while (true) {
+        int valread = read(new_socket, buffer, 1024);
+        if (valread <= 0)
+            break;
+
+        std::string message(buffer, valread);
+        memset(buffer, 0, sizeof(buffer));
+
+        if (std::regex_search(message, match, pattern)) {
+            std::string workerName = match[1];
+            long long startTime = std::abs(std::stoll(match[2]));
+            long long endTime = std::abs(std::stoll(match[3]));
+
+            system->addSample(workerName, {startTime, endTime});
+            // std::cout << "Received: " << workerName << ", Start=" << startTime << ", End=" << endTime << std::endl;
+        }
+    }
+}

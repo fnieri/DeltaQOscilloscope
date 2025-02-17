@@ -7,8 +7,14 @@ add_library(${PREFIX}_dashboard
         DeltaQHelpers.cpp
         JsonComponent.h
         JsonComponent.cpp
-         ComponentEditDialog.h
-       ComponentEditDialog.cpp
+        ComponentEditDialog.h
+        ComponentEditDialog.cpp
+        MainWindow.h
+        MainWindow.cpp
+        DeltaQPlot.h
+        DeltaQPlot.cpp
+        AddPlotDialog.h
+        AddPlotDialog.cpp
     )
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gyu Widgets Charts Graphs)
@@ -18,7 +24,8 @@ target_link_libraries(${PREFIX}_dashboard
         PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::Graphs
         ${PREFIX}_maths
         nlohmann_json
-)
+        ${PREFIX}_server
+    )
 
 target_include_directories(${PREFIX}_dashboard
         PUBLIC

@@ -145,20 +145,6 @@ dashboard/fast:
 .PHONY : dashboard/fast
 
 # Convenience name for target.
-src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
-.PHONY : src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
-
-# Convenience name for target.
-DQ_dashboard_autogen_timestamp_deps: src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
-.PHONY : DQ_dashboard_autogen_timestamp_deps
-
-# fast build rule for target.
-DQ_dashboard_autogen_timestamp_deps/fast:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/build
-.PHONY : DQ_dashboard_autogen_timestamp_deps/fast
-
-# Convenience name for target.
 src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule
 .PHONY : src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule
@@ -173,20 +159,6 @@ DQ_dashboard_autogen/fast:
 .PHONY : DQ_dashboard_autogen/fast
 
 # Convenience name for target.
-src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
-.PHONY : src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
-
-# Convenience name for target.
-dashboard_autogen_timestamp_deps: src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
-.PHONY : dashboard_autogen_timestamp_deps
-
-# fast build rule for target.
-dashboard_autogen_timestamp_deps/fast:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/build.make src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/build
-.PHONY : dashboard_autogen_timestamp_deps/fast
-
-# Convenience name for target.
 src/dashboard/CMakeFiles/dashboard_autogen.dir/rule:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
 .PHONY : src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
@@ -199,6 +171,30 @@ dashboard_autogen: src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
 dashboard_autogen/fast:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/dashboard_autogen.dir/build.make src/dashboard/CMakeFiles/dashboard_autogen.dir/build
 .PHONY : dashboard_autogen/fast
+
+ComponentEditDialog.o: ComponentEditDialog.cpp.o
+.PHONY : ComponentEditDialog.o
+
+# target to build an object file
+ComponentEditDialog.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/ComponentEditDialog.cpp.o
+.PHONY : ComponentEditDialog.cpp.o
+
+ComponentEditDialog.i: ComponentEditDialog.cpp.i
+.PHONY : ComponentEditDialog.i
+
+# target to preprocess a source file
+ComponentEditDialog.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/ComponentEditDialog.cpp.i
+.PHONY : ComponentEditDialog.cpp.i
+
+ComponentEditDialog.s: ComponentEditDialog.cpp.s
+.PHONY : ComponentEditDialog.s
+
+# target to generate assembly for a file
+ComponentEditDialog.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/ComponentEditDialog.cpp.s
+.PHONY : ComponentEditDialog.cpp.s
 
 DQ_dashboard_autogen/mocs_compilation.o: DQ_dashboard_autogen/mocs_compilation.cpp.o
 .PHONY : DQ_dashboard_autogen/mocs_compilation.o
@@ -377,11 +373,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... DQ_dashboard_autogen"
-	@echo "... DQ_dashboard_autogen_timestamp_deps"
 	@echo "... dashboard_autogen"
-	@echo "... dashboard_autogen_timestamp_deps"
 	@echo "... DQ_dashboard"
 	@echo "... dashboard"
+	@echo "... ComponentEditDialog.o"
+	@echo "... ComponentEditDialog.i"
+	@echo "... ComponentEditDialog.s"
 	@echo "... DQ_dashboard_autogen/mocs_compilation.o"
 	@echo "... DQ_dashboard_autogen/mocs_compilation.i"
 	@echo "... DQ_dashboard_autogen/mocs_compilation.s"

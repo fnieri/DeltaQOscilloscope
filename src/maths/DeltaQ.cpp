@@ -7,7 +7,6 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
-#include <map>
 
 DeltaQ::DeltaQ(const double binWidth)
     : binWidth(binWidth)
@@ -15,7 +14,7 @@ DeltaQ::DeltaQ(const double binWidth)
 {
 }
 
-DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const bool isPdf)
+DeltaQ::DeltaQ(const double binWidth, const std::vector<long double> &values, const bool isPdf)
     : binWidth(binWidth)
     , size(values.size())
 {
@@ -28,24 +27,56 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const b
     }
 }
 
-DeltaQ::DeltaQ(const double binWidth, std::vector<double> outcomeSamples)
+DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples)
     : binWidth {binWidth}
 {
     processSamples(outcomeSamples);
 }
 
-void DeltaQ::calculateDeltaQ(std::vector<double> &outcomeSamples)
+DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples, int nBins)
+    : binWidth {binWidth}
 {
-    if (outcomeSamples.empty())
-        return;
-    std::sort(outcomeSamples.begin(), outcomeSamples.end());
+    processSamples(outcomeSamples, nBins);
+}
 
+void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples)
+{
+    if (outcomeSamples.empty() || binWidth == 0)
+        return;
     const int numBins = 10;
     std::vector<double> histogram(numBins);
-
-    // Add samples to corresponding bins
     for (const double &sample : outcomeSamples) {
-        const int bin = std::floor(sample / binWidth);
+        int bin = std::floor(std::abs(sample) / binWidth);
+
+        if (bin >= numBins) {
+            bin = numBins - 1; // Clamp to last valid bin
+        }
+
+        histogram[bin]++;
+    }
+
+    // Calculate discrete PDF
+    const auto outcomesSize = static_cast<double>(outcomeSamples.size());
+    for (const double &binValue : histogram) {
+        pdfValues.push_back(binValue / outcomesSize);
+    }
+
+    calculateCDF();
+    size = pdfValues.size();
+}
+
+void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins)
+{
+    if (outcomeSamples.empty() || binWidth == 0)
+        return;
+    std::vector<double> histogram(nBins);
+    for (const double &sample : outcomeSamples) {
+        int bin = std::floor(std::abs(sample) / binWidth);
+
+        if (bin >= nBins) {
+            bin = nBins - 1; // Clamp to last valid bin
+        }
+
         histogram[bin]++;
     }
 
@@ -80,21 +111,33 @@ void DeltaQ::calculatePDF()
     }
 }
 
-void DeltaQ::processSamples(std::vector<double> &outcomeSamples)
+void DeltaQ::processSamples(std::vector<long double> &outcomeSamples)
 {
     pdfValues.clear();
     cdfValues.clear();
     calculateDeltaQ(outcomeSamples);
 }
 
-const std::vector<double> &DeltaQ::getPdfValues() const
+void DeltaQ::processSamples(std::vector<long double> &outcomeSamples, int nBins)
+{
+    pdfValues.clear();
+    cdfValues.clear();
+    calculateDeltaQ(outcomeSamples, nBins);
+}
+
+const std::vector<long double> &DeltaQ::getPdfValues() const
 {
     return pdfValues;
 }
 
-const std::vector<double> &DeltaQ::getCdfValues() const
+const std::vector<long double> &DeltaQ::getCdfValues() const
 {
     return cdfValues;
+}
+
+void DeltaQ::setBinWidth(double newWidth)
+{
+    binWidth = newWidth;
 }
 
 double DeltaQ::getBinWidth() const
@@ -158,7 +201,7 @@ DeltaQ applyBinaryOperation(const DeltaQ &lhs, const DeltaQ &rhs, BinaryOperatio
     const DeltaQ &highestDeltaQ = (lhs > rhs) ? lhs : rhs;
     const DeltaQ &otherDeltaQ = (lhs > rhs) ? rhs : lhs;
 
-    std::vector<double> resultingCdf;
+    std::vector<long double> resultingCdf;
     resultingCdf.reserve(highestDeltaQ.getSize());
 
     for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
@@ -197,7 +240,7 @@ std::string DeltaQ::toString() const
     // Iterate through CDF values to construct the string
     for (size_t i = 0; i < cdfValues.size(); ++i) {
         const double bin = i * binWidth;
-        oss << "(" << std::fixed << std::setprecision(3) << bin << ", " << std::setprecision(6) << pdfValues[i] << ")";
+        oss << "(" << std::fixed << std::setprecision(3) << bin << ", " << std::setprecision(6) << cdfValues[i] << ")";
         if (i < cdfValues.size() - 1) {
             oss << ", ";
         }

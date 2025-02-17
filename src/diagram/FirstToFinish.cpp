@@ -15,7 +15,7 @@ FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::sha
 
 DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
 {
-    std::vector<double> resultingCdf;
+    std::vector<long double> resultingCdf;
 
     const double binWidth = system.getBinWidth();
 

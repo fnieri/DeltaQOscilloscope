@@ -16,15 +16,15 @@ class DeltaQ
 {
 
     double binWidth;
-    std::vector<double> pdfValues;
-    std::vector<double> cdfValues;
+    std::vector<long double> pdfValues;
+    std::vector<long double> cdfValues;
     int size {};
 
     /**
      * Calculate PDF and CDF values given samples from an outcome
      */
-    void calculateDeltaQ(std::vector<double> &outcomeSamples);
-
+    void calculateDeltaQ(std::vector<long double> &outcomeSamples);
+    void calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins);
     /**
      * Calculate CDF given PDF values
      */
@@ -37,22 +37,26 @@ class DeltaQ
 public:
     DeltaQ() = default;
     DeltaQ(double binWidth);
-    DeltaQ(double binWidth, const std::vector<double> &values, bool isPdf);
-    DeltaQ(double binWidth, const std::vector<double> outcomeSamples);
+    DeltaQ(double binWidth, const std::vector<long double> &values, bool isPdf);
+    DeltaQ(double binWidth, const std::vector<long double> outcomeSamples);
+    DeltaQ(double binWidth, const std::vector<long double> outcomeSamples, int nBins);
     /**
      * Processes outcome samples to generate PDF and CDF.
      */
-    void processSamples(std::vector<double> &outcomeSamples);
+    void processSamples(std::vector<long double> &outcomeSamples);
+    void processSamples(std::vector<long double> &outcomeSamples, int nBins);
 
     /**
      * Getters
      */
-    [[nodiscard]] const std::vector<double> &getPdfValues() const;
-    [[nodiscard]] const std::vector<double> &getCdfValues() const;
+    [[nodiscard]] const std::vector<long double> &getPdfValues() const;
+    [[nodiscard]] const std::vector<long double> &getCdfValues() const;
     [[nodiscard]] double getBinWidth() const;
     [[nodiscard]] int getSize() const;
     [[nodiscard]] double pdfAt(int x) const;
     [[nodiscard]] double cdfAt(int x) const;
+
+    void setBinWidth(double newWidth);
     /**
      * Operator Overloads
      */

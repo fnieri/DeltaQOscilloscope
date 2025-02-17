@@ -3,11 +3,7 @@ add_library(${PREFIX}_diagram
     AllToFinish.cpp
     DiagramComponent.h
     DiagramComponent.cpp
-    Event.h
-    Event.cpp
-    EventSample.h
-    EventSample.cpp
-    FirstToFinish.h
+   FirstToFinish.h
     FirstToFinish.cpp
     Outcome.h
     Outcome.cpp
