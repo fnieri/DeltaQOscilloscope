@@ -11,13 +11,6 @@ ComponentEditDialog::ComponentEditDialog(QWidget *parent)
 
     nameLineEdit = new QLineEdit;
     nameLineEdit->setPlaceholderText("Name");
-
-    startEventLineEdit = new QLineEdit;
-    startEventLineEdit->setPlaceholderText("Start Event");
-
-    endEventLineEdit = new QLineEdit;
-    endEventLineEdit->setPlaceholderText("End Event");
-
     operatorChoice = new QComboBox;
     operatorChoice->addItems({"Outcome", "First-to-finish", "All-to-finish", "Probabilistic choice"});
 
@@ -28,10 +21,6 @@ ComponentEditDialog::ComponentEditDialog(QWidget *parent)
     // Layouts
     mainLayout->addWidget(new QLabel("Name:"));
     mainLayout->addWidget(nameLineEdit);
-    mainLayout->addWidget(new QLabel("Start Event:"));
-    mainLayout->addWidget(startEventLineEdit);
-    mainLayout->addWidget(new QLabel("End Event:"));
-    mainLayout->addWidget(endEventLineEdit);
     mainLayout->addWidget(new QLabel("Operator Type:"));
     mainLayout->addWidget(operatorChoice);
 
@@ -49,9 +38,6 @@ ComponentEditDialog::ComponentEditDialog(QWidget *parent)
 void ComponentEditDialog::setFields(const JsonComponent &component)
 {
     nameLineEdit->setText(QString::fromStdString(component.name));
-    startEventLineEdit->setText(QString::fromStdString(component.startEvent));
-    endEventLineEdit->setText(QString::fromStdString(component.endEvent));
-
     if (component.type == "O")
         operatorChoice->setCurrentIndex(0);
     else if (component.type == "F")
@@ -76,13 +62,12 @@ JsonComponent ComponentEditDialog::getEditedComponent() const
     else if (operatorType == "All-to-finish")
         operatorShortCode = "A";
 
-    return JsonComponent {
-        nameLineEdit->text().toStdString(), startEventLineEdit->text().toStdString(), endEventLineEdit->text().toStdString(), operatorShortCode};
+    return JsonComponent {nameLineEdit->text().toStdString(), operatorShortCode};
 }
 
 void ComponentEditDialog::onConfirm()
 {
-    if (nameLineEdit->text().trimmed().isEmpty() || startEventLineEdit->text().trimmed().isEmpty()) {
+    if (nameLineEdit->text().trimmed().isEmpty()) {
         QMessageBox::warning(this, "Validation Error", "Name and Start Event must not be empty.");
         return;
     }

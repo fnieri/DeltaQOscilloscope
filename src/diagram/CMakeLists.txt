@@ -3,7 +3,7 @@ add_library(${PREFIX}_diagram
     AllToFinish.cpp
     DiagramComponent.h
     DiagramComponent.cpp
-   FirstToFinish.h
+    FirstToFinish.h
     FirstToFinish.cpp
     Outcome.h
     Outcome.cpp
@@ -19,16 +19,19 @@ add_library(${PREFIX}_diagram
     SystemParser.h
 )
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
         nlohmann_json
+    
 )
 
 
 target_include_directories(${PREFIX}_diagram
         PUBLIC
         ${CMAKE_SOURCE_DIR}
+PRIVATE ${Python3_INCLUDE_DIRS}
 )
 
 add_executable(diagram
@@ -39,4 +42,5 @@ add_executable(diagram
 target_link_libraries(diagram
         PRIVATE
         ${PREFIX}_diagram
+${Python3_LIBRARIES}
 )

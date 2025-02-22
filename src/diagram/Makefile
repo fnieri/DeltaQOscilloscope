@@ -192,54 +192,6 @@ DiagramComponent.cpp.s:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/DiagramComponent.cpp.s
 .PHONY : DiagramComponent.cpp.s
 
-Event.o: Event.cpp.o
-.PHONY : Event.o
-
-# target to build an object file
-Event.cpp.o:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Event.cpp.o
-.PHONY : Event.cpp.o
-
-Event.i: Event.cpp.i
-.PHONY : Event.i
-
-# target to preprocess a source file
-Event.cpp.i:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Event.cpp.i
-.PHONY : Event.cpp.i
-
-Event.s: Event.cpp.s
-.PHONY : Event.s
-
-# target to generate assembly for a file
-Event.cpp.s:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Event.cpp.s
-.PHONY : Event.cpp.s
-
-EventSample.o: EventSample.cpp.o
-.PHONY : EventSample.o
-
-# target to build an object file
-EventSample.cpp.o:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/EventSample.cpp.o
-.PHONY : EventSample.cpp.o
-
-EventSample.i: EventSample.cpp.i
-.PHONY : EventSample.i
-
-# target to preprocess a source file
-EventSample.cpp.i:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/EventSample.cpp.i
-.PHONY : EventSample.cpp.i
-
-EventSample.s: EventSample.cpp.s
-.PHONY : EventSample.s
-
-# target to generate assembly for a file
-EventSample.cpp.s:
-	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/EventSample.cpp.s
-.PHONY : EventSample.cpp.s
-
 FirstToFinish.o: FirstToFinish.cpp.o
 .PHONY : FirstToFinish.o
 
@@ -448,12 +400,6 @@ help:
 	@echo "... DiagramComponent.o"
 	@echo "... DiagramComponent.i"
 	@echo "... DiagramComponent.s"
-	@echo "... Event.o"
-	@echo "... Event.i"
-	@echo "... Event.s"
-	@echo "... EventSample.o"
-	@echo "... EventSample.i"
-	@echo "... EventSample.s"
 	@echo "... FirstToFinish.o"
 	@echo "... FirstToFinish.i"
 	@echo "... FirstToFinish.s"

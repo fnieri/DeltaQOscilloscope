@@ -1,4 +1,3 @@
-//
 
 #ifndef DASHBOARD_H
 #define DASHBOARD_H
@@ -34,14 +33,6 @@ private:
     QWidget *nameWidget;
     QLabel *nameLabel;
     QLineEdit *nameLineEdit;
-
-    QWidget *startEventWidget;
-    QLabel *startEventLabel;
-    QLineEdit *startEventLineEdit;
-
-    QWidget *endEventWidget;
-    QLabel *endEventLabel;
-    QLineEdit *endEventLineEdit;
 
     QPushButton *addButton;
 

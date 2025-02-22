@@ -20,4 +20,8 @@ public:
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
      */
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
+
+    std::string toString() const override;
+
+    void print(int depth) const override;
 };

@@ -102,3 +102,8 @@ void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> p
 {
     probes = probesMap;
 }
+
+void System::toString() const
+{
+    firstComponent->print(0);
+}

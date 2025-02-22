@@ -6,13 +6,13 @@
  */
 
 #include "DiagramComponent.h"
-DiagramComponent::DiagramComponent(const std::string name)
+DiagramComponent::DiagramComponent(const std::string &name)
 
-    : name {std::move(name)}
+    : name {name}
 {
 }
 
-std::string DiagramComponent::getName()
+std::string DiagramComponent::getName() const
 {
     return this->name;
 }

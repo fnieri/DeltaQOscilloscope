@@ -16,12 +16,16 @@ class DiagramComponent
 
 protected:
     std::string name;
-    explicit DiagramComponent(const std::string name);
+    explicit DiagramComponent(const std::string &name);
 
 public:
-    virtual ~DiagramComponent() = default;
+    DiagramComponent() = default;
+    ~DiagramComponent() { };
 
     virtual DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) = 0;
 
-    std::string getName();
+    std::string getName() const;
+
+    virtual void print(int depth) const { };
+    virtual std::string toString() const = 0;
 };

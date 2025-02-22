@@ -1,22 +1,8 @@
 {
-    components: [    
-    {
-      "name" : "O1",
-      "type" : "O",
-      "start" : "a",
-      "end": "b"
-    },
-    {
-      "name" : "02",
-      "type" : "O",
-        "start": "c",
-      "end": "d"
-    }
-    {
-      "type": "F",
-      "name": "F1",
-      "start" : "sf1",
-      "end" : "ef1"
-    }
-  ]
+    "components": [
+        {
+            "name": "asda",
+            "type": "O"
+        }
+    ]
 }

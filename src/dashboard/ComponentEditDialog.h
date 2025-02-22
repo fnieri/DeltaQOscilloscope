@@ -18,8 +18,6 @@ public:
 
 private:
     QLineEdit *nameLineEdit;
-    QLineEdit *startEventLineEdit;
-    QLineEdit *endEventLineEdit;
     QComboBox *operatorChoice;
     QPushButton *confirmButton;
     QPushButton *cancelButton;

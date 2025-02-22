@@ -5,7 +5,7 @@
 #include "../maths/DeltaQ.h"
 class Probe
 {
-    std::string name;
+    std::string probeName;
     std::vector<std::pair<long long, long long>> samples;
 
 public:
@@ -20,4 +20,6 @@ public:
     [[nodiscard]] double getMax() const;
 
     [[nodiscard]] double getMax(std::vector<long double> samples) const;
+
+    std::string toString() const;
 };

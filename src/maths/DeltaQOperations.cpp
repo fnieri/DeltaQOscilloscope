@@ -53,7 +53,6 @@ DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
 
 DeltaQ allToFinish(const std::vector<DeltaQ> &deltaQs)
 {
-
     DeltaQ result = deltaQs[0];
     for (size_t i = 1; i < deltaQs.size(); ++i) {
         result = result * deltaQs[i];
@@ -70,7 +69,7 @@ DeltaQ firstToFinish(const std::vector<DeltaQ> &deltaQs)
 
     for (size_t i = 0; i < largestDeltaQSize; i++) {
         double sumAtI = 0;
-        double productAtI = 0;
+        double productAtI = 1;
         for (const DeltaQ &deltaQ : deltaQs) {
             const double cdfAtI = deltaQ.cdfAt(i);
             sumAtI += cdfAtI;

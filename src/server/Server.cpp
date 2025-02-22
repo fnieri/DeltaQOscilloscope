@@ -28,9 +28,17 @@ void Server::start()
 
 void Server::run()
 {
+
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == 0) {
         perror("Socket failed");
+        return;
+    }
+
+    // Allow reuse of the address (fix bind issues)
+    int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt failed");
         return;
     }
 
@@ -42,7 +50,6 @@ void Server::run()
         perror("Bind failed");
         return;
     }
-
     if (listen(server_fd, 3) < 0) {
         perror("Listen failed");
         return;

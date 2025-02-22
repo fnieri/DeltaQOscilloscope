@@ -1,9 +1,7 @@
 add_library(${PREFIX}_dashboard
         Dashboard.cpp
         Dashboard.h
-        Plot.cpp
-        Plot.h
-        DeltaQHelpers.h
+       DeltaQHelpers.h
         DeltaQHelpers.cpp
         JsonComponent.h
         JsonComponent.cpp

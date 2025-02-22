@@ -145,6 +145,20 @@ dashboard/fast:
 .PHONY : dashboard/fast
 
 # Convenience name for target.
+src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
+.PHONY : src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
+
+# Convenience name for target.
+DQ_dashboard_autogen_timestamp_deps: src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/rule
+.PHONY : DQ_dashboard_autogen_timestamp_deps
+
+# fast build rule for target.
+DQ_dashboard_autogen_timestamp_deps/fast:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard_autogen_timestamp_deps.dir/build
+.PHONY : DQ_dashboard_autogen_timestamp_deps/fast
+
+# Convenience name for target.
 src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule
 .PHONY : src/dashboard/CMakeFiles/DQ_dashboard_autogen.dir/rule
@@ -159,6 +173,20 @@ DQ_dashboard_autogen/fast:
 .PHONY : DQ_dashboard_autogen/fast
 
 # Convenience name for target.
+src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
+.PHONY : src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
+
+# Convenience name for target.
+dashboard_autogen_timestamp_deps: src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/rule
+.PHONY : dashboard_autogen_timestamp_deps
+
+# fast build rule for target.
+dashboard_autogen_timestamp_deps/fast:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/build.make src/dashboard/CMakeFiles/dashboard_autogen_timestamp_deps.dir/build
+.PHONY : dashboard_autogen_timestamp_deps/fast
+
+# Convenience name for target.
 src/dashboard/CMakeFiles/dashboard_autogen.dir/rule:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
 .PHONY : src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
@@ -171,6 +199,30 @@ dashboard_autogen: src/dashboard/CMakeFiles/dashboard_autogen.dir/rule
 dashboard_autogen/fast:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/dashboard_autogen.dir/build.make src/dashboard/CMakeFiles/dashboard_autogen.dir/build
 .PHONY : dashboard_autogen/fast
+
+AddPlotDialog.o: AddPlotDialog.cpp.o
+.PHONY : AddPlotDialog.o
+
+# target to build an object file
+AddPlotDialog.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/AddPlotDialog.cpp.o
+.PHONY : AddPlotDialog.cpp.o
+
+AddPlotDialog.i: AddPlotDialog.cpp.i
+.PHONY : AddPlotDialog.i
+
+# target to preprocess a source file
+AddPlotDialog.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/AddPlotDialog.cpp.i
+.PHONY : AddPlotDialog.cpp.i
+
+AddPlotDialog.s: AddPlotDialog.cpp.s
+.PHONY : AddPlotDialog.s
+
+# target to generate assembly for a file
+AddPlotDialog.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/AddPlotDialog.cpp.s
+.PHONY : AddPlotDialog.cpp.s
 
 ComponentEditDialog.o: ComponentEditDialog.cpp.o
 .PHONY : ComponentEditDialog.o
@@ -268,6 +320,30 @@ DeltaQHelpers.cpp.s:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/DeltaQHelpers.cpp.s
 .PHONY : DeltaQHelpers.cpp.s
 
+DeltaQPlot.o: DeltaQPlot.cpp.o
+.PHONY : DeltaQPlot.o
+
+# target to build an object file
+DeltaQPlot.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/DeltaQPlot.cpp.o
+.PHONY : DeltaQPlot.cpp.o
+
+DeltaQPlot.i: DeltaQPlot.cpp.i
+.PHONY : DeltaQPlot.i
+
+# target to preprocess a source file
+DeltaQPlot.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/DeltaQPlot.cpp.i
+.PHONY : DeltaQPlot.cpp.i
+
+DeltaQPlot.s: DeltaQPlot.cpp.s
+.PHONY : DeltaQPlot.s
+
+# target to generate assembly for a file
+DeltaQPlot.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/DeltaQPlot.cpp.s
+.PHONY : DeltaQPlot.cpp.s
+
 JsonComponent.o: JsonComponent.cpp.o
 .PHONY : JsonComponent.o
 
@@ -291,6 +367,30 @@ JsonComponent.s: JsonComponent.cpp.s
 JsonComponent.cpp.s:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/JsonComponent.cpp.s
 .PHONY : JsonComponent.cpp.s
+
+MainWindow.o: MainWindow.cpp.o
+.PHONY : MainWindow.o
+
+# target to build an object file
+MainWindow.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/MainWindow.cpp.o
+.PHONY : MainWindow.cpp.o
+
+MainWindow.i: MainWindow.cpp.i
+.PHONY : MainWindow.i
+
+# target to preprocess a source file
+MainWindow.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/MainWindow.cpp.i
+.PHONY : MainWindow.cpp.i
+
+MainWindow.s: MainWindow.cpp.s
+.PHONY : MainWindow.s
+
+# target to generate assembly for a file
+MainWindow.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/dashboard/CMakeFiles/DQ_dashboard.dir/build.make src/dashboard/CMakeFiles/DQ_dashboard.dir/MainWindow.cpp.s
+.PHONY : MainWindow.cpp.s
 
 Plot.o: Plot.cpp.o
 .PHONY : Plot.o
@@ -373,9 +473,14 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... DQ_dashboard_autogen"
+	@echo "... DQ_dashboard_autogen_timestamp_deps"
 	@echo "... dashboard_autogen"
+	@echo "... dashboard_autogen_timestamp_deps"
 	@echo "... DQ_dashboard"
 	@echo "... dashboard"
+	@echo "... AddPlotDialog.o"
+	@echo "... AddPlotDialog.i"
+	@echo "... AddPlotDialog.s"
 	@echo "... ComponentEditDialog.o"
 	@echo "... ComponentEditDialog.i"
 	@echo "... ComponentEditDialog.s"
@@ -388,9 +493,15 @@ help:
 	@echo "... DeltaQHelpers.o"
 	@echo "... DeltaQHelpers.i"
 	@echo "... DeltaQHelpers.s"
+	@echo "... DeltaQPlot.o"
+	@echo "... DeltaQPlot.i"
+	@echo "... DeltaQPlot.s"
 	@echo "... JsonComponent.o"
 	@echo "... JsonComponent.i"
 	@echo "... JsonComponent.s"
+	@echo "... MainWindow.o"
+	@echo "... MainWindow.i"
+	@echo "... MainWindow.s"
 	@echo "... Plot.o"
 	@echo "... Plot.i"
 	@echo "... Plot.s"

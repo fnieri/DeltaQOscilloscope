@@ -31,8 +31,6 @@ Dashboard::Dashboard(QWidget *parent)
     QVBoxLayout *formLayout = new QVBoxLayout;
     formLayout->addWidget(operatorChoice);
     formLayout->addWidget(nameLineEdit);
-    formLayout->addWidget(startEventLineEdit);
-    formLayout->addWidget(endEventLineEdit);
 
     addButton = new QPushButton("Add Component");
     formLayout->addWidget(addButton);
@@ -93,36 +91,13 @@ void Dashboard::setUpComponentTree()
 void Dashboard::setUpLineEdits()
 {
     QVBoxLayout *nameLayout = new QVBoxLayout;
-    QVBoxLayout *startEventLayout = new QVBoxLayout;
-    QVBoxLayout *endEventLayout = new QVBoxLayout;
-
     nameWidget = new QWidget;
-    startEventWidget = new QWidget;
-    endEventWidget = new QWidget;
-
     nameLabel = new QLabel("Operator's name");
-    startEventLabel = new QLabel("Start event");
-    endEventLabel = new QLabel("End event");
-
     nameLineEdit = new QLineEdit;
-    startEventLineEdit = new QLineEdit;
-    endEventLineEdit = new QLineEdit;
-
     nameLineEdit->setPlaceholderText("Name");
-    startEventLineEdit->setPlaceholderText("Start Event");
-    endEventLineEdit->setPlaceholderText("End Event");
-
     nameLayout->addWidget(nameLabel);
     nameLayout->addWidget(nameLineEdit);
     nameWidget->setLayout(nameLayout);
-
-    startEventLayout->addWidget(startEventLabel);
-    startEventLayout->addWidget(startEventLineEdit);
-    startEventWidget->setLayout(startEventLayout);
-
-    endEventLayout->addWidget(endEventLabel);
-    endEventLayout->addWidget(endEventLineEdit);
-    endEventWidget->setLayout(endEventLayout);
 }
 
 void Dashboard::setupAddButton()
@@ -138,9 +113,6 @@ void Dashboard::onAdd()
     if (!areFieldsValid(name.toStdString())) {
         return;
     }
-
-    QString startEvent = startEventLineEdit->text().trimmed();
-    QString endEvent = endEventLineEdit->text().trimmed();
     QString operatorType = operatorChoice->currentText();
 
     // Map operator type to short code
@@ -161,7 +133,7 @@ void Dashboard::onAdd()
         parentCategory = componentTree->topLevelItem(3); // Probabilistic choice category
     }
 
-    JsonComponent jsonComponent {name.toStdString(), startEvent.toStdString(), endEvent.toStdString(), operatorShortCode};
+    JsonComponent jsonComponent {name.toStdString(), operatorShortCode};
 
     componentsJson.push_back(jsonComponent);
 
@@ -174,8 +146,6 @@ void Dashboard::onAdd()
     // Success and reset
     QMessageBox::information(this, "Success", "Component added successfully!");
     nameLineEdit->clear();
-    startEventLineEdit->clear();
-    endEventLineEdit->clear();
     operatorChoice->setCurrentIndex(0);
 }
 void Dashboard::onEditItem(QTreeWidgetItem *item, int column)
@@ -204,7 +174,7 @@ void Dashboard::onEditItem(QTreeWidgetItem *item, int column)
     if (dialog.exec() == QDialog::Accepted) {
         JsonComponent editedComponent = dialog.getEditedComponent();
 
-        if (editedComponent.name.empty() || editedComponent.startEvent.empty() || (editedComponent.endEvent.empty())) {
+        if (editedComponent.name.empty()) {
             QMessageBox::warning(this, "Validation Error", "Please fill in the required fields.");
             return;
         }
@@ -267,9 +237,6 @@ bool Dashboard::areFieldsValid(const std::string &name)
     // Reset styles for all fields
     auto resetField = [](QLineEdit *field) { field->setStyleSheet(""); };
     resetField(nameLineEdit);
-    resetField(startEventLineEdit);
-    resetField(endEventLineEdit);
-
     // Validate fields
     bool isValid = true;
 
@@ -277,17 +244,6 @@ bool Dashboard::areFieldsValid(const std::string &name)
         nameLineEdit->setStyleSheet("background-color: #FFCCCC;"); // Highlight in red
         isValid = false;
     }
-
-    if (startEventLineEdit->text().trimmed().isEmpty()) {
-        startEventLineEdit->setStyleSheet("background-color: #FFCCCC;");
-        isValid = false;
-    }
-
-    if (operatorChoice->currentText() == "Outcome" && endEventLineEdit->text().trimmed().isEmpty()) {
-        endEventLineEdit->setStyleSheet("background-color: #FFCCCC;");
-        isValid = false;
-    }
-
     if (!isValid) {
         QMessageBox::warning(this, "Validation Error", "Please fill in the required fields.");
     }
@@ -360,8 +316,6 @@ void Dashboard::loadFromFile()
             JsonComponent component;
             component.name = componentJson.at("name").get<std::string>();
             component.type = componentJson.at("type").get<std::string>();
-            component.startEvent = componentJson.at("start").get<std::string>();
-            component.endEvent = componentJson.at("end").get<std::string>();
 
             componentsJson.push_back(component);
             addComponentToTree(component);

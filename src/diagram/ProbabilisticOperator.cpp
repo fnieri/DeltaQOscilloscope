@@ -7,15 +7,14 @@
 #include "ProbabilisticOperator.h"
 
 #include "../maths/DeltaQOperations.h"
+#include <iostream>
 #include <utility>
 ProbabilisticOperator::ProbabilisticOperator(const std::string &name)
-    : DiagramComponent(name)
-    , Operator(name)
+    : Operator(name)
 {
 }
 ProbabilisticOperator::ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
-    : DiagramComponent(name)
-    , Operator(name, nextComponents)
+    : Operator(name, nextComponents)
 {
 }
 
@@ -41,4 +40,19 @@ DeltaQ ProbabilisticOperator::calculateDeltaQ(const System &system, const DeltaQ
     */
     // TODO Calculate Probabilities
     return {0, resultingCdf, false};
+}
+
+std::string ProbabilisticOperator::toString() const
+{
+    return "Probabilistic operator: " + name + "\n";
+}
+
+void ProbabilisticOperator::print(int depth) const
+{
+    std::cout << std::string(depth * 2, ' ') + "Probabilistic operator: " + getName() + "\n";
+    for (auto &component : nextComponents) {
+        component->print(depth + 1);
+    }
+    if (followingComponent)
+        followingComponent->print(depth);
 }

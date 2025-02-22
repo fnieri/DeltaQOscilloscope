@@ -1,3 +1,4 @@
+
 //
 // Created by francy on 06/12/24.
 //
@@ -11,6 +12,7 @@
 #include "ProbabilisticOperator.h"
 #include "System.h"
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -23,55 +25,46 @@ using OperatorsMap = std::unordered_map<std::string, std::shared_ptr<Operator>>;
 namespace
 {
 
-OutcomesMap parseOutcomes(const json &systemJson, System &system)
+OutcomesMap outcomes;
+OperatorsMap operators;
+std::shared_ptr<DiagramComponent> parse(const json &componentJson)
 {
-    OutcomesMap outcomes;
-    for (const auto &outcomeJson : systemJson["outcomes"]) {
-        std::string name = outcomeJson["name"];
-        auto outcome = std::make_shared<Outcome>(name);
-        outcomes[name] = outcome;
+    std::string name = componentJson["name"];
+    std::shared_ptr<DiagramComponent> nextComponent = nullptr;
+    if (componentJson.contains("next")) {
+        nextComponent = parse(componentJson["next"]);
     }
-    return outcomes;
-}
+    if (componentJson.contains("children")) {
 
-OperatorsMap parseOperators(const json &systemJson, System &system)
-{
-    OperatorsMap operators;
-    for (const auto &operatorJson : systemJson["operators"]) {
-        std::string name = operatorJson["name"];
-        std::string type = operatorJson["type"];
         std::shared_ptr<Operator> systemOperator;
-        if (type == "F") {
+        std::string type = componentJson["type"];
+        if (type == "f") {
             systemOperator = std::make_shared<FirstToFinish>(name);
-        } else if (type == "A") {
+        } else if (type == "a") {
             systemOperator = std::make_shared<AllToFinish>(name);
-        } else if (type == "P") {
+        } else if (type == "p") {
             systemOperator = std::make_shared<ProbabilisticOperator>(name);
         } else {
             throw std::invalid_argument("Unknown operator type: " + type);
         }
-        operators[name] = systemOperator;
-    }
-    return operators;
-}
-
-void setFirstComponent(const json &systemJson, System &system, OutcomesMap outcomes, OperatorsMap operators)
-{
-    std::string firstComponentName = systemJson["first"];
-    auto firstOutcomeIt = outcomes.find(firstComponentName);
-    if (firstOutcomeIt != outcomes.end()) {
-        // Found as an outcome
-        system.setFirstComponent(firstOutcomeIt->second);
-    } else {
-        auto firstOperatorIt = operators.find(firstComponentName);
-        if (firstOperatorIt != operators.end()) {
-            // Found as an operator
-            system.setFirstComponent(firstOperatorIt->second);
-        } else {
-            // Not found in either outcomes or operators
-            throw std::runtime_error("First component '" + firstComponentName + "' not found in outcomes or operators.");
+        for (const auto &childJson : componentJson["children"]) {
+            systemOperator->addNextComponent(parse(childJson));
         }
+
+        if (nextComponent) {
+            systemOperator->setFollowingComponent(nextComponent);
+        }
+        operators[name] = systemOperator;
+        return systemOperator;
     }
+
+    auto outcome = std::make_shared<Outcome>(name);
+    outcomes[name] = outcome;
+    if (nextComponent) {
+        outcome->setNext(nextComponent);
+    }
+
+    return outcome;
 }
 }
 
@@ -80,10 +73,22 @@ System parseSystemJson(const std::string &fileName)
     System system;
     std::ifstream ifs(fileName);
     json systemJson = json::parse(ifs);
-    OutcomesMap outcomes = parseOutcomes(systemJson, system);
-    OperatorsMap operators = parseOperators(systemJson, system);
-    setFirstComponent(systemJson, system, outcomes, operators);
+
+    if (!systemJson["system"].empty()) {
+        auto firstComponent = parse(systemJson["system"][0]);
+        system.setFirstComponent(firstComponent);
+    }
+
+    if (systemJson.contains("probes")) {
+        std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
+        for (const auto &probeName : systemJson["probes"]) {
+            probes[probeName] = std::make_shared<Probe>(probeName);
+        }
+        system.setProbes(probes);
+    }
+
     system.setOutcomes(outcomes);
     system.setOperators(operators);
+    system.toString();
     return system;
 }

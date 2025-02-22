@@ -3,7 +3,7 @@
 #include <iostream>
 
 Probe::Probe(const std::string &name)
-    : name {name}
+    : probeName {name}
 {
 }
 
@@ -45,4 +45,9 @@ double Probe::getMax(std::vector<long double> samples) const
 void Probe::addSample(std::pair<long long, long long> sample)
 {
     samples.push_back(sample);
+}
+
+std::string Probe::toString() const
+{
+    return "Probe: " + probeName + "\n";
 }

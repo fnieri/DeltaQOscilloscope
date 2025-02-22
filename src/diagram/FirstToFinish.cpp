@@ -1,9 +1,8 @@
 #include "FirstToFinish.h"
 #include "../maths/DeltaQOperations.h"
-
+#include <iostream>
 FirstToFinish::FirstToFinish(const std::string &name)
-    : DiagramComponent(name)
-    , Operator(name)
+    : Operator(name)
 {
 }
 
@@ -30,7 +29,7 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ
 
     for (std::size_t i = 0; i < largestDeltaQSize; i++) {
         double sumAtI = 0;
-        double productAtI = 0;
+        double productAtI = 1;
         for (const DeltaQ &probDeltaQ : deltaQs) {
             const double cdfAtI = probDeltaQ.cdfAt(i);
             sumAtI += cdfAtI;
@@ -40,4 +39,19 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ
         resultingCdf.push_back(resultAtI);
     }
     return {binWidth, resultingCdf, false};
+}
+
+std::string FirstToFinish::toString() const
+{
+    return "First to finish: " + name + "\n";
+}
+
+void FirstToFinish::print(int depth) const
+{
+    std::cout << std::string(depth * 2, ' ') + "First to finish: " + name + "\n";
+    for (auto &component : nextComponents) {
+        component->print(depth + 1);
+    }
+    if (followingComponent)
+        followingComponent->print(depth);
 }

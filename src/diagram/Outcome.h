@@ -21,4 +21,8 @@ public:
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
 
     [[nodiscard]] DeltaQ getDeltaQ(double binWidth) const override;
+
+    std::string toString() const;
+
+    void print(int depth) const override;
 };

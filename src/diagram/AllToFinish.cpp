@@ -1,13 +1,11 @@
 #include "AllToFinish.h"
-
+#include <iostream>
 AllToFinish::AllToFinish(const std::string &name)
-    : DiagramComponent(name)
-    , Operator(name)
+    : Operator(name)
 {
 }
 AllToFinish::AllToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
-    : DiagramComponent(name)
-    , Operator(name, nextComponents)
+    : Operator(name, nextComponents)
 {
 }
 
@@ -27,4 +25,19 @@ DeltaQ AllToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
         result = result * deltaQs[i];
     }
     return result;
+}
+
+std::string AllToFinish::toString() const
+{
+    return "All to finish: " + name + "\n";
+}
+
+void AllToFinish::print(int depth) const
+{
+    std::cout << std::string(depth * 2, ' ') + "All to finish: " + name + "\n";
+    for (auto &component : nextComponents) {
+        component->print(depth + 1);
+    }
+    if (followingComponent)
+        followingComponent->print(depth);
 }
