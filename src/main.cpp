@@ -1,5 +1,4 @@
 
-#include "dashboard/Dashboard.h"
 #include "dashboard/MainWindow.h"
 #include "diagram/Outcome.h"
 #include "diagram/System.h"

@@ -1,16 +1,12 @@
 add_library(${PREFIX}_dashboard
-        Dashboard.cpp
-        Dashboard.h
-       DeltaQHelpers.h
-        DeltaQHelpers.cpp
-        JsonComponent.h
+       JsonComponent.h
         JsonComponent.cpp
-        ComponentEditDialog.h
-        ComponentEditDialog.cpp
-        MainWindow.h
-        MainWindow.cpp
+        DQPlotController.h
+        DQPlotController.cpp
         DeltaQPlot.h
         DeltaQPlot.cpp
+        MainWindow.h
+        MainWindow.cpp
         AddPlotDialog.h
         AddPlotDialog.cpp
     )

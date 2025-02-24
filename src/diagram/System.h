@@ -58,7 +58,7 @@ public:
 
     bool containsProbe(std::string &name);
 
-    std::shared_ptr<Probe> getProbe(std::string &name);
+    std::shared_ptr<Probe> getProbe(const std::string &name);
 
     void setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap);
 

@@ -1,6 +1,6 @@
 
-from lark import Lark, Transformer, Token
 import json
+from lark import Lark, Transformer
 
 grammar = """
 %import common.WS
@@ -70,13 +70,13 @@ class ComponentTransformer(Transformer):
 parser = Lark(grammar, start="start", parser="earley")
 transformer = ComponentTransformer()
 
-# Function to parse and generate JSON
-def parse_and_generate_json(input_string):
+def parse_and_save_json(input_string, filename="parsed_system.json"):
     tree = parser.parse(input_string)
     transformed_tree = transformer.transform(tree)
-    return json.dumps(transformed_tree, indent=2)
+    with open(filename, "w") as json_file:
+        json.dump(transformed_tree, json_file, indent=2)
+    return filename  # Return filename for reference
 
-# Test input
-text = "worker_1 -> f:ftf_1(worker_2 -> start -> end, o4 -> p:probab(o5 -> o6 -> p:carm(2 -> 3))) -> o7 ; [probe1, probe2, whatever]"
-data = parse_and_generate_json(text)
-print(data)
+# Example Usage:
+# parse_and_save_json("worker_1 -> f:ftf_1(worker_2 -> start -> end, o4 -> p:probab(o5 -> o6 -> p:carm(2 -> 3))) -> o7 ; [probe1, probe2]")
+rint(data)

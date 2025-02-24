@@ -93,7 +93,7 @@ bool System::containsProbe(std::string &name)
     return probes.find(name) != probes.end();
 }
 
-std::shared_ptr<Probe> System::getProbe(std::string &name)
+std::shared_ptr<Probe> System::getProbe(const std::string &name)
 {
     return probes[name];
 }

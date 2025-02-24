@@ -31,6 +31,7 @@ MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
     connect(addPlotButton, &QPushButton::clicked, this, &MainWindow::onAddPlotClicked);
     mainLayout->addWidget(addPlotButton);
 }
+
 void MainWindow::updatePlots()
 {
     system->calculateBinWidth();
@@ -54,31 +55,11 @@ void MainWindow::onAddPlotClicked()
     if (dialog.exec() == QDialog::Accepted) {
         SelectionResult selection = dialog.getSelections();
 
-        // Determine the operation function pointer
-        DeltaQ (*operationFunction)(const std::vector<DeltaQ> &) = nullptr;
-        if (selection.selectedOperation == "Convolution") {
-            operationFunction = &convolveN;
-        } else if (selection.selectedOperation == "All-to-Finish") {
-            operationFunction = &allToFinish;
-        } else if (selection.selectedOperation == "First-to-Finish") {
-            operationFunction = &firstToFinish;
-        }
-
-        // Create new DeltaQPlot with operation function pointer
         auto *plotWidget = new QWidget(this);
         auto *plotLayout = new QVBoxLayout(plotWidget);
-        auto *deltaQPlot = new DeltaQPlot(system, this, operationFunction);
+        auto *deltaQPlot = new DeltaQPlot(system, selection, this);
+
         plotContainers[deltaQPlot] = plotWidget;
-
-        // Add outcomes
-        for (const QString &item : selection.selectedOutcomes) {
-            deltaQPlot->addComponent(item.toStdString(), false);
-        }
-
-        // Add probes
-        for (const QString &item : selection.selectedProbes) {
-            deltaQPlot->addComponent(item.toStdString(), true);
-        }
 
         plotLayout->addWidget(deltaQPlot);
         mainLayout->addWidget(plotWidget);
@@ -117,51 +98,17 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::onEditPlot(DeltaQPlot *plot)
 {
-    // Get currently plotted items
+
     QStringList existingItems;
     for (const auto &name : plot->getComponents()) {
         existingItems.append(QString::fromStdString(name));
     }
-
     // Open dialog with preselected items
     AddPlotDialog dialog(system, existingItems, this);
     if (dialog.exec() == QDialog::Accepted) {
+
         SelectionResult selection = dialog.getSelections();
-
-        // Determine new operation function pointer
-        DeltaQ (*operationFunction)(const std::vector<DeltaQ> &) = nullptr;
-        if (selection.selectedOperation == "Convolution") {
-            operationFunction = &convolveN;
-        } else if (selection.selectedOperation == "All-to-Finish") {
-            operationFunction = &allToFinish;
-        } else if (selection.selectedOperation == "First-to-Finish") {
-            operationFunction = &firstToFinish;
-        }
-
-        // Update the plot's operation function
-        plot->setOperation(operationFunction);
-
-        // Remove unselected items
-        for (const QString &name : existingItems) {
-            if (!selection.selectedOutcomes.contains(name) && !selection.selectedProbes.contains(name)) {
-                plot->removeComponent(name.toStdString());
-            }
-        }
-
-        // Add new selections
-        for (const QString &name : selection.selectedOutcomes) {
-            std::string stdName = name.toStdString();
-            if (!plot->containsComponent(stdName)) {
-                plot->addComponent(stdName, false);
-            }
-        }
-        for (const QString &name : selection.selectedProbes) {
-            std::string stdName = name.toStdString();
-            if (!plot->containsComponent(stdName)) {
-                plot->addComponent(stdName, true);
-            }
-        }
-
+        plot->editPlot(selection);
         plot->update();
     }
 }

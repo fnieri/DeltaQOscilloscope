@@ -4,34 +4,37 @@
 #pragma once
 
 #include "../diagram/System.h"
+#include "AddPlotDialog.h"
+#include "DQPlotController.h"
 #include <QChartView>
 #include <QLineSeries>
 #include <QValueAxis>
 #include <memory>
+#include <qlineseries.h>
+
+class DQPlotController;
 class DeltaQPlot : public QChartView
 {
     Q_OBJECT
 
 public:
-    explicit DeltaQPlot(std::shared_ptr<System> system, QWidget *parent = nullptr, DeltaQ (*operation)(const std::vector<DeltaQ> &) = nullptr);
-
-    void addComponent(std::string name, bool isProbe);
-
-    void removeComponent(std::string name);
-
-    bool containsComponent(std::string name);
-
+    explicit DeltaQPlot(std::shared_ptr<System> system, SelectionResult selection, QWidget *parent = nullptr);
+    ~DeltaQPlot();
     void update();
+    void updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data, double xRange);
+
+    void updateOperationSeries(const std::vector<std::pair<double, double>> &data, double xRange);
+    void removeSeries(QAbstractSeries *series);
+    void updateOperation();
+    void editPlot(SelectionResult selection);
 
     std::vector<std::string> getComponents();
-
-    void setOperation(DeltaQ (*newOperation)(const std::vector<DeltaQ> &));
+    void addSeries(QLineSeries *series, std::string &name);
 
 private:
+    DQPlotController *controller;
+
     std::shared_ptr<System> system;
-    std::unordered_map<std::string, std::pair<QLineSeries *, std::shared_ptr<Probe>>> probes;
-    std::unordered_map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
-    DeltaQ (*operation)(const std::vector<DeltaQ> &) = nullptr;
 
     QLineSeries *operationSeries;
     QChart *chart;
