@@ -117,6 +117,45 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named RealTimeDeltaQSD
+
+# Build rule for target.
+RealTimeDeltaQSD: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 RealTimeDeltaQSD
+.PHONY : RealTimeDeltaQSD
+
+# fast build rule for target.
+RealTimeDeltaQSD/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD.dir/build.make src/CMakeFiles/RealTimeDeltaQSD.dir/build
+.PHONY : RealTimeDeltaQSD/fast
+
+#=============================================================================
+# Target rules for targets named RealTimeDeltaQSD_autogen_timestamp_deps
+
+# Build rule for target.
+RealTimeDeltaQSD_autogen_timestamp_deps: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 RealTimeDeltaQSD_autogen_timestamp_deps
+.PHONY : RealTimeDeltaQSD_autogen_timestamp_deps
+
+# fast build rule for target.
+RealTimeDeltaQSD_autogen_timestamp_deps/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD_autogen_timestamp_deps.dir/build.make src/CMakeFiles/RealTimeDeltaQSD_autogen_timestamp_deps.dir/build
+.PHONY : RealTimeDeltaQSD_autogen_timestamp_deps/fast
+
+#=============================================================================
+# Target rules for targets named RealTimeDeltaQSD_autogen
+
+# Build rule for target.
+RealTimeDeltaQSD_autogen: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 RealTimeDeltaQSD_autogen
+.PHONY : RealTimeDeltaQSD_autogen
+
+# fast build rule for target.
+RealTimeDeltaQSD_autogen/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD_autogen.dir/build.make src/CMakeFiles/RealTimeDeltaQSD_autogen.dir/build
+.PHONY : RealTimeDeltaQSD_autogen/fast
+
+#=============================================================================
 # Target rules for targets named DQ_dashboard
 
 # Build rule for target.
@@ -246,6 +285,32 @@ maths/fast:
 	$(MAKE) $(MAKESILENT) -f src/maths/CMakeFiles/maths.dir/build.make src/maths/CMakeFiles/maths.dir/build
 .PHONY : maths/fast
 
+#=============================================================================
+# Target rules for targets named DQ_server
+
+# Build rule for target.
+DQ_server: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 DQ_server
+.PHONY : DQ_server
+
+# fast build rule for target.
+DQ_server/fast:
+	$(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/DQ_server.dir/build.make src/server/CMakeFiles/DQ_server.dir/build
+.PHONY : DQ_server/fast
+
+#=============================================================================
+# Target rules for targets named server
+
+# Build rule for target.
+server: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 server
+.PHONY : server
+
+# fast build rule for target.
+server/fast:
+	$(MAKE) $(MAKESILENT) -f src/server/CMakeFiles/server.dir/build.make src/server/CMakeFiles/server.dir/build
+.PHONY : server/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -256,14 +321,19 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... DQ_dashboard_autogen"
 	@echo "... DQ_dashboard_autogen_timestamp_deps"
+	@echo "... RealTimeDeltaQSD_autogen"
+	@echo "... RealTimeDeltaQSD_autogen_timestamp_deps"
 	@echo "... dashboard_autogen"
 	@echo "... dashboard_autogen_timestamp_deps"
 	@echo "... DQ_dashboard"
 	@echo "... DQ_diagram"
 	@echo "... DQ_maths"
+	@echo "... DQ_server"
+	@echo "... RealTimeDeltaQSD"
 	@echo "... dashboard"
 	@echo "... diagram"
 	@echo "... maths"
+	@echo "... server"
 .PHONY : help
 
 

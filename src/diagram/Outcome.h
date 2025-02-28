@@ -9,14 +9,10 @@
 #include "Probe.h"
 #include <cmath>
 #include <memory>
-class Outcome final : virtual public DiagramComponent, virtual public Probe
+class Outcome final : virtual public Probe
 {
-    std::shared_ptr<DiagramComponent> nextComponent;
-
 public:
     Outcome(const std::string &name);
-
-    void setNext(std::shared_ptr<DiagramComponent> next);
 
     DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
 
@@ -24,5 +20,5 @@ public:
 
     std::string toString() const;
 
-    void print(int depth) const override;
+    void print(int depth, std::string currentProbe) override;
 };

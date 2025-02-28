@@ -11,13 +11,13 @@
 #include "Operator.h"
 #include "System.h"
 
-class ProbabilisticOperator final : virtual public Operator
+class ProbabilisticOperator final : public Operator
 {
 
 public:
     ProbabilisticOperator(const std::string &name);
 
-    ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents);
+    ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
     /**
      * Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event
@@ -30,5 +30,5 @@ public:
 
     std::string toString() const override;
 
-    void print(int depth) const override;
+    void print(int depth, std::string currentProbe) override;
 };

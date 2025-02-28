@@ -4,11 +4,11 @@
 #include "Operator.h"
 #include "System.h"
 
-class AllToFinish final : virtual public Operator
+class AllToFinish final : public Operator
 {
 
 public:
-    AllToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents);
+    AllToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
 
     AllToFinish(const std::string &name);
     /**
@@ -20,5 +20,5 @@ public:
 
     std::string toString() const;
 
-    void print(int depth) const override;
+    void print(int depth, std::string currentProbe) override;
 };

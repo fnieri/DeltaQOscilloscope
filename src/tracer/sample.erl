@@ -7,12 +7,13 @@ start(X, Y, K) ->
     {ok, Socket} = gen_tcp:connect("127.0.0.1", 8080, [binary, {packet, 0}, {active, false}]),
 
     % Step 1: Spawn worker buffer processes with undefined worker placeholders
-    Worker1Buffer = spawn(fun() -> worker_buffer(worker_1, undefined, K, 0) end),
-    Worker2Buffer = spawn(fun() -> worker_buffer(worker_2, undefined, K, 0) end),
+    Worker1Buffer = spawn_opt(fun() -> worker_buffer(worker_1, undefined, K, 0) end, [{scheduler, 3}]),
+    Worker2Buffer = spawn_opt(fun() -> worker_buffer(worker_2, undefined, K, 0) end, [{scheduler, 4}]),
 
+    
     % Step 2: Spawn worker loop processes with correct buffer PIDs
     Worker2 = spawn_opt(fun() -> worker_loop(worker_2, Y, Socket, Worker1Buffer, Worker2Buffer) end, [{scheduler, 1}]),
-    Worker1 = spawn_opt(fun() -> worker_loop(worker_1, Y, Socket, Worker1Buffer, Worker2Buffer) end, [{scheduler, 1}]),
+    Worker1 = spawn_opt(fun() -> worker_loop(worker_1, Y, Socket, Worker1Buffer, Worker2Buffer) end, [{scheduler, 2}]),
 
     % Step 3: Update the worker buffers with the correct worker PIDs
     Worker1Buffer ! {set_worker, Worker1},
@@ -21,13 +22,13 @@ start(X, Y, K) ->
     % Start sender process
     Sender = spawn(fun() -> send(X, Worker1Buffer) end),
 
-    {Worker1Buffer, Worker2Buffer, Sender}.
+    {Worker1, Worker2, Worker1Buffer, Worker2Buffer, Sender}.
 
 
 send(X, Worker1Buffer) ->
     Delay = -math:log(rand:uniform()) / X, 
     timer:sleep(trunc(Delay * 1000)),
-    StartTimeNano = erlang:system_time(millisecond), 
+    StartTimeNano = erlang:system_time(millisecond),
     Worker1Buffer ! {StartTimeNano},
     send(X, Worker1Buffer).
 
@@ -56,8 +57,9 @@ worker_buffer(worker_2, Worker2, K, QueueLength) ->
 worker_loop(worker_1, Y, Socket, Worker1Buffer, Worker2Buffer) ->
     receive
         {StartTimeNano} ->
-            Loops = rand:uniform(Y),
+            
             StartNano = erlang:system_time(millisecond), 
+            Loops = rand:uniform(Y),
             loop(Loops),
             EndNano = erlang:system_time(millisecond),
 
@@ -72,8 +74,8 @@ worker_loop(worker_2, Y, Socket, Worker1Buffer, Worker2Buffer) ->
     receive
         {StartTimeNano, PrevMessage} ->  
             
-            Loops = rand:uniform(Y),
             StartNano = erlang:system_time(millisecond),
+            Loops = rand:uniform(Y),
             loop(Loops),
             EndNano = erlang:system_time(millisecond),
             Worker2Buffer ! {processed},

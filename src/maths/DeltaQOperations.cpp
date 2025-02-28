@@ -31,8 +31,6 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
         for (size_t j = 0; j <= i; ++j) {
             result += highestDeltaQ.pdfAt(j) * otherDeltaQ.pdfAt(i - j);
         }
-
-        // Normalize by bin width
         convolutedPdf.push_back(result);
     }
     return {binWidth, convolutedPdf, true};

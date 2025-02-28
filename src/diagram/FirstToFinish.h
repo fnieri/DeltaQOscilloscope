@@ -5,13 +5,13 @@
 #include "System.h"
 #include <vector>
 
-class FirstToFinish final : virtual public Operator
+class FirstToFinish final : public Operator
 {
 
 public:
     FirstToFinish(const std::string &name);
 
-    FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents);
+    FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
     /**
      * Assume two independent outcomes with the same start event
      * First-to-finish outcome occurs when at least one end event occurs
@@ -23,5 +23,5 @@ public:
 
     std::string toString() const override;
 
-    void print(int depth) const override;
+    void print(int depth, std::string currentProbe) override;
 };

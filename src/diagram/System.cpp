@@ -25,12 +25,6 @@ void System::setOperators(std::unordered_map<std::string, std::shared_ptr<Operat
 {
     operators = operatorsMap;
 }
-
-void System::setEvents(std::unordered_map<std::string, std::shared_ptr<Event>> eventsMap)
-{
-    events = eventsMap;
-}
-
 std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
 {
     return outcomes[name];
@@ -105,5 +99,11 @@ void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> p
 
 void System::toString() const
 {
-    firstComponent->print(0);
+    std::cout << "Printing system" << "\n";
+    firstComponent->print(0, "system");
+}
+
+void System::toString(const std::string &probeName) const
+{
+    probes.at(probeName)->print(0, probeName);
 }

@@ -2,12 +2,13 @@
 #include "../maths/DeltaQOperations.h"
 #include <iostream>
 FirstToFinish::FirstToFinish(const std::string &name)
-    : Operator(name)
+    : DiagramComponent(name)
+    , Operator(name)
 {
 }
 
-FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
-    : Operator(name, nextComponents)
+FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children)
+    : Operator(name, children)
     , DiagramComponent(name)
 {
 }
@@ -19,9 +20,9 @@ DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ
     const double binWidth = system.getBinWidth();
 
     std::vector<DeltaQ> deltaQs;
-    deltaQs.reserve(nextComponents.size());
+    deltaQs.reserve(children.size());
 
-    for (const std::shared_ptr<DiagramComponent> &component : nextComponents) {
+    for (const std::shared_ptr<DiagramComponent> &component : children) {
         deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
     }
 
@@ -46,12 +47,16 @@ std::string FirstToFinish::toString() const
     return "First to finish: " + name + "\n";
 }
 
-void FirstToFinish::print(int depth) const
+void FirstToFinish::print(int depth, std::string currentProbe)
 {
     std::cout << std::string(depth * 2, ' ') + "First to finish: " + name + "\n";
-    for (auto &component : nextComponents) {
-        component->print(depth + 1);
+
+    int childIdx = 0;
+    for (auto &child : children) {
+        std::cout << std::string(depth * 2, ' ') + "Child: " << childIdx << "\n";
+        child->print(depth + 1, currentProbe);
+        childIdx++;
     }
-    if (followingComponent)
-        followingComponent->print(depth);
+    if (probeNextComponent.count(currentProbe))
+        probeNextComponent.at(currentProbe)->print(depth, currentProbe);
 }

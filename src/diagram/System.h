@@ -14,12 +14,10 @@
 #include <memory>
 #include <unordered_map>
 class DiagramComponent;
-class Event;
 class Operator;
 class Probe;
 class System
 {
-    std::unordered_map<std::string, std::shared_ptr<Event>> events;
     std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
     std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
     std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
@@ -38,8 +36,6 @@ public:
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
-
-    void setEvents(std::unordered_map<std::string, std::shared_ptr<Event>> eventsMap);
 
     void addSample(std::string &componentName, std::pair<long long, long long> sample);
 
@@ -63,4 +59,6 @@ public:
     void setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap);
 
     void toString() const;
+
+    void toString(const std::string &probeName) const;
 };

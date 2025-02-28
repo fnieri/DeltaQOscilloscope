@@ -6,17 +6,20 @@ grammar = """
 %import common.WS
 %ignore WS
 
-start: system (";" probe_list)?  // System first, optional probes
+start: definition* system?  //Subsystem first, system second
+definition: IDENTIFIER "=" component+ ";"
 
-system: component+
+system: "system" "=" component+
 
-component: IDENTIFIER ("->" component)?  
+component: outcome ("->" component)?  
         | BEHAVIOR_TYPE ":" IDENTIFIER "(" component_list ")" ("->" component)?  
+        | probe ("->" component)?
 
-component_list: component ("," component)*
+outcome: IDENTIFIER
+probe: PROBE_IDENTIFIER ":" IDENTIFIER 
+component_list: component ("," component)+
 
-probe_list: "[" IDENTIFIER ("," IDENTIFIER)* "]"  // List of probes
-
+PROBE_IDENTIFIER: "s"
 BEHAVIOR_TYPE: "f" | "a" | "p"
 
 IDENTIFIER: /[a-zA-Z0-9_]+/
@@ -25,46 +28,68 @@ IDENTIFIER: /[a-zA-Z0-9_]+/
 
 class ComponentTransformer(Transformer):
     def start(self, items):
-        system_data = items[0]  # First part is the system
-        probes = items[1] if len(items) > 1 else []  # Probes if present
-        return {"system": system_data, "probes": probes}
+        definitions = items[:-1] if len(items) > 1 else items
+        system = items[-1] if len(items) > 1 else None
+        return {"probes": definitions, "system": system}
+
+    def definition(self, items):
+        components = items[1:]
+        if len(components) == 1:
+            components = components[0]
+        return {"name": items[0], "components": components}
 
     def system(self, items):
-        return items  # Return system components
+        components = items
+        if len(components) == 1:
+            components = components[0]
+        return {"name": "system", "components": components}
 
     def component(self, items):
-        if len(items) == 1:  
-            return {"name": items[0]}  # Simple component
-        
-        if len(items) >= 3 and isinstance(items[0], str):  # Behavior-based component
-            behavior = items[0]
-            name = items[1]
-            component_data = {"name": name, "type": behavior}
-            children = items[2] if isinstance(items[2], list) else []
-            if children:
-                component_data["children"] = children
-            if len(items) > 3 and isinstance(items[3], dict):
-                component_data["next"] = items[3]
-            return component_data
-        
-        # Regular component with "->" linkage
-        component_data = {"name": str(items[0])}
-        if isinstance(items[1], dict):
-            component_data["next"] = items[1]
+        if len(items) == 1 and isinstance(items[0], dict):
+            return items[0]  
 
-        return component_data
+        if len(items) == 2 and isinstance(items[0], dict):
+            component_data = items[0]
+            component_data["next"] = items[1]
+            return component_data
+
+        if len(items) >= 3 and isinstance(items[0], str) and items[0] in ["f", "a", "p"]:
+            behavior, name, children = items[0], items[1], self.flatten_list(items[2:])
+            return {
+                "name": name,
+                "type": behavior,
+                "children": children
+            }
+
+        return items
+
+    def outcome(self, items):
+        return {"name": items[0], "type": "o"}  
+
+    def probe(self, items):
+        return {"name": items[1], "type": "s"}  
 
     def component_list(self, items):
-        return items  
+        return self.flatten_list(items)
 
-    def probe_list(self, items):
-        return items  # Return as list of probe names
+    def flatten_list(self, items):
+        """Flattens nested lists while ensuring structure remains intact."""
+        flattened = []
+        for item in items:
+            if isinstance(item, list):
+                flattened.extend(self.flatten_list(item))
+            else:
+                flattened.append(item)
+        return flattened
 
     def BEHAVIOR_TYPE(self, token):
         return str(token)
 
     def IDENTIFIER(self, token):
-        return str(token)  # Convert token to string
+        return str(token)
+
+    def PROBE_IDENTIFIER(self, token):
+        return str(token)
 
 # Create the parser
 parser = Lark(grammar, start="start", parser="earley")
@@ -75,8 +100,8 @@ def parse_and_save_json(input_string, filename="parsed_system.json"):
     transformed_tree = transformer.transform(tree)
     with open(filename, "w") as json_file:
         json.dump(transformed_tree, json_file, indent=2)
-    return filename  # Return filename for reference
+    return filename
 
 # Example Usage:
-# parse_and_save_json("worker_1 -> f:ftf_1(worker_2 -> start -> end, o4 -> p:probab(o5 -> o6 -> p:carm(2 -> 3))) -> o7 ; [probe1, probe2]")
-rint(data)
+parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
+

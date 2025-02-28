@@ -11,7 +11,7 @@ int main()
 {
     try {
         // Specify the path to the test JSON file
-        fs::path filePath = fs::current_path() / "src/diagram/system.json";
+        fs::path filePath = fs::current_path() / "src/diagram/parsed_system.json";
 
         std::string pathString = filePath.string();
         // Parse the system from the JSON file

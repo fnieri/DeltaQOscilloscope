@@ -1,23 +1,23 @@
 #include "Operator.h"
 #include "DiagramComponent.h"
 
-Operator::Operator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
+Operator::Operator(const std::string name, const std::vector<std::shared_ptr<DiagramComponent>> &children)
     : DiagramComponent(name)
-    , nextComponents {nextComponents}
+    , children {children}
 {
 }
 
-Operator::Operator(const std::string &name)
+Operator::Operator(const std::string name)
     : DiagramComponent(name)
 {
 }
 
-void Operator::addNextComponent(std::shared_ptr<DiagramComponent> nextComponent)
+void Operator::addChildren(std::shared_ptr<DiagramComponent> nextComponent)
 {
-    nextComponents.push_back(nextComponent);
+    children.push_back(nextComponent);
 }
 
-void Operator::setFollowingComponent(std::shared_ptr<DiagramComponent> component)
+std::vector<std::shared_ptr<DiagramComponent>> Operator::getChildren()
 {
-    followingComponent = std::move(component);
+    return children;
 }

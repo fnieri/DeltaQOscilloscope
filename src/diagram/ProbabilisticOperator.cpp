@@ -10,11 +10,13 @@
 #include <iostream>
 #include <utility>
 ProbabilisticOperator::ProbabilisticOperator(const std::string &name)
-    : Operator(name)
+    : DiagramComponent(name)
+    , Operator(name)
 {
 }
-ProbabilisticOperator::ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &nextComponents)
-    : Operator(name, nextComponents)
+ProbabilisticOperator::ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children)
+    : DiagramComponent(name)
+    , Operator(name, children)
 {
 }
 
@@ -47,12 +49,15 @@ std::string ProbabilisticOperator::toString() const
     return "Probabilistic operator: " + name + "\n";
 }
 
-void ProbabilisticOperator::print(int depth) const
+void ProbabilisticOperator::print(int depth, std::string currentProbe)
 {
     std::cout << std::string(depth * 2, ' ') + "Probabilistic operator: " + getName() + "\n";
-    for (auto &component : nextComponents) {
-        component->print(depth + 1);
+    int childIdx = 0;
+    for (auto &child : children) {
+        std::cout << std::string(depth * 2, ' ') + "Child: " << childIdx << "\n";
+        child->print(depth + 1, currentProbe);
+        childIdx++;
     }
-    if (followingComponent)
-        followingComponent->print(depth);
+    if (probeNextComponent.count(currentProbe))
+        probeNextComponent.at(currentProbe)->print(depth, currentProbe);
 }
