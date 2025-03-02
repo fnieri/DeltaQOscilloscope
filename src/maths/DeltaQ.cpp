@@ -29,12 +29,14 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<long double> &values, co
 
 DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples)
     : binWidth {binWidth}
+    , size {0}
 {
     processSamples(outcomeSamples);
 }
 
 DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples, int nBins)
     : binWidth {binWidth}
+    , size {0}
 {
     processSamples(outcomeSamples, nBins);
 }
@@ -87,6 +89,7 @@ void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins
     }
 
     calculateCDF();
+
     size = pdfValues.size();
 }
 

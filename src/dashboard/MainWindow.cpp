@@ -1,13 +1,15 @@
 
 #include "MainWindow.h"
 #include "../maths/DeltaQOperations.h"
-#include "AddPlotDialog.h"
+#include "DQPlotList.h"
 #include "DeltaQPlot.h"
+#include "NewPlotList.h"
+#include "Sidebar.h"
 #include <QMenu>
 #include <QMessageBox>
 #include <QThread>
-#include <qboxlayout.h>
-
+#include <QVBoxLayout>
+#include <iostream>
 MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
     : QMainWindow(parent)
     , system(system)
@@ -19,17 +21,18 @@ MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
     QWidget *plotContainer = new QWidget();
     plotContainer->setLayout(plotLayout);
     mainLayout->addWidget(plotContainer);
+    sidebar = new Sidebar(system, this);
+    mainLayout->addWidget(sidebar);
 
-    timerThread = new QThread(this); // Store in the class so we can clean up later
+    // Connect the signal from Sidebar to the slot in MainWindow
+    connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
+
+    timerThread = new QThread(this);
     updateTimer = new QTimer();
     updateTimer->moveToThread(timerThread);
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::updatePlots, Qt::QueuedConnection);
     connect(timerThread, &QThread::started, [this]() { updateTimer->start(500); });
     timerThread->start();
-
-    addPlotButton = new QPushButton("Add Plot", this);
-    connect(addPlotButton, &QPushButton::clicked, this, &MainWindow::onAddPlotClicked);
-    mainLayout->addWidget(addPlotButton);
 }
 
 void MainWindow::updatePlots()
@@ -51,19 +54,40 @@ MainWindow::~MainWindow()
 
 void MainWindow::onAddPlotClicked()
 {
-    AddPlotDialog dialog(system, {}, this);
-    if (dialog.exec() == QDialog::Accepted) {
-        SelectionResult selection = dialog.getSelections();
+    auto selectedItems = sidebar->getPlotList()->getSelectedItems();
 
-        auto *plotWidget = new QWidget(this);
-        auto *plotLayout = new QVBoxLayout(plotWidget);
-        auto *deltaQPlot = new DeltaQPlot(system, selection, this);
-
-        plotContainers[deltaQPlot] = plotWidget;
-
-        plotLayout->addWidget(deltaQPlot);
-        mainLayout->addWidget(plotWidget);
+    if (selectedItems.empty()) {
+        QMessageBox::warning(this, "No Selection", "Please select components before adding a plot.");
+        return;
     }
+
+    auto *plotWidget = new QWidget(this);
+    auto *plotLayout = new QVBoxLayout(plotWidget);
+    auto *deltaQPlot = new DeltaQPlot(system, selectedItems, this);
+
+    connect(deltaQPlot, &DeltaQPlot::plotSelected, this, &MainWindow::onPlotSelected);
+    plotContainers[deltaQPlot] = plotWidget;
+
+    plotLayout->addWidget(deltaQPlot);
+    mainLayout->addWidget(plotWidget);
+
+    onPlotSelected(deltaQPlot);
+
+    sidebar->clearOnAdd();
+}
+
+void MainWindow::onUpdateSystem()
+{
+    std::string text = sidebar->getSystemText();
+}
+
+void MainWindow::onEditPlot(DeltaQPlot *plot)
+{
+    auto selectedItems = sidebar->getPlotList()->getSelectedItems();
+    plot->editPlot(selectedItems);
+    plot->update();
+
+    onPlotSelected(plot);
 }
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
@@ -96,23 +120,6 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
     }
 }
 
-void MainWindow::onEditPlot(DeltaQPlot *plot)
-{
-
-    QStringList existingItems;
-    for (const auto &name : plot->getComponents()) {
-        existingItems.append(QString::fromStdString(name));
-    }
-    // Open dialog with preselected items
-    AddPlotDialog dialog(system, existingItems, this);
-    if (dialog.exec() == QDialog::Accepted) {
-
-        SelectionResult selection = dialog.getSelections();
-        plot->editPlot(selection);
-        plot->update();
-    }
-}
-
 void MainWindow::onRemovePlot(DeltaQPlot *plot)
 {
     QWidget *plotWidget = plotContainers.value(plot, nullptr);
@@ -121,4 +128,21 @@ void MainWindow::onRemovePlot(DeltaQPlot *plot)
         plotWidget->deleteLater();
         plotContainers.remove(plot);
     }
+    sidebar->hideCurrentPlot();
+}
+
+void MainWindow::onPlotSelected(DeltaQPlot *plot)
+{
+    qDebug() << "onPlotSelected called for plot:" << plot;
+    if (!plot)
+        return;
+
+    DQPlotList *plotList = plot->getPlotList();
+    if (!plotList) {
+        qDebug() << "No valid plot list found!";
+        return;
+    }
+
+    sidebar->setCurrentPlotList(plotList);
+    qDebug() << "Sidebar updated.";
 }

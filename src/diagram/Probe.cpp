@@ -16,7 +16,7 @@ Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> fi
 }
 std::vector<long double> Probe::getTimeSeries() const
 {
-    std::vector<long double> timeSeries;
+    std::vector<long double> timeSeries {};
 
     for (const std::pair<double, double> &sample : samples) {
         double elapsedTime = sample.second - sample.first;

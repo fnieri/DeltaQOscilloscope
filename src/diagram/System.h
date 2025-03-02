@@ -21,6 +21,7 @@ class System
     std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
     std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
     std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
+
     std::shared_ptr<DiagramComponent> firstComponent;
     double binWidth {0};
 
@@ -29,10 +30,11 @@ public:
 
     void setFirstComponent(std::shared_ptr<DiagramComponent> component);
 
-    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> getOutcomes();
+    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &getOutcomes();
 
-    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> getProbes();
+    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> &getProbes();
 
+    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Operator>> &getOperators();
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
@@ -41,6 +43,7 @@ public:
 
     std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
 
+    std::vector<std::string> getAllComponentsName();
     /**
      * Calculate the resulting DeltaQ for the whole system
      */
@@ -52,7 +55,7 @@ public:
 
     bool containsOutcome(std::string &name);
 
-    bool containsProbe(std::string &name);
+    bool hasProbe(const std::string &name);
 
     std::shared_ptr<Probe> getProbe(const std::string &name);
 

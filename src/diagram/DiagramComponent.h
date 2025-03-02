@@ -24,7 +24,7 @@ protected:
 
 public:
     DiagramComponent() = default;
-    ~DiagramComponent() { };
+    virtual ~DiagramComponent() { };
 
     void setNext(const std::string &probeName, std::shared_ptr<DiagramComponent> next);
 

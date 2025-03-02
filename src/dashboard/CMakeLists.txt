@@ -1,15 +1,18 @@
 add_library(${PREFIX}_dashboard
-       JsonComponent.h
-        JsonComponent.cpp
         DQPlotController.h
         DQPlotController.cpp
+        DQPlotList.h
+        DQPlotList.cpp
         DeltaQPlot.h
         DeltaQPlot.cpp
         MainWindow.h
         MainWindow.cpp
-        AddPlotDialog.h
-        AddPlotDialog.cpp
+        NewPlotList.h
+        NewPlotList.cpp
+        Sidebar.h
+        Sidebar.cpp
     )
+
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gyu Widgets Charts Graphs)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Charts Widgets Graphs)
@@ -19,6 +22,7 @@ target_link_libraries(${PREFIX}_dashboard
         ${PREFIX}_maths
         nlohmann_json
         ${PREFIX}_server
+        ${PREFIX}_parser
     )
 
 target_include_directories(${PREFIX}_dashboard

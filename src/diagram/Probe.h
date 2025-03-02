@@ -6,7 +6,7 @@
 #include "DiagramComponent.h"
 class Probe : virtual public DiagramComponent
 {
-    std::vector<std::pair<long long, long long>> samples;
+    std::vector<std::pair<long long, long long>> samples {};
     std::shared_ptr<DiagramComponent> firstComponent;
 
 public:

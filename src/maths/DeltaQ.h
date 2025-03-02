@@ -16,9 +16,9 @@ class DeltaQ
 {
 
     double binWidth;
-    std::vector<long double> pdfValues;
-    std::vector<long double> cdfValues;
-    int size {};
+    std::vector<long double> pdfValues {};
+    std::vector<long double> cdfValues {};
+    int size {0};
 
     /**
      * Calculate PDF and CDF values given samples from an outcome

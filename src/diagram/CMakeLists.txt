@@ -24,7 +24,7 @@ target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
         nlohmann_json
-    
+        ${PREFIX}_parser
 )
 
 

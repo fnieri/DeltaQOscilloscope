@@ -67,12 +67,17 @@ DeltaQ System::calculateDeltaQ()
     return firstComponent->calculateDeltaQ(*this, DeltaQ());
 }
 
-[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> System::getOutcomes()
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &System::getOutcomes()
 {
     return outcomes;
 }
 
-[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> System::getProbes()
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Operator>> &System::getOperators()
+{
+    return operators;
+}
+
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> &System::getProbes()
 {
     return probes;
 }
@@ -82,7 +87,7 @@ bool System::containsOutcome(std::string &name)
     return outcomes.find(name) != outcomes.end();
 }
 
-bool System::containsProbe(std::string &name)
+bool System::hasProbe(const std::string &name)
 {
     return probes.find(name) != probes.end();
 }
@@ -106,4 +111,18 @@ void System::toString() const
 void System::toString(const std::string &probeName) const
 {
     probes.at(probeName)->print(0, probeName);
+}
+
+std::vector<std::string> System::getAllComponentsName()
+{
+    std::vector<std::string> names;
+    int probesSize = probes.size();
+    int outcomesSize = outcomes.size();
+    // TODO add operators
+    names.reserve(probesSize + outcomesSize);
+    for (auto &[name, _] : getProbes())
+        names.push_back(name);
+    for (auto &[name, k] : getOutcomes())
+        names.push_back(name);
+    return names;
 }

@@ -25,7 +25,8 @@ using json = nlohmann::json;
 using OutcomesMap = std::unordered_map<std::string, std::shared_ptr<Outcome>>;
 using OperatorsMap = std::unordered_map<std::string, std::shared_ptr<Operator>>;
 using ProbesMap = std::unordered_map<std::string, std::shared_ptr<Probe>>;
-namespace
+
+namespace parser
 {
 
 OutcomesMap outcomes;
@@ -144,6 +145,61 @@ std::shared_ptr<Probe> parseProbe(const json &componentJson)
 }
 }
 
+namespace reconstructer
+{
+
+std::string reconstructComponent(const json &componentJson)
+{
+    std::string name = componentJson["name"];
+    std::string type = componentJson["type"];
+    std::string operatorType;
+    if (type == "o")
+        operatorType = "";
+    else
+        operatorType = type + ":";
+    if (componentJson.contains("children")) {
+        // Handle operators with children (e.g., f:ftf1(o5 -> p:probab(o6, o7), o8))
+        std::string childrenStr;
+        for (const auto &child : componentJson["children"]) {
+            if (!childrenStr.empty()) {
+                childrenStr += ", "; // Comma separates child elements
+            }
+            childrenStr += reconstructComponent(child);
+        }
+
+        return operatorType + name + "(" + childrenStr + ")";
+    }
+
+    if (componentJson.contains("next")) {
+        // Handle sequential connections (e.g., o1 -> o2 -> s:o3)
+        return operatorType + name + " -> " + reconstructComponent(componentJson["next"]);
+    }
+
+    return operatorType + name;
+}
+}
+std::string reconstructFromJson(const json &systemJson)
+{
+    std::string output;
+
+    // Handle Probes
+    if (systemJson.contains("probes")) {
+        for (const auto &probeJson : systemJson["probes"]) {
+            std::string probeName = probeJson["name"];
+            std::string probeComponents = reconstructer::reconstructComponent(probeJson["components"]);
+            output += probeName + " = " + probeComponents + ";\n";
+        }
+    }
+
+    // Handle System
+    if (systemJson.contains("system")) {
+        std::string systemComponents = reconstructer::reconstructComponent(systemJson["system"]["components"]);
+        output += "system = " + systemComponents + ";\n";
+    }
+
+    return output;
+}
+
 System parseSystemJson(const std::string &fileName)
 {
     System system;
@@ -163,17 +219,19 @@ System parseSystemJson(const std::string &fileName)
     json systemJson = json::parse(jsonString);
     if (systemJson.contains("probes")) {
         for (auto &probeJson : systemJson["probes"]) {
-            auto probe = parseProbe(probeJson);
+            auto probe = parser::parseProbe(probeJson);
         }
     }
     if (!systemJson["system"].empty()) {
-        auto firstComponent = parse(systemJson["system"]["components"], "system");
+        auto firstComponent = parser::parse(systemJson["system"]["components"], "system");
         system.setFirstComponent(firstComponent);
     }
 
-    system.setOutcomes(outcomes);
-    system.setOperators(operators);
-    system.setProbes(probes);
+    system.setOutcomes(parser::outcomes);
+    system.setOperators(parser::operators);
+    system.setProbes(parser::probes);
     system.toString();
+    std::cout << reconstructFromJson(systemJson) << "\n";
+
     return system;
 }

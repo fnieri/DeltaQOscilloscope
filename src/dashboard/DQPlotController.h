@@ -1,38 +1,35 @@
+
+#ifndef DQPLOTCONTROLLER_H
+#define DQPLOTCONTROLLER_H
 #pragma once
-
 #include "../diagram/System.h"
-#include "../maths/DeltaQ.h"
-#include "AddPlotDialog.h"
 #include "DeltaQPlot.h"
-#include <QLineSeries>
+#include <QString>
+#include <QtCharts/QLineSeries>
+#include <map>
 #include <memory>
-
+#include <vector>
 class DeltaQPlot;
 class DQPlotController
 {
-    std::shared_ptr<System> system;
-    std::unordered_map<std::string, std::pair<QLineSeries *, std::shared_ptr<Probe>>> probes;
-    std::unordered_map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
-    DeltaQ (*operation)(const std::vector<DeltaQ> &) = nullptr;
-
-    DeltaQPlot *plot;
-
-    void updateComponent(QLineSeries *series, std::shared_ptr<Probe> component, double binWidth);
-
 public:
-    DQPlotController(std::shared_ptr<System> system, DeltaQPlot *plot, SelectionResult selection);
-
-    void editPlot(SelectionResult selection);
-
-    void addComponent(std::string name, bool isProbe);
-
-    void removeComponent(std::string &&name);
+    DQPlotController(std::shared_ptr<System> system, DeltaQPlot *plot, const std::vector<std::string> &selectedItems);
 
     bool containsComponent(std::string name);
-
+    void editPlot(const std::vector<std::string> &selectedItems);
+    void addComponent(std::string name, bool isProbe);
+    std::vector<std::string> getComponents();
+    void removeComponent(std::string &&name);
+    void removeComponent(const std::string &name);
     void update();
 
-    std::vector<std::string> getComponents();
+private:
+    void updateComponent(QLineSeries *series, std::shared_ptr<Probe> component, double binWidth);
 
-    void setOperation(DeltaQ (*newOperation)(const std::vector<DeltaQ> &));
+    std::shared_ptr<System> system;
+    DeltaQPlot *plot;
+    std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
+    std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Probe>>> probes;
 };
+
+#endif // DQPLOTCONTROLLER_H

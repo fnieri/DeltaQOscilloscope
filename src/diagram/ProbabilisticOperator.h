@@ -11,7 +11,7 @@
 #include "Operator.h"
 #include "System.h"
 
-class ProbabilisticOperator final : public Operator
+class ProbabilisticOperator : public Operator
 {
 
 public:
