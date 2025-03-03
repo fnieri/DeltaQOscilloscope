@@ -17,6 +17,7 @@ public:
     std::vector<std::string> getSelectedItems();
 
     void deselectAll();
+    void reset();
 
 private:
     std::shared_ptr<System> system;
@@ -28,8 +29,6 @@ private:
     void addProbes();
     void addOutcomes();
     void addOperators();
-
-    QMap<QString, QListWidgetItem *> systemItems;
 };
 
 #endif // NEW_PLOT_LIST_H

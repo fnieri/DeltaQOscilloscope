@@ -126,3 +126,29 @@ std::vector<std::string> System::getAllComponentsName()
         names.push_back(name);
     return names;
 }
+
+void System::setSystemDefinitionText(std::string &text)
+{
+    systemDefinitionText = text;
+}
+
+std::string System::getSystemDefinitionText()
+{
+    return systemDefinitionText;
+}
+
+void System::replaceSystem(const System &other)
+{
+    if (this != &other) // Prevent self-assignment
+    {
+        outcomes = other.outcomes;
+        operators = other.operators;
+        probes = other.probes;
+        systemDefinitionText = other.systemDefinitionText;
+        firstComponent = other.firstComponent;
+        binWidth = other.binWidth;
+    }
+    for (auto &[name, component] : outcomes) {
+        std::cout << name << "\n";
+    }
+}

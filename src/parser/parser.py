@@ -98,10 +98,15 @@ transformer = ComponentTransformer()
 def parse_and_save_json(input_string, filename="parsed_system.json"):
     tree = parser.parse(input_string)
     transformed_tree = transformer.transform(tree)
+    result = {
+        "text": input_string,
+        "parsed_data": transformed_tree
+    }
+
     with open(filename, "w") as json_file:
-        json.dump(transformed_tree, json_file, indent=2)
+        json.dump(result, json_file, indent=2)
     return filename
 #
 # # Example Usage:
-# parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
+parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
 

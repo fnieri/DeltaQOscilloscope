@@ -38,8 +38,8 @@ signals:
 
 private slots:
     void onUpdateSystem();
-    // void saveSystemTo();
-    // void loadSystem();
+    void saveSystemTo();
+    void loadSystem();
     void onAddPlotClicked(); // Handle the plot creation
 
 public:

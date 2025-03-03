@@ -1,6 +1,8 @@
 #include "NewPlotList.h"
+#include "Application.h"
 #include <iostream>
 #include <qlistwidget.h>
+
 using Outcomes = std::unordered_map<std::string, std::shared_ptr<Outcome>>;
 using Operators = std::unordered_map<std::string, std::shared_ptr<Operator>>;
 using Probes = std::unordered_map<std::string, std::shared_ptr<Probe>>;
@@ -11,6 +13,7 @@ NewPlotList::NewPlotList(std::shared_ptr<System> system, QWidget *parent)
 {
     setSelectionMode(QAbstractItemView::MultiSelection);
     create();
+    Application::getInstance().addObserver([this]() { this->reset(); });
 }
 
 void NewPlotList::create()
@@ -18,15 +21,23 @@ void NewPlotList::create()
     addItems();
 }
 
+void NewPlotList::reset()
+{
+
+    // This right here is a hack, it sucks, but it works
+    this->blockSignals(true);
+    while (count() != 0)
+        delete takeItem(0);
+    this->blockSignals(false);
+
+    create();
+}
+
 void NewPlotList::addCategory(const QString &category)
 {
-    assert(!systemItems.contains(category));
-
     QListWidgetItem *categoryItem = new QListWidgetItem(category, this);
     categoryItem->setFlags(Qt::NoItemFlags); // Non-selectable label
     categoryItem->setFont(QFont("Arial", 10, QFont::Bold)); // Bold label
-
-    systemItems.insert(category, categoryItem);
 }
 
 void NewPlotList::addItems()

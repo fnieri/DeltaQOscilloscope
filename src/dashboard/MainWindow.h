@@ -35,6 +35,7 @@ private slots:
     void updatePlots();
     void onUpdateSystem();
     void onAddPlotClicked();
+
     void onEditPlot(DeltaQPlot *plot);
     void onRemovePlot(DeltaQPlot *plot);
     void onPlotSelected(DeltaQPlot *plot);

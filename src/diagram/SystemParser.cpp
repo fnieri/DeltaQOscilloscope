@@ -158,7 +158,7 @@ std::string reconstructComponent(const json &componentJson)
     else
         operatorType = type + ":";
     if (componentJson.contains("children")) {
-        // Handle operators with children (e.g., f:ftf1(o5 -> p:probab(o6, o7), o8))
+        // Handle oper ators with children (e.g., f:ftf1(o5 -> p:probab(o6, o7), o8))
         std::string childrenStr;
         for (const auto &child : componentJson["children"]) {
             if (!childrenStr.empty()) {
@@ -178,28 +178,6 @@ std::string reconstructComponent(const json &componentJson)
     return operatorType + name;
 }
 }
-std::string reconstructFromJson(const json &systemJson)
-{
-    std::string output;
-
-    // Handle Probes
-    if (systemJson.contains("probes")) {
-        for (const auto &probeJson : systemJson["probes"]) {
-            std::string probeName = probeJson["name"];
-            std::string probeComponents = reconstructer::reconstructComponent(probeJson["components"]);
-            output += probeName + " = " + probeComponents + ";\n";
-        }
-    }
-
-    // Handle System
-    if (systemJson.contains("system")) {
-        std::string systemComponents = reconstructer::reconstructComponent(systemJson["system"]["components"]);
-        output += "system = " + systemComponents + ";\n";
-    }
-
-    return output;
-}
-
 System parseSystemJson(const std::string &fileName)
 {
     System system;
@@ -231,7 +209,6 @@ System parseSystemJson(const std::string &fileName)
     system.setOperators(parser::operators);
     system.setProbes(parser::probes);
     system.toString();
-    std::cout << reconstructFromJson(systemJson) << "\n";
 
     return system;
 }

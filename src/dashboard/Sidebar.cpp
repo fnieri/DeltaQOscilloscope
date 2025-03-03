@@ -1,17 +1,20 @@
 
 #include "Sidebar.h"
+#include "../diagram/SystemParser.h"
 #include "../parser/ParserWrapper.h"
+#include "Application.h"
 #include "NewPlotList.h"
 #include <QBoxLayout>
+#include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>
 #include <iostream>
+#include <memory>
 #include <qboxlayout.h>
 #include <qlabel.h>
 #include <qlogging.h>
 #include <qpushbutton.h>
 #include <qtextedit.h>
-
 Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
     : QWidget(parent)
     , system(system)
@@ -31,15 +34,17 @@ Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
     loadSystemButton = new QPushButton("Load system from");
 
     systemButtonsLayout->addWidget(updateSystemButton);
-    systemButtonsLayout->addWidget(saveSystemButton);
-    systemButtonsLayout->addWidget(loadSystemButton);
+    connect(updateSystemButton, &QPushButton::clicked, this, &Sidebar::onUpdateSystem);
 
+    systemButtonsLayout->addWidget(saveSystemButton);
+    connect(saveSystemButton, &QPushButton::clicked, this, &Sidebar::saveSystemTo);
+
+    systemButtonsLayout->addWidget(loadSystemButton);
+    connect(loadSystemButton, &QPushButton::clicked, this, &Sidebar::loadSystem);
     layout->addWidget(systemLabel);
     layout->addWidget(systemTextEdit);
 
     layout->addLayout(systemButtonsLayout);
-
-    connect(updateSystemButton, &QPushButton::clicked, this, &Sidebar::onUpdateSystem);
 
     newPlotLabel = new QLabel("Add a new plot:", this);
     newPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -114,4 +119,20 @@ void Sidebar::onAddPlotClicked()
     }
 
     emit addPlotClicked(); // Emit signal to MainWindow to add plot
+}
+
+void Sidebar::saveSystemTo()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    std::string filename = dialog.getSaveFileName(this, "Save file", " ", ".json").toStdString();
+    std::string systemText = getSystemText();
+    parseAndSaveJson(systemText, filename);
+}
+
+void Sidebar::loadSystem()
+{
+    QFileDialog dialog(this);
+    std::string filename = dialog.getOpenFileName(this, "Select file", " ", ".json").toStdString();
+    Application::getInstance().setSystem(parseSystemJson(filename));
 }

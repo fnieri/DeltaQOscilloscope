@@ -1,5 +1,8 @@
 add_library(${PREFIX}_dashboard
-        DQPlotController.h
+    Application.h
+    Application.cpp
+
+    DQPlotController.h
         DQPlotController.cpp
         DQPlotList.h
         DQPlotList.cpp
