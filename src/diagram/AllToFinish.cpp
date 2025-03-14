@@ -12,22 +12,25 @@ AllToFinish::AllToFinish(const std::string &name, const std::vector<std::shared_
 {
 }
 
-DeltaQ AllToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
+DeltaQ AllToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
-    std::vector<double> resultingCdf;
+    /*
+        std::vector<double> resultingCdf;
 
-    std::vector<DeltaQ> deltaQs;
-    deltaQs.reserve(children.size());
+        std::vector<DeltaQ> deltaQs;
+        deltaQs.reserve(children.size());
 
-    for (const std::shared_ptr<DiagramComponent> &component : children) {
-        deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
-    }
+        for (const std::shared_ptr<DiagramComponent> &component : children) {
+            deltaQs.push_back(component->calculateDeltaQ(binWidth, deltaQ));
+        }
 
-    DeltaQ result = deltaQs[0];
-    for (std::size_t i = 1; i < deltaQs.size(); ++i) {
-        result = result * deltaQs[i];
-    }
-    return result;
+        DeltaQ result = deltaQs[0];
+        for (std::size_t i = 1; i < deltaQs.size(); ++i) {
+            result = result * deltaQs[i];
+        }
+        return result;
+        */
+    return DeltaQ();
 }
 
 std::string AllToFinish::toString() const

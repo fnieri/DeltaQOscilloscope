@@ -17,24 +17,32 @@ MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
     mainLayout = new QHBoxLayout(centralWidget);
-    plotLayout = new QVBoxLayout();
-    QWidget *plotContainer = new QWidget();
-    plotContainer->setLayout(plotLayout);
-    mainLayout->addWidget(plotContainer);
-    sidebar = new Sidebar(system, this);
-    mainLayout->addWidget(sidebar);
 
-    // Connect the signal from Sidebar to the slot in MainWindow
+    // Create a scroll area for the plots
+    scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true); // Allow the widget to resize
+
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setBaseSize(800, 800);
+    QWidget *plotContainer = new QWidget();
+    plotLayout = new QGridLayout(plotContainer);
+    scrollArea->setWidget(plotContainer);
+
+    mainLayout->addWidget(scrollArea, 1);
+
+    sidebar = new Sidebar(system, this);
+    mainLayout->addWidget(sidebar, 0);
+
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
 
     timerThread = new QThread(this);
     updateTimer = new QTimer();
     updateTimer->moveToThread(timerThread);
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::updatePlots, Qt::QueuedConnection);
-    connect(timerThread, &QThread::started, [this]() { updateTimer->start(500); });
+    connect(timerThread, &QThread::started, [this]() { updateTimer->start(1000); });
     timerThread->start();
 }
-
 void MainWindow::updatePlots()
 {
     system->calculateBinWidth();
@@ -51,7 +59,6 @@ MainWindow::~MainWindow()
         delete timerThread;
     }
 }
-
 void MainWindow::onAddPlotClicked()
 {
     auto selectedItems = sidebar->getPlotList()->getSelectedItems();
@@ -62,20 +69,36 @@ void MainWindow::onAddPlotClicked()
     }
 
     auto *plotWidget = new QWidget(this);
-    auto *plotLayout = new QVBoxLayout(plotWidget);
+    auto *plotWidgetLayout = new QVBoxLayout(plotWidget);
     auto *deltaQPlot = new DeltaQPlot(system, selectedItems, this);
 
     connect(deltaQPlot, &DeltaQPlot::plotSelected, this, &MainWindow::onPlotSelected);
     plotContainers[deltaQPlot] = plotWidget;
 
-    plotLayout->addWidget(deltaQPlot);
-    mainLayout->addWidget(plotWidget);
+    plotWidgetLayout->addWidget(deltaQPlot);
+    plotWidget->setMaximumWidth(scrollArea->width() / 4);
+    plotWidget->setMaximumHeight(400);
+
+    int plotCount = plotContainers.size();
+    int maxPlotsPerRow = 4;
+    int row = (plotCount - 1) / maxPlotsPerRow;
+    int col = (plotCount - 1) % maxPlotsPerRow;
+
+    plotLayout->addWidget(plotWidget, row, col);
+    plotLayout->setColumnStretch(col, 1);
+    plotLayout->setRowStretch(row, 1);
 
     onPlotSelected(deltaQPlot);
-
     sidebar->clearOnAdd();
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    for (auto [plot, widget] : plotContainers.asKeyValueRange()) {
+        widget->setMaximumWidth(scrollArea->width() / 4);
+    }
+}
 void MainWindow::onUpdateSystem()
 {
     std::string text = sidebar->getSystemText();
@@ -119,18 +142,30 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
         onRemovePlot(selectedPlot);
     }
 }
-
 void MainWindow::onRemovePlot(DeltaQPlot *plot)
 {
     QWidget *plotWidget = plotContainers.value(plot, nullptr);
     if (plotWidget) {
-        plotLayout->removeWidget(plotWidget);
+        plotLayout->removeWidget(plotWidget); // Remove the plot from the layout
         plotWidget->deleteLater();
         plotContainers.remove(plot);
+
+        // Reorganize the remaining plots
+        int plotCount = 0;
+        for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
+            int row = plotCount / 4; // Calculate the row
+            int col = plotCount % 4; // Calculate the column
+            plotLayout->addWidget(it.value(), row, col); // Re-add the plot to the grid
+
+            // Update stretch factors for the row and column
+            plotLayout->setRowStretch(row, 1);
+            plotLayout->setColumnStretch(col, 1);
+
+            plotCount++;
+        }
     }
     sidebar->hideCurrentPlot();
 }
-
 void MainWindow::onPlotSelected(DeltaQPlot *plot)
 {
     qDebug() << "onPlotSelected called for plot:" << plot;

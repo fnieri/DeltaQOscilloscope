@@ -143,41 +143,13 @@ std::shared_ptr<Probe> parseProbe(const json &componentJson)
     probes[name] = probe;
     return probe;
 }
-}
 
-namespace reconstructer
+std::string parseText(const json &systemJson)
 {
-
-std::string reconstructComponent(const json &componentJson)
-{
-    std::string name = componentJson["name"];
-    std::string type = componentJson["type"];
-    std::string operatorType;
-    if (type == "o")
-        operatorType = "";
-    else
-        operatorType = type + ":";
-    if (componentJson.contains("children")) {
-        // Handle oper ators with children (e.g., f:ftf1(o5 -> p:probab(o6, o7), o8))
-        std::string childrenStr;
-        for (const auto &child : componentJson["children"]) {
-            if (!childrenStr.empty()) {
-                childrenStr += ", "; // Comma separates child elements
-            }
-            childrenStr += reconstructComponent(child);
-        }
-
-        return operatorType + name + "(" + childrenStr + ")";
-    }
-
-    if (componentJson.contains("next")) {
-        // Handle sequential connections (e.g., o1 -> o2 -> s:o3)
-        return operatorType + name + " -> " + reconstructComponent(componentJson["next"]);
-    }
-
-    return operatorType + name;
+    return systemJson["text"];
 }
 }
+
 System parseSystemJson(const std::string &fileName)
 {
     System system;
@@ -195,16 +167,18 @@ System parseSystemJson(const std::string &fileName)
     }
 
     json systemJson = json::parse(jsonString);
-    if (systemJson.contains("probes")) {
-        for (auto &probeJson : systemJson["probes"]) {
+    if (systemJson.contains("parsed_data")) {
+        for (auto &probeJson : systemJson["parsed_data"]["probes"]) {
             auto probe = parser::parseProbe(probeJson);
         }
     }
-    if (!systemJson["system"].empty()) {
-        auto firstComponent = parser::parse(systemJson["system"]["components"], "system");
+    if (!systemJson["parsed_data"]["system"].empty()) {
+        auto firstComponent = parser::parse(systemJson["parsed_data"]["system"]["components"], "system");
         system.setFirstComponent(firstComponent);
+        std::cout << firstComponent->toString() << "\n";
     }
-
+    std::string systemText = parser::parseText(systemJson);
+    system.setSystemDefinitionText(systemText);
     system.setOutcomes(parser::outcomes);
     system.setOperators(parser::operators);
     system.setProbes(parser::probes);

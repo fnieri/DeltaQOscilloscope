@@ -20,7 +20,7 @@ ProbabilisticOperator::ProbabilisticOperator(const std::string &name, const std:
 {
 }
 
-DeltaQ ProbabilisticOperator::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
+DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
     std::vector<long double> resultingCdf;
     std::vector<DeltaQ> scaledDeltaQs;

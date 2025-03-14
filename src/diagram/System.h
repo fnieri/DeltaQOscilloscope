@@ -39,7 +39,7 @@ public:
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
 
-    void addSample(std::string &componentName, std::pair<long long, long long> sample);
+    void addSample(std::string &componentName, Sample &sample);
 
     std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
 

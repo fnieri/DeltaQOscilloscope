@@ -39,7 +39,7 @@ private:
     std::shared_ptr<System> system;
     DQPlotController *controller;
     DQPlotList *plotList;
-
+    double currentXRange {0};
 signals:
     void plotSelected(DeltaQPlot *plot);
 };

@@ -18,13 +18,13 @@ class MainWindow : public QMainWindow
 
     QHBoxLayout *mainLayout;
 
-    QVBoxLayout *plotLayout;
+    QScrollArea *scrollArea;
+    QGridLayout *plotLayout;
     QWidget *centralWidget;
     std::shared_ptr<System> system;
     QThread *timerThread;
     QTimer *updateTimer;
     Sidebar *sidebar;
-
     QPushButton *addPlotButton;
     QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
 public:
@@ -42,4 +42,5 @@ private slots:
 
 protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 };

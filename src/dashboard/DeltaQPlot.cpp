@@ -60,7 +60,11 @@ void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<d
     series->append(0, 0);
     for (const auto &[x, y] : data)
         series->append(x, y);
-    axisX->setRange(0, xRange);
+
+    if (currentXRange < xRange) {
+        currentXRange = xRange;
+        axisX->setRange(0, xRange);
+    }
 }
 std::vector<std::string> DeltaQPlot::getComponents()
 {

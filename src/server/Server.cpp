@@ -78,10 +78,10 @@ void Server::run()
 
         if (std::regex_search(message, match, pattern)) {
             std::string workerName = match[1];
-            long long startTime = std::abs(std::stoll(match[2]));
-            long long endTime = std::abs(std::stoll(match[3]));
-
-            system->addSample(workerName, {startTime, endTime});
+            double startTime = std::abs(std::stoll(match[2]));
+            double endTime = std::abs(std::stoll(match[3]));
+            Sample sample = {startTime, endTime};
+            system->addSample(workerName, sample);
             // std::cout << "Received: " << workerName << ", Start=" << startTime << ", End=" << endTime << std::endl;
         }
     }

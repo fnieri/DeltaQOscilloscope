@@ -6,7 +6,6 @@
 
 #include "System.h"
 
-#include "Outcome.h"
 #include <iostream>
 #include <utility>
 #define N_OF_BINS 10.0
@@ -42,7 +41,7 @@ void System::calculateBinWidth()
     binWidth = max / N_OF_BINS;
 }
 
-void System::addSample(std::string &componentName, std::pair<long long, long long> sample)
+void System::addSample(std::string &componentName, Sample &sample)
 {
     auto findOutcome = outcomes.find(componentName);
     if (findOutcome != outcomes.end()) {
@@ -64,7 +63,7 @@ double System::getBinWidth() const
 DeltaQ System::calculateDeltaQ()
 {
     calculateBinWidth();
-    return firstComponent->calculateDeltaQ(*this, DeltaQ());
+    return firstComponent->calculateDeltaQ(binWidth, "system");
 }
 
 [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &System::getOutcomes()
@@ -104,8 +103,8 @@ void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> p
 
 void System::toString() const
 {
-    std::cout << "Printing system" << "\n";
-    firstComponent->print(0, "system");
+    if (firstComponent)
+        firstComponent->print(0, "system");
 }
 
 void System::toString(const std::string &probeName) const

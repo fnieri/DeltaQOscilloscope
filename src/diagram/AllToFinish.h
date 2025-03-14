@@ -16,7 +16,7 @@ public:
      * All-to-finish outcome occurs when both end events occur
      * All-to-finish is defined as ΔQ_{LTF(A,B)} ΔQ_A * ΔQ_B
      */
-    DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
+    DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) override;
 
     std::string toString() const;
 

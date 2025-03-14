@@ -5,18 +5,16 @@
  */
 #pragma once
 
-#include "DiagramComponent.h"
-#include "Probe.h"
-#include <cmath>
-#include <memory>
-class Outcome final : virtual public Probe
+#include "Primitive.h"
+// TODO remove probe inheritance
+class Outcome : public Primitive
 {
 public:
     Outcome(const std::string &name);
 
-    DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
+    DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) override;
 
-    [[nodiscard]] DeltaQ getDeltaQ(double binWidth) const override;
+    [[nodiscard]] DeltaQ getDeltaQ(double binWidth) const;
 
     std::string toString() const;
 

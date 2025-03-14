@@ -24,12 +24,14 @@ public:
     void update();
 
 private:
-    void updateComponent(QLineSeries *series, std::shared_ptr<Probe> component, double binWidth);
+    void updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth);
+    void updateProbe(QLineSeries *probeSeries, QLineSeries *calculatedProbeSeries, std::shared_ptr<Probe> probe, double binWidth);
 
     std::shared_ptr<System> system;
     DeltaQPlot *plot;
+
     std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
-    std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Probe>>> probes;
+    std::map<std::string, std::tuple<QLineSeries *, QLineSeries *, std::shared_ptr<Probe>>> probes;
 };
 
 #endif // DQPLOTCONTROLLER_H

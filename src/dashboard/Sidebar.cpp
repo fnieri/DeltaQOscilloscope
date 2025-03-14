@@ -50,7 +50,8 @@ Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
     newPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     addNewPlotButton = new QPushButton("Add plot");
     newPlotList = new NewPlotList(system, this);
-    connect(addNewPlotButton, &QPushButton::clicked, this, &Sidebar::onAddPlotClicked); // Connect to onAddPlotClicked
+    connect(addNewPlotButton, &QPushButton::clicked, this, &Sidebar::onAddPlotClicked);
+
     layout->addWidget(newPlotLabel);
     layout->addWidget(newPlotList);
     layout->addWidget(addNewPlotButton);
@@ -63,13 +64,7 @@ Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
 
 void Sidebar::setCurrentPlotList(DQPlotList *plotList)
 {
-    if (!plotList) {
-        qDebug() << "Sidebar: Received nullptr plotList, skipping update.";
-        return;
-    }
-
     if (currentPlotList == plotList) {
-        qDebug() << "Sidebar: Skipping redundant update.";
         return;
     }
 
@@ -86,7 +81,6 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
     layout->addWidget(currentPlotList);
     currentPlotList->show();
     currentPlotLabel->show();
-    qDebug() << "Sidebar: Updated with new plot list.";
 }
 
 void Sidebar::hideCurrentPlot()
@@ -128,6 +122,7 @@ void Sidebar::saveSystemTo()
     std::string filename = dialog.getSaveFileName(this, "Save file", " ", ".json").toStdString();
     std::string systemText = getSystemText();
     parseAndSaveJson(systemText, filename);
+    Application::getInstance().setSystem(parseSystemJson(filename));
 }
 
 void Sidebar::loadSystem()
@@ -135,4 +130,6 @@ void Sidebar::loadSystem()
     QFileDialog dialog(this);
     std::string filename = dialog.getOpenFileName(this, "Select file", " ", ".json").toStdString();
     Application::getInstance().setSystem(parseSystemJson(filename));
+    std::string systemText = Application::getInstance().getSystem()->getSystemDefinitionText();
+    systemTextEdit->setText(QString::fromStdString(systemText));
 }

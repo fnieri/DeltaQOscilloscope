@@ -13,33 +13,33 @@ FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::sha
 {
 }
 
-DeltaQ FirstToFinish::calculateDeltaQ(const System &system, const DeltaQ &deltaQ)
+DeltaQ FirstToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
-    std::vector<long double> resultingCdf;
+    /*    std::vector<long double> resultingCdf;
 
-    const double binWidth = system.getBinWidth();
+        std::vector<DeltaQ> deltaQs;
+        deltaQs.reserve(children.size());
 
-    std::vector<DeltaQ> deltaQs;
-    deltaQs.reserve(children.size());
-
-    for (const std::shared_ptr<DiagramComponent> &component : children) {
-        deltaQs.push_back(component->calculateDeltaQ(system, deltaQ));
-    }
-
-    const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
-
-    for (std::size_t i = 0; i < largestDeltaQSize; i++) {
-        double sumAtI = 0;
-        double productAtI = 1;
-        for (const DeltaQ &probDeltaQ : deltaQs) {
-            const double cdfAtI = probDeltaQ.cdfAt(i);
-            sumAtI += cdfAtI;
-            productAtI *= cdfAtI;
+        for (const std::shared_ptr<DiagramComponent> &component : children) {
+            deltaQs.push_back(component->calculateDeltaQ(binWidth, deltaQ));
         }
-        double resultAtI = sumAtI - productAtI;
-        resultingCdf.push_back(resultAtI);
-    }
-    return {binWidth, resultingCdf, false};
+
+        const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
+
+        for (std::size_t i = 0; i < largestDeltaQSize; i++) {
+            double sumAtI = 0;
+            double productAtI = 1;
+            for (const DeltaQ &probDeltaQ : deltaQs) {
+                const double cdfAtI = probDeltaQ.cdfAt(i);
+                sumAtI += cdfAtI;
+                productAtI *= cdfAtI;
+            }
+            double resultAtI = sumAtI - productAtI;
+            resultingCdf.push_back(resultAtI);
+        }
+        return {binWidth, resultingCdf, false};
+    */
+    return DeltaQ();
 }
 
 std::string FirstToFinish::toString() const

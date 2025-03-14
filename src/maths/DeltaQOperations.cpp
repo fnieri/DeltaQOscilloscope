@@ -20,7 +20,7 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
 
     double binWidth = lhs.getBinWidth();
     const int totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
-
+    std::cout << "steps: " << totalSteps << "\n";
     std::vector<long double> convolutedPdf;
     convolutedPdf.reserve(totalSteps);
     // Perform convolution

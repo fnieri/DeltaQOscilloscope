@@ -29,18 +29,18 @@ class Sidebar : public QWidget
     QPushButton *addNewPlotButton;
 
     QLabel *currentPlotLabel;
-    DQPlotList *currentPlotList = nullptr; // @note Need to be nullptr because it will be site at compile time to gibberish
+    DQPlotList *currentPlotList = nullptr;
 
     QVBoxLayout *layout;
 
 signals:
-    void addPlotClicked(); // Add a signal for the plot addition
+    void addPlotClicked();
 
 private slots:
     void onUpdateSystem();
     void saveSystemTo();
     void loadSystem();
-    void onAddPlotClicked(); // Handle the plot creation
+    void onAddPlotClicked();
 
 public:
     explicit Sidebar(std::shared_ptr<System> system, QWidget *parent = nullptr);

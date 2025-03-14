@@ -19,7 +19,7 @@ public:
      * First-to-finish is defined as
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
      */
-    DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
+    DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) override;
 
     std::string toString() const override;
 

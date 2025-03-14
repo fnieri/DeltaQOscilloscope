@@ -8,11 +8,11 @@
 #include <string>
 #include <unistd.h>
 namespace fs = std::filesystem;
-/* int main()
+int main()
 {
     try {
         // Specify the path to the test JSON file
-        fs::path filePath = fs::current_path() / "src/diagram/parsed_system.json";
+        fs::path filePath = fs::current_path() / "src/diagram/data.json";
 
         std::string pathString = filePath.string();
         // Parse the system from the JSON file
@@ -27,8 +27,8 @@ namespace fs = std::filesystem;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
-} */
-
+}
+/*
 int main()
 {
     std::string input = "probe1 = o1 -> o2 -> s:o3; system = s:probe1";
@@ -38,4 +38,4 @@ int main()
     std::cout << "Parser output saved to: " << result << std::endl;
 
     return 0;
-}
+} */

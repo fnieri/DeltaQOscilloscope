@@ -26,7 +26,7 @@ public:
      * Therefore:
      * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
      */
-    DeltaQ calculateDeltaQ(const System &system, const DeltaQ &deltaQ) override;
+    DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) override;
 
     std::string toString() const override;
 
