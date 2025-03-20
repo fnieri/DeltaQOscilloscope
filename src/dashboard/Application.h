@@ -2,6 +2,7 @@
 #pragma once
 #include "../diagram/System.h"
 #pragma once
+#include "../diagram/Sample.h"
 #include <functional>
 #include <iostream>
 #include <memory>

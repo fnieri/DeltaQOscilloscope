@@ -7,9 +7,8 @@ using Outcomes = std::unordered_map<std::string, std::shared_ptr<Outcome>>;
 using Operators = std::unordered_map<std::string, std::shared_ptr<Operator>>;
 using Probes = std::unordered_map<std::string, std::shared_ptr<Probe>>;
 
-NewPlotList::NewPlotList(std::shared_ptr<System> system, QWidget *parent)
-    : system {system}
-    , QListWidget(parent)
+NewPlotList::NewPlotList(QWidget *parent)
+    : QListWidget(parent)
 {
     setSelectionMode(QAbstractItemView::MultiSelection);
     create();
@@ -42,41 +41,42 @@ void NewPlotList::addCategory(const QString &category)
 
 void NewPlotList::addItems()
 {
-    addProbes();
-    addOutcomes();
-    addOperators();
+    auto system = Application::getInstance().getSystem();
+    Probes probes = system->getProbes();
+    Outcomes outcomes = system->getOutcomes();
+    Operators operators = system->getOperators();
+    addProbes(probes);
+    addOutcomes(outcomes);
+    addOperators(operators);
 }
 
-void NewPlotList::addProbes()
+void NewPlotList::addProbes(Probes probes)
 {
     QString category = "Probes:";
     addCategory(category);
 
-    Probes probes = system->getProbes();
     for (const auto &probe : probes) {
         QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(probe.first), this);
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
 }
 
-void NewPlotList::addOutcomes()
+void NewPlotList::addOutcomes(Outcomes outcomes)
 {
     QString category = "Outcomes:";
     addCategory(category);
 
-    Outcomes outcomes = system->getOutcomes();
     for (const auto &outcome : outcomes) {
         QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(outcome.first), this);
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }
 }
 
-void NewPlotList::addOperators()
+void NewPlotList::addOperators(Operators operators)
 {
     QString category = "Operators:";
     addCategory(category);
 
-    Operators operators = system->getOperators();
     for (const auto &op : operators) {
         QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(op.first), this);
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);

@@ -1,6 +1,7 @@
 
 #include "MainWindow.h"
 #include "../maths/DeltaQOperations.h"
+#include "Application.h"
 #include "DQPlotList.h"
 #include "DeltaQPlot.h"
 #include "NewPlotList.h"
@@ -9,10 +10,9 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QVBoxLayout>
-#include <iostream>
-MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
+
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , system(system)
 {
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -31,7 +31,7 @@ MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
 
     mainLayout->addWidget(scrollArea, 1);
 
-    sidebar = new Sidebar(system, this);
+    sidebar = new Sidebar(this);
     mainLayout->addWidget(sidebar, 0);
 
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
@@ -42,12 +42,28 @@ MainWindow::MainWindow(std::shared_ptr<System> system, QWidget *parent)
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::updatePlots, Qt::QueuedConnection);
     connect(timerThread, &QThread::started, [this]() { updateTimer->start(1000); });
     timerThread->start();
+    Application::getInstance().addObserver([this] { this->reset(); });
 }
+
+void MainWindow::reset()
+{
+    for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
+        DeltaQPlot *plot = it.key();
+        QWidget *plotWidget = it.value();
+
+        delete plot;
+        delete plotWidget;
+    }
+    plotContainers.clear();
+}
+
 void MainWindow::updatePlots()
 {
+    auto system = Application::getInstance().getSystem();
     system->calculateBinWidth();
+    double binWidth = system->getBinWidth();
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
-        plot->update();
+        plot->update(binWidth);
     }
 }
 
@@ -70,7 +86,7 @@ void MainWindow::onAddPlotClicked()
 
     auto *plotWidget = new QWidget(this);
     auto *plotWidgetLayout = new QVBoxLayout(plotWidget);
-    auto *deltaQPlot = new DeltaQPlot(system, selectedItems, this);
+    auto *deltaQPlot = new DeltaQPlot(selectedItems, this);
 
     connect(deltaQPlot, &DeltaQPlot::plotSelected, this, &MainWindow::onPlotSelected);
     plotContainers[deltaQPlot] = plotWidget;
@@ -80,7 +96,7 @@ void MainWindow::onAddPlotClicked()
     plotWidget->setMaximumHeight(400);
 
     int plotCount = plotContainers.size();
-    int maxPlotsPerRow = 4;
+    int maxPlotsPerRow = 3;
     int row = (plotCount - 1) / maxPlotsPerRow;
     int col = (plotCount - 1) % maxPlotsPerRow;
 
@@ -108,7 +124,6 @@ void MainWindow::onEditPlot(DeltaQPlot *plot)
 {
     auto selectedItems = sidebar->getPlotList()->getSelectedItems();
     plot->editPlot(selectedItems);
-    plot->update();
 
     onPlotSelected(plot);
 }
@@ -142,30 +157,32 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
         onRemovePlot(selectedPlot);
     }
 }
+
 void MainWindow::onRemovePlot(DeltaQPlot *plot)
 {
     QWidget *plotWidget = plotContainers.value(plot, nullptr);
     if (plotWidget) {
-        plotLayout->removeWidget(plotWidget); // Remove the plot from the layout
-        plotWidget->deleteLater();
-        plotContainers.remove(plot);
-
-        // Reorganize the remaining plots
-        int plotCount = 0;
-        for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
-            int row = plotCount / 4; // Calculate the row
-            int col = plotCount % 4; // Calculate the column
-            plotLayout->addWidget(it.value(), row, col); // Re-add the plot to the grid
-
-            // Update stretch factors for the row and column
-            plotLayout->setRowStretch(row, 1);
-            plotLayout->setColumnStretch(col, 1);
-
-            plotCount++;
-        }
+        plotLayout->removeWidget(plotWidget);
+        delete plotWidget; // Ensure the widget is deleted
     }
+
+    plotContainers.remove(plot);
+    delete plot; // Ensure the plot itself is deleted
+
+    // Reorganize the layout
+    int plotCount = 0;
+    for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
+        int row = plotCount / 3;
+        int col = plotCount % 3;
+        plotLayout->addWidget(it.value(), row, col);
+        plotLayout->setRowStretch(row, 1);
+        plotLayout->setColumnStretch(col, 1);
+        plotCount++;
+    }
+
     sidebar->hideCurrentPlot();
 }
+
 void MainWindow::onPlotSelected(DeltaQPlot *plot)
 {
     qDebug() << "onPlotSelected called for plot:" << plot;

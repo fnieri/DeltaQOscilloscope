@@ -18,8 +18,8 @@ add_library(${PREFIX}_diagram
     SystemParser.cpp
     SystemParser.h
     Sample.h
-    Primitive.h
-    Primitive.cpp
+    Observable.h
+    Observable.cpp
 )
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)

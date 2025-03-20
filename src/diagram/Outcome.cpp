@@ -6,14 +6,13 @@
 
 Outcome::Outcome(const std::string &name)
     : DiagramComponent(name)
-    , Primitive(name)
+    , Observable(name)
 {
 }
 
 DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
     if (probeNextComponent.count(currentProbe)) {
-        std::cout << "Calculating " << name << "\n";
 
         return convolve(getDeltaQ(binWidth), probeNextComponent.at(currentProbe)->calculateDeltaQ(binWidth, currentProbe));
     }

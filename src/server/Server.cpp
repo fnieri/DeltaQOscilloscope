@@ -1,10 +1,10 @@
 #include "Server.h"
 #include <arpa/inet.h>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <regex>
 #include <unistd.h>
-
 Server::Server(int port, std::shared_ptr<System> system)
     : port(port)
     , server_fd(0)
@@ -78,11 +78,12 @@ void Server::run()
 
         if (std::regex_search(message, match, pattern)) {
             std::string workerName = match[1];
-            double startTime = std::abs(std::stoll(match[2]));
-            double endTime = std::abs(std::stoll(match[3]));
-            Sample sample = {startTime, endTime};
+            double startTime = std::abs(std::stold(match[2]));
+            double endTime = std::abs(std::stold(match[3]));
+            Sample sample = {workerName, startTime, endTime};
             system->addSample(workerName, sample);
-            // std::cout << "Received: " << workerName << ", Start=" << startTime << ", End=" << endTime << std::endl;
+            //            std::cout << "Received: " << workerName << ", Start=" << std::fixed << std::setprecision(12) << startTime << ", End=" << std::fixed
+            //                    << std::setprecision(12) << endTime << std::endl;
         }
     }
 }

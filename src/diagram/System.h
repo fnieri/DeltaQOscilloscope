@@ -35,6 +35,7 @@ public:
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> &getProbes();
 
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Operator>> &getOperators();
+
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
@@ -53,7 +54,7 @@ public:
 
     double getBinWidth() const;
 
-    bool containsOutcome(std::string &name);
+    bool hasOutcome(std::string &name);
 
     bool hasProbe(const std::string &name);
 

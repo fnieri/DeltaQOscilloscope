@@ -1,13 +1,14 @@
 
 #include "DQPlotController.h"
 #include "../maths/DeltaQOperations.h"
+#include "Application.h"
 
 #include <iostream>
 #include <qlineseries.h>
-DQPlotController::DQPlotController(std::shared_ptr<System> system, DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
-    : system(system)
-    , plot(plot)
+DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
+    : plot(plot)
 {
+    auto system = Application::getInstance().getSystem();
     for (const auto &name : selectedItems) {
         if (system->hasProbe(name)) {
             addComponent(name, true);
@@ -15,6 +16,19 @@ DQPlotController::DQPlotController(std::shared_ptr<System> system, DeltaQPlot *p
             addComponent(name, false);
         }
     }
+}
+
+DQPlotController::~DQPlotController()
+{
+    for (const auto &[name, outcome] : outcomes) {
+        qDebug() << "Deleting outcome: " << QString::fromStdString(name) << ", use_count: " << std::get<1>(outcome).use_count();
+    }
+    for (const auto &[name, probeTuple] : probes) {
+        qDebug() << "Deleting probe: " << QString::fromStdString(name) << ", use_count: " << std::get<2>(probeTuple).use_count();
+    }
+
+    outcomes.clear();
+    probes.clear();
 }
 
 bool DQPlotController::containsComponent(std::string name)
@@ -32,7 +46,7 @@ void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
             removeComponent(name);
         }
     }
-
+    auto system = Application::getInstance().getSystem();
     // Add new selections
     for (const auto &name : selectedItems) {
         if (!containsComponent(name)) {
@@ -47,19 +61,22 @@ void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
 
 void DQPlotController::addComponent(std::string name, bool isProbe)
 {
-
+    auto system = Application::getInstance().getSystem();
     if (!isProbe) {
-
         auto series = new QLineSeries();
         outcomes[name] = {series, system->getOutcome(name)};
 
         plot->addSeries(series, name);
     } else {
+
         auto probeSeries = new QLineSeries();
         std::string probeSeriesName = "Probe " + name + "time series";
+
         auto calculatedProbeSeries = new QLineSeries();
         std::string calculatedProbeSeriesName = "Probe " + name + "calculated DQ";
+
         probes[name] = {probeSeries, calculatedProbeSeries, system->getProbe(name)};
+
         plot->addSeries(probeSeries, probeSeriesName);
         plot->addSeries(calculatedProbeSeries, calculatedProbeSeriesName);
     }
@@ -108,9 +125,8 @@ void DQPlotController::removeComponent(std::string &&name)
     }
 }
 
-void DQPlotController::update()
+void DQPlotController::update(double binWidth)
 {
-    double binWidth = system->getBinWidth();
     for (auto &[name, seriesOutcome] : outcomes) {
         updateOutcome(seriesOutcome.first, seriesOutcome.second, binWidth);
     }
@@ -140,7 +156,6 @@ void DQPlotController::updateProbe(QLineSeries *probeSeries, QLineSeries *calcul
     int size = probeDeltaQ.getSize();
     double probeBinWidth = probeDeltaQ.getBinWidth();
     std::vector<std::pair<double, double>> probeData;
-    std::cout << "probe " << probeDeltaQ.toString() << "\n";
     for (int i = 0; i < size; i++) {
         probeData.push_back({probeBinWidth * (i + 1), probeDeltaQ.cdfAt(i)});
     }
@@ -148,9 +163,7 @@ void DQPlotController::updateProbe(QLineSeries *probeSeries, QLineSeries *calcul
     plot->updateSeries(probeSeries, probeData, probeBinWidth * size);
 
     DeltaQ calculatedProbeDeltaQ = probeDeltaQs.calculatedProbeDeltaQ;
-    std::cout << "calculated " << calculatedProbeDeltaQ.toString() << "\n";
     int calculatedSize = calculatedProbeDeltaQ.getSize();
-    std::cout << calculatedSize << " size \n";
     std::vector<std::pair<double, double>> calculatedProbeData;
     for (int i = 0; i < calculatedSize; i++) {
         calculatedProbeData.push_back({binWidth * (i + 1), calculatedProbeDeltaQ.cdfAt(i)});

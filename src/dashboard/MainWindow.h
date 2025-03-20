@@ -20,16 +20,20 @@ class MainWindow : public QMainWindow
 
     QScrollArea *scrollArea;
     QGridLayout *plotLayout;
+
     QWidget *centralWidget;
-    std::shared_ptr<System> system;
+
     QThread *timerThread;
     QTimer *updateTimer;
+
     Sidebar *sidebar;
     QPushButton *addPlotButton;
+
     QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
 public:
-    MainWindow(std::shared_ptr<System> system, QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void reset();
 
 private slots:
     void updatePlots();

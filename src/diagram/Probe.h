@@ -4,14 +4,14 @@
 
 #include "../maths/DeltaQ.h"
 #include "DiagramComponent.h"
-#include "Primitive.h"
+#include "Observable.h"
 
 struct ProbeDeltaQ {
     DeltaQ probeDeltaQ;
     DeltaQ calculatedProbeDeltaQ;
 };
 
-class Probe : public Primitive
+class Probe : public Observable
 {
     std::shared_ptr<DiagramComponent> firstComponent;
 

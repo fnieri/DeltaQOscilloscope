@@ -6,13 +6,13 @@
 #include <memory>
 Probe::Probe(const std::string &name)
     : DiagramComponent(name)
-    , Primitive(name)
+    , Observable(name)
 {
 }
 
 Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> firstComponent)
     : DiagramComponent(name)
-    , Primitive(name)
+    , Observable(name)
     , firstComponent(firstComponent)
 {
 }
@@ -48,7 +48,6 @@ DeltaQ Probe::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
 
     if (currentProbe == name) {
-        std::cout << "Calculating for " << name << "\n";
         if (firstComponent)
             return firstComponent->calculateDeltaQ(binWidth, currentProbe);
     }

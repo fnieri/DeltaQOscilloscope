@@ -1,13 +1,13 @@
-#include "Primitive.h"
+#include "Observable.h"
 #include "DiagramComponent.h"
 #include <algorithm>
 #include <iostream>
 
-Primitive::Primitive(const std::string &name)
+Observable::Observable(const std::string &name)
     : DiagramComponent(name)
 {
 }
-std::vector<long double> Primitive::getTimeSeries() const
+std::vector<long double> Observable::getTimeSeries() const
 {
     std::vector<long double> timeSeries {};
 
@@ -18,7 +18,7 @@ std::vector<long double> Primitive::getTimeSeries() const
     return timeSeries;
 }
 
-double Primitive::getMax() const
+double Observable::getMax() const
 {
     std::vector<long double> timeSeries = getTimeSeries();
     if (!timeSeries.empty()) {
@@ -27,7 +27,7 @@ double Primitive::getMax() const
     return 0;
 }
 
-double Primitive::getMax(std::vector<long double> samples) const
+double Observable::getMax(std::vector<long double> samples) const
 {
     if (!samples.empty()) {
         return *std::max_element(samples.begin(), samples.end());
@@ -35,7 +35,7 @@ double Primitive::getMax(std::vector<long double> samples) const
     return 0;
 }
 
-void Primitive::addSample(const Sample &sample)
+void Observable::addSample(const Sample &sample)
 {
     samples.push_back(sample);
 }

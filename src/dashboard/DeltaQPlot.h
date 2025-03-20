@@ -17,11 +17,11 @@ class DeltaQPlot : public QChartView
     Q_OBJECT
 
 public:
-    explicit DeltaQPlot(std::shared_ptr<System> system, const std::vector<std::string> &selectedItems, QWidget *parent = nullptr);
+    explicit DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *parent = nullptr);
     ~DeltaQPlot();
 
     void addSeries(QLineSeries *series, std::string &name);
-    void update();
+    void update(double binWidth);
     void removeSeries(QAbstractSeries *series);
     void editPlot(const std::vector<std::string> &selectedItems);
     std::vector<std::string> getComponents();
@@ -36,7 +36,6 @@ private:
     QValueAxis *axisX;
     QValueAxis *axisY;
     QLineSeries *operationSeries;
-    std::shared_ptr<System> system;
     DQPlotController *controller;
     DQPlotList *plotList;
     double currentXRange {0};

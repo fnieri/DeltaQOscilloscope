@@ -1,12 +1,11 @@
 
 #include "DQPlotList.h"
+#include "Application.h"
 #include <QLabel>
 #include <QListWidgetItem>
 #include <qlistwidget.h>
-
-DQPlotList::DQPlotList(DQPlotController *controller, std::shared_ptr<System> system, QWidget *parent)
+DQPlotList::DQPlotList(DQPlotController *controller, QWidget *parent)
     : QWidget(parent)
-    , system {system}
     , controller(controller)
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -41,13 +40,14 @@ void DQPlotList::addCategory(const QString &category)
     categoryItem->setFlags(Qt::NoItemFlags); // Non-selectable
     categoryItem->setFont(QFont("Arial", 10, QFont::Bold));
 }
+
 void DQPlotList::updateLists()
 {
     availableList->clear();
     selectedList->clear();
 
     auto plotComponents = controller->getComponents();
-
+    auto system = Application::getInstance().getSystem();
     // Add components selected in a DeltaQPlot
     for (auto &component : plotComponents) {
         new QListWidgetItem(QString::fromStdString(component), selectedList);
@@ -68,7 +68,7 @@ void DQPlotList::updateLists()
 void DQPlotList::onConfirmSelection()
 {
     QList<QListWidgetItem *> selected = availableList->selectedItems();
-
+    auto system = Application::getInstance().getSystem();
     for (QListWidgetItem *item : selected) {
         controller->addComponent(item->text().toStdString(), system->hasProbe(item->text().toStdString()));
     }

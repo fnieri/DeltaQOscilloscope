@@ -9,14 +9,10 @@ start(_Type, _Args) ->
     {ok, Pid}.
 
 start(X, Y, K) ->
-    %Worker1Buffer = spawn_opt(fun() -> worker_buffer(worker_1, undefined, K, 0) end, [{scheduler, 3}]),
-    %Worker2Buffer = spawn_opt(fun() -> worker_buffer(worker_2, undefined, K, 0) end, [{scheduler, 4}]),
-Worker1Buffer = spawn(fun() -> worker_buffer(worker_1, undefined, K, 0) end),
-Worker2Buffer = spawn(fun() -> worker_buffer(worker_2, undefined, K, 0) end),
-    %Worker2 = spawn_opt(fun() -> worker_loop(worker_2, Y,  Worker1Buffer, Worker2Buffer) end, [{scheduler, 1}]),
-    %Worker1 = spawn_opt(fun() -> worker_loop(worker_1, Y,  Worker1Buffer, Worker2Buffer) end, [{scheduler, 2}]),
-    Worker2 = spawn(fun() -> worker_loop(worker_2, Y,  Worker1Buffer, Worker2Buffer) end),
-    Worker1 = spawn(fun() -> worker_loop(worker_1, Y,  Worker1Buffer, Worker2Buffer) end),
+    Worker1Buffer = spawn_opt(fun() -> worker_buffer(worker_1, undefined, K, 0) end, [{scheduler, 3}]),
+    Worker2Buffer = spawn_opt(fun() -> worker_buffer(worker_2, undefined, K, 0) end, [{scheduler, 4}]),
+    Worker2 = spawn_opt(fun() -> worker_loop(worker_2, Y,  Worker1Buffer, Worker2Buffer) end, [{scheduler, 1}]),
+    Worker1 = spawn_opt(fun() -> worker_loop(worker_1, Y,  Worker1Buffer, Worker2Buffer) end, [{scheduler, 2}]),
 
 
     Worker1Buffer ! {set_worker, Worker1},
@@ -27,11 +23,11 @@ Worker2Buffer = spawn(fun() -> worker_buffer(worker_2, undefined, K, 0) end),
     {ok, self()}.
 
 send(X, Worker1Buffer) ->
-    
-    Delay = -math:log(rand:uniform()) / X, 
+Delay = -math:log(rand:uniform()) / X, 
     timer:sleep(trunc(Delay * 1000)),
-    Worker1Buffer ! {},
-    send(X, Worker1Buffer).
+    SpanCtx = ?start_span(probe),
+        Worker1Buffer ! {SpanCtx} ,
+        send(X, Worker1Buffer).
 
 worker_buffer(worker_1, Worker1, K, QueueLength) ->
     receive
@@ -39,8 +35,9 @@ worker_buffer(worker_1, Worker1, K, QueueLength) ->
         {set_worker, NewWorker} ->
             worker_buffer(worker_1, NewWorker, K, QueueLength);
         
-        {} when QueueLength < K ->
-            Worker1 ! {},
+        {ProbeCtx} when QueueLength < K ->
+            WorkerSpan = ?start_span(worker_1),
+            Worker1 ! {ProbeCtx, WorkerSpan},
             worker_buffer(worker_1, Worker1, K, QueueLength + 1);
         
         {processed} ->
@@ -59,8 +56,9 @@ worker_buffer(worker_2, Worker2, K, QueueLength) ->
         {set_worker, NewWorker} ->
             worker_buffer(worker_2, NewWorker, K, QueueLength);
         
-        {} when QueueLength < K ->
-            Worker2 ! {},
+        {ProbeCtx} when QueueLength < K ->
+              WorkerSpan = ?start_span(worker_2),
+            Worker2 ! {ProbeCtx, WorkerSpan},
             worker_buffer(worker_2, Worker2, K, QueueLength + 1);
         
         {processed} ->
@@ -73,21 +71,37 @@ worker_buffer(worker_2, Worker2, K, QueueLength) ->
 
 worker_loop(worker_1, Y, Worker1Buffer, Worker2Buffer) ->
     receive
-        {} ->
-            Loops = rand:uniform(Y),
+        {ProbeCtx, WorkerSpan} ->
+proc_lib:spawn_link(fun() ->
+                        otel_ctx:attach(ProbeCtx),
+                        ?set_current_span(WorkerSpan),
+                                 Loops = rand:uniform(Y),
             loop(Loops),
-            Worker2Buffer ! {},
+            Worker2Buffer ! {ProbeCtx},
             Worker1Buffer ! {processed},
-                                                     
+                     
+                        ?end_span(WorkerSpan),
+                        ?set_current_span(ProbeCtx)
+                    end),
+                                   
             worker_loop(worker_1, Y,  Worker1Buffer, Worker2Buffer)
     end;
 
 worker_loop(worker_2, Y, Worker1Buffer, Worker2Buffer) ->
     receive
-        {} ->
-            Loops = rand:uniform(Y),
-            loop(Loops),
-            Worker2Buffer ! {processed},            
+        {ProbeCtx, WorkerSpan} ->
+            proc_lib:spawn_link(fun() ->
+                        otel_ctx:attach(ProbeCtx),
+                        ?set_current_span(WorkerSpan),
+                Loops = rand:uniform(Y),
+                loop(Loops),
+                Worker2Buffer ! {processed},   
+                    
+                        ?end_span(WorkerSpan),
+                        ?set_current_span(ProbeCtx),
+                        ?end_span(ProbeCtx)
+                    end),
+           
             worker_loop(worker_2, Y,  Worker1Buffer, Worker2Buffer)
     end.
 

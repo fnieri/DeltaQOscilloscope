@@ -28,7 +28,7 @@ start(X, Y, K) ->
 send(X, Worker1Buffer) ->
     Delay = -math:log(rand:uniform()) / X, 
     timer:sleep(trunc(Delay * 1000)),
-    StartTimeNano = erlang:system_time(millisecond),
+    StartTimeNano = erlang:system_time(nanosecond),
     Worker1Buffer ! {StartTimeNano},
     send(X, Worker1Buffer).
 
@@ -58,10 +58,10 @@ worker_loop(worker_1, Y, Socket, Worker1Buffer, Worker2Buffer) ->
     receive
         {StartTimeNano} ->
             
-            StartNano = erlang:system_time(millisecond), 
+            StartNano = erlang:system_time(nanosecond), 
             Loops = rand:uniform(Y),
             loop(Loops),
-            EndNano = erlang:system_time(millisecond),
+            EndNano = erlang:system_time(nanosecond),
 
             Message = io_lib:format("worker_1: Start=~p End=~p~n", [StartNano, EndNano]),  
             
@@ -74,10 +74,10 @@ worker_loop(worker_2, Y, Socket, Worker1Buffer, Worker2Buffer) ->
     receive
         {StartTimeNano, PrevMessage} ->  
             
-            StartNano = erlang:system_time(millisecond),
+            StartNano = erlang:system_time(nanosecond),
             Loops = rand:uniform(Y),
             loop(Loops),
-            EndNano = erlang:system_time(millisecond),
+            EndNano = erlang:system_time(nanosecond),
             Worker2Buffer ! {processed},
             % Construct messages
             Worker2Message = io_lib:format("worker_2: Start=~p End=~p~n", [StartNano, EndNano]),

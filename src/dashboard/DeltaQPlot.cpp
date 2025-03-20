@@ -5,10 +5,9 @@
 #include <QDebug>
 #include <QLineSeries>
 
-DeltaQPlot::DeltaQPlot(std::shared_ptr<System> system, const std::vector<std::string> &selectedItems, QWidget *parent)
+DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *parent)
     : QChartView(parent)
     , chart(new QChart())
-    , system(system)
 {
     setChart(chart);
     chart->legend()->setVisible(true);
@@ -20,14 +19,18 @@ DeltaQPlot::DeltaQPlot(std::shared_ptr<System> system, const std::vector<std::st
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
 
-    controller = new DQPlotController(system, this, selectedItems);
-    plotList = new DQPlotList(controller, system, parent);
+    controller = new DQPlotController(this, selectedItems);
+    plotList = new DQPlotList(controller, this);
 }
 
 DeltaQPlot::~DeltaQPlot()
 {
     delete controller;
+    controller = NULL;
     delete plotList;
+    plotList = NULL;
+    delete chart;
+    chart = NULL;
 }
 
 void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
@@ -38,9 +41,9 @@ void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
     series->attachAxis(axisY);
 }
 
-void DeltaQPlot::update()
+void DeltaQPlot::update(double binWidth)
 {
-    controller->update();
+    controller->update(binWidth);
 }
 
 void DeltaQPlot::removeSeries(QAbstractSeries *series)
@@ -78,5 +81,5 @@ DQPlotList *DeltaQPlot::getPlotList()
 
 void DeltaQPlot::mousePressEvent(QMouseEvent *event)
 {
-    emit plotSelected(this); // Emit signal when clicked
+    emit plotSelected(this);
 }

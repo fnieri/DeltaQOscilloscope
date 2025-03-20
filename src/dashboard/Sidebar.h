@@ -15,8 +15,6 @@ class Sidebar : public QWidget
 {
     Q_OBJECT
 
-    std::shared_ptr<System> system;
-
     QHBoxLayout *systemButtonsLayout;
     QLabel *systemLabel;
     QTextEdit *systemTextEdit;
@@ -43,7 +41,7 @@ private slots:
     void onAddPlotClicked();
 
 public:
-    explicit Sidebar(std::shared_ptr<System> system, QWidget *parent = nullptr);
+    explicit Sidebar(QWidget *parent = nullptr);
 
     void setCurrentPlotList(DQPlotList *currentPlotList);
     void hideCurrentPlot();

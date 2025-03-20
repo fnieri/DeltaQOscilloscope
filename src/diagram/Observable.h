@@ -2,12 +2,12 @@
 
 #include "DiagramComponent.h"
 #include "Sample.h"
-class Primitive : virtual public DiagramComponent
+class Observable : virtual public DiagramComponent
 {
     std::vector<Sample> samples;
 
 public:
-    explicit Primitive(const std::string &name);
+    explicit Observable(const std::string &name);
 
     [[nodiscard]] std::vector<long double> getTimeSeries() const;
 

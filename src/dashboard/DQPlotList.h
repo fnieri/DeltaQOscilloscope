@@ -15,7 +15,9 @@ class DQPlotList : public QWidget
 {
     Q_OBJECT
 public:
-    explicit DQPlotList(DQPlotController *controller, std::shared_ptr<System>, QWidget *parent = nullptr);
+    explicit DQPlotList(DQPlotController *controller, QWidget *parent = nullptr);
+
+    void reset();
 
 private slots:
     void onConfirmSelection();
@@ -33,8 +35,6 @@ private:
 
     QPushButton *addButton;
     QPushButton *removeButton;
-
-    std::shared_ptr<System> system;
 };
 
 #endif // DQ_PLOT_LIST_H

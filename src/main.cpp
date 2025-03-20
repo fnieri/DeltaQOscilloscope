@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     // dashboard.setWindowTitle("System Editor");
     // dashboard.resize(400, 300); // Set an appropriate size
     // dashboard.show();
-    MainWindow window(application.getSystem());
+    MainWindow window;
     window.show();
 
     return app.exec(); // Start Qt event loop

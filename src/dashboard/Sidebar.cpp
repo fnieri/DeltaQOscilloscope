@@ -15,9 +15,8 @@
 #include <qlogging.h>
 #include <qpushbutton.h>
 #include <qtextedit.h>
-Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
+Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
-    , system(system)
 {
     layout = new QVBoxLayout(this);
     layout->setAlignment(Qt::AlignTop);
@@ -49,7 +48,7 @@ Sidebar::Sidebar(std::shared_ptr<System> system, QWidget *parent)
     newPlotLabel = new QLabel("Add a new plot:", this);
     newPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     addNewPlotButton = new QPushButton("Add plot");
-    newPlotList = new NewPlotList(system, this);
+    newPlotList = new NewPlotList(this);
     connect(addNewPlotButton, &QPushButton::clicked, this, &Sidebar::onAddPlotClicked);
 
     layout->addWidget(newPlotLabel);

@@ -13,21 +13,20 @@ class DeltaQPlot;
 class DQPlotController
 {
 public:
-    DQPlotController(std::shared_ptr<System> system, DeltaQPlot *plot, const std::vector<std::string> &selectedItems);
-
+    DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems);
+    ~DQPlotController();
     bool containsComponent(std::string name);
     void editPlot(const std::vector<std::string> &selectedItems);
     void addComponent(std::string name, bool isProbe);
     std::vector<std::string> getComponents();
     void removeComponent(std::string &&name);
     void removeComponent(const std::string &name);
-    void update();
+    void update(double binWidth);
 
 private:
     void updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth);
     void updateProbe(QLineSeries *probeSeries, QLineSeries *calculatedProbeSeries, std::shared_ptr<Probe> probe, double binWidth);
 
-    std::shared_ptr<System> system;
     DeltaQPlot *plot;
 
     std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;

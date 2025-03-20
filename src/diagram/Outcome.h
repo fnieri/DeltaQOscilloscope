@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "Primitive.h"
+#include "Observable.h"
 // TODO remove probe inheritance
-class Outcome : public Primitive
+class Outcome : public Observable
 {
 public:
     Outcome(const std::string &name);

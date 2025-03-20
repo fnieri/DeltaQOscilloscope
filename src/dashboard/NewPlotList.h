@@ -12,7 +12,7 @@ class NewPlotList : public QListWidget
 {
     Q_OBJECT
 public:
-    explicit NewPlotList(std::shared_ptr<System> system, QWidget *parent = nullptr);
+    explicit NewPlotList(QWidget *parent = nullptr);
 
     std::vector<std::string> getSelectedItems();
 
@@ -20,15 +20,13 @@ public:
     void reset();
 
 private:
-    std::shared_ptr<System> system;
-
     void create();
     void addCategory(const QString &category);
 
     void addItems();
-    void addProbes();
-    void addOutcomes();
-    void addOperators();
+    void addProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probes);
+    void addOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes);
+    void addOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operators);
 };
 
 #endif // NEW_PLOT_LIST_H

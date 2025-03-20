@@ -81,7 +81,7 @@ DeltaQ System::calculateDeltaQ()
     return probes;
 }
 
-bool System::containsOutcome(std::string &name)
+bool System::hasOutcome(std::string &name)
 {
     return outcomes.find(name) != outcomes.end();
 }
@@ -140,6 +140,11 @@ void System::replaceSystem(const System &other)
 {
     if (this != &other) // Prevent self-assignment
     {
+
+        outcomes.clear();
+        operators.clear();
+        probes.clear();
+
         outcomes = other.outcomes;
         operators = other.operators;
         probes = other.probes;
