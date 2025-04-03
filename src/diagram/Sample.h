@@ -1,7 +1,12 @@
 #pragma once
-#include <string>
+
+#include <cstdint>
+
+enum Status { SUCCESS, TIMEDOUT, FAILED };
+
 struct Sample {
-    std::string componentName;
-    double startTime;
-    double endTime;
+    std::uint64_t startTime;
+    std::uint64_t endTime;
+    double long elapsedTime;
+    Status status;
 };

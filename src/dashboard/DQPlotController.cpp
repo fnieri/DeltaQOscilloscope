@@ -1,7 +1,7 @@
 
 #include "DQPlotController.h"
+#include "../Application.h"
 #include "../maths/DeltaQOperations.h"
-#include "Application.h"
 
 #include <iostream>
 #include <qlineseries.h>

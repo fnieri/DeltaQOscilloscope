@@ -41,24 +41,60 @@ DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples, i
     processSamples(outcomeSamples, nBins);
 }
 
+DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
+    : binWidth(binWidth)
+    , size {0}
+{
+    calculateDeltaQ(samples);
+}
+
 void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples)
 {
-    if (outcomeSamples.empty() || binWidth == 0)
+    if (outcomeSamples.empty() || binWidth <= 0)
         return;
+
     const int numBins = 10;
-    std::vector<double> histogram(numBins);
-    for (const double &sample : outcomeSamples) {
-        int bin = std::floor(std::abs(sample) / binWidth);
+    std::vector<double> histogram(numBins, 0.0); // Initialize to 0
+
+    const auto outcomesSize = static_cast<long long>(outcomeSamples.size());
+    for (auto i = 0; i < outcomesSize; i++) {
+        const double sample = outcomeSamples[i];
+
+        if (binWidth <= std::numeric_limits<double>::epsilon()) {
+            std::cerr << "Error: binWidth is too small" << std::endl;
+            return;
+        }
+
+        // Ensure sample is valid
+        if (std::isnan(sample) || std::isinf(sample)) {
+            std::cerr << "Warning: Invalid sample value: " << sample << std::endl;
+            continue;
+        }
+        // Ensure sample is valid
+        if (sample < 0) {
+            std::cerr << "Warning: Negative sample value: " << sample << std::endl;
+            continue;
+        }
+
+        // Calculate bin
+        int bin = std::floor(sample / binWidth);
+
+        // Check bin value
+        if (bin < 0) {
+            std::cerr << "Warning: Negative bin value: " << bin << ", sample: " << sample << std::endl;
+            continue; // Skip this sample
+        }
 
         if (bin >= numBins) {
             bin = numBins - 1; // Clamp to last valid bin
+            std::cerr << "Warning: bin value exceeds the histogram size for sample: " << sample << " - clamping to max" << std::endl;
         }
 
-        histogram[bin]++;
+        histogram.at(bin)++;
     }
 
     // Calculate discrete PDF
-    const auto outcomesSize = static_cast<double>(outcomeSamples.size());
+    pdfValues.reserve(numBins);
     for (const double &binValue : histogram) {
         pdfValues.push_back(binValue / outcomesSize);
     }
@@ -90,6 +126,52 @@ void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins
 
     calculateCDF();
 
+    size = pdfValues.size();
+}
+
+void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
+{
+    if (outcomeSamples.empty() || binWidth <= 0)
+        return;
+
+    const int numBins = 10;
+    std::vector<double> histogram(numBins, 0.0);
+
+    long long totalSamples = outcomeSamples.size();
+    long long successfulSamples = 0;
+
+    for (const auto &sample : outcomeSamples) {
+        if (sample.status == Status::TIMEDOUT) {
+            continue; // Exclude failed samples from histogram but count them
+        }
+
+        successfulSamples++;
+        double elapsed = sample.elapsedTime;
+
+        if (elapsed < 0 || std::isnan(elapsed) || std::isinf(elapsed)) {
+            std::cerr << "Warning: Invalid sample value: " << elapsed << std::endl;
+            continue;
+        }
+
+        int bin = std::floor(elapsed / binWidth);
+        if (bin < 0) {
+            std::cerr << "Warning: Negative bin value: " << bin << std::endl;
+            continue;
+        }
+        if (bin >= numBins) {
+            bin = numBins - 1;
+        }
+
+        histogram[bin]++;
+    }
+
+    // Calculate PDF
+    pdfValues.reserve(numBins);
+    for (const double &binValue : histogram) {
+        pdfValues.push_back(binValue / totalSamples);
+    }
+
+    calculateCDF();
     size = pdfValues.size();
 }
 

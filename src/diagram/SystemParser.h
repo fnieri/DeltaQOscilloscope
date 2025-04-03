@@ -11,4 +11,5 @@
 #include <nlohmann/json.hpp>
 #include <string>
 System parseSystemJson(const std::string &fileName);
+System parseJsonString(const std::string &jsonString);
 #endif // SYSTEMPARSER_H

@@ -5,7 +5,7 @@
  */
 
 #include "System.h"
-
+#include <execution>
 #include <iostream>
 #include <utility>
 #define N_OF_BINS 10.0
@@ -18,6 +18,17 @@ void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
 void System::setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap)
 {
     outcomes = outcomesMap;
+    for (auto &[name, outcome] : outcomes) {
+        components[name] = outcome;
+    }
+}
+
+void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap)
+{
+    probes = probesMap;
+    for (auto &[name, probe] : probes) {
+        components[name] = probe;
+    }
 }
 
 void System::setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap)
@@ -38,6 +49,7 @@ void System::calculateBinWidth()
             max = outcomeMax;
         }
     }
+    std::cout << max << " max \n";
     binWidth = max / N_OF_BINS;
 }
 
@@ -52,6 +64,7 @@ void System::addSample(std::string &componentName, Sample &sample)
     if (findProbe != probes.end()) {
         auto component = probes[componentName];
         component->addSample(sample);
+        std::cout << "added \n";
     }
 }
 
@@ -95,12 +108,6 @@ std::shared_ptr<Probe> System::getProbe(const std::string &name)
 {
     return probes[name];
 }
-
-void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap)
-{
-    probes = probesMap;
-}
-
 void System::toString() const
 {
     if (firstComponent)
@@ -136,6 +143,32 @@ std::string System::getSystemDefinitionText()
     return systemDefinitionText;
 }
 
+void System::addSamplesBatch(const std::unordered_map<std::string, std::vector<Sample>> &batchSamples)
+{
+    std::for_each(std::execution::par_unseq, batchSamples.begin(), batchSamples.end(), [this](const auto &pair) { this->addSamples(pair.first, pair.second); });
+}
+
+void System::addSamples(const std::string &componentName, const std::vector<Sample> &samples)
+{
+    if (auto it = components.find(componentName); it != components.end()) {
+        it->second->addSamples(samples); // Copy
+    }
+}
+void System::addSamples(const std::string &componentName, std::vector<Sample> &&samples)
+{
+    if (auto it = components.find(componentName); it != components.end()) {
+        it->second->addSamples(std::move(samples)); // Move
+    }
+}
+
+void System::addSamplesBatch(std::unordered_map<std::string, std::vector<Sample>> &&batchSamples)
+{
+    std::for_each(std::execution::par_unseq, batchSamples.begin(), batchSamples.end(),
+        [this](auto &&pair) { // Use forwarding reference
+            this->addSamples(pair.first, std::move(pair.second));
+        });
+}
+
 void System::replaceSystem(const System &other)
 {
     if (this != &other) // Prevent self-assignment
@@ -144,10 +177,13 @@ void System::replaceSystem(const System &other)
         outcomes.clear();
         operators.clear();
         probes.clear();
+        components.clear();
 
         outcomes = other.outcomes;
         operators = other.operators;
         probes = other.probes;
+        components = other.components;
+
         systemDefinitionText = other.systemDefinitionText;
         firstComponent = other.firstComponent;
         binWidth = other.binWidth;

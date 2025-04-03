@@ -17,7 +17,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 include(cmake/CPM.cmake)
 include(cmake/AddJson.cmake)
+include(cmake/FindErlang.cmake)
 add_subdirectory(src)
+
+

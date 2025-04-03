@@ -1,5 +1,5 @@
 #include "NewPlotList.h"
-#include "Application.h"
+#include "../Application.h"
 #include <iostream>
 #include <qlistwidget.h>
 

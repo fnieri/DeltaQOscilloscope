@@ -1,20 +1,17 @@
 add_library(${PREFIX}_dashboard
-    Application.h
-    Application.cpp
-
     DQPlotController.h
-        DQPlotController.cpp
-        DQPlotList.h
-        DQPlotList.cpp
-        DeltaQPlot.h
-        DeltaQPlot.cpp
-        MainWindow.h
-        MainWindow.cpp
-        NewPlotList.h
-        NewPlotList.cpp
-        Sidebar.h
-        Sidebar.cpp
-    )
+    DQPlotController.cpp
+    DQPlotList.h
+    DQPlotList.cpp
+    DeltaQPlot.h
+    DeltaQPlot.cpp
+    MainWindow.h
+    MainWindow.cpp
+    NewPlotList.h
+    NewPlotList.cpp
+    Sidebar.h
+    Sidebar.cpp
+)
 
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gyu Widgets Charts Graphs)

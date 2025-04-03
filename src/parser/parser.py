@@ -106,7 +106,18 @@ def parse_and_save_json(input_string, filename="parsed_system.json"):
     with open(filename, "w") as json_file:
         json.dump(result, json_file, indent=2)
     return filename
+
+def parse_json(input_string):
+    """Parses the input and returns JSON as a string instead of writing to a file."""
+    tree = parser.parse(input_string)
+    transformed_tree = transformer.transform(tree)
+    result = {
+        "text": input_string,
+        "parsed_data": transformed_tree
+    }
+    return json.dumps(result, indent=2)  # Return JSON as a string
+
 #
 # # Example Usage:
-parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
+#parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
 

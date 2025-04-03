@@ -18,13 +18,18 @@ DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe
     }
     return getDeltaQ(binWidth);
 }
-
+/*
 DeltaQ Outcome::getDeltaQ(double binWidth) const
 {
     std::vector<long double> outcomeSamples = getTimeSeries();
     return {binWidth, outcomeSamples};
 }
+*/
 
+DeltaQ Outcome::getDeltaQ(double binWidth) const
+{
+    return {binWidth, getSamplesInRange(0, 10000000000000000000)}; // FIXME
+}
 std::string Outcome::toString() const
 {
     return "Outcome: " + name + "\n";

@@ -10,7 +10,7 @@
 class Server
 {
 public:
-    Server(int port, std::shared_ptr<System> system);
+    Server(int port);
     ~Server();
     void start(); // Start the server in a new thread
 
@@ -20,7 +20,8 @@ private:
     struct sockaddr_in address;
     int port;
     std::thread serverThread;
-
+    void updateSystem();
+    void parseErlangMessage(const char *buffer, int len);
     std::shared_ptr<System> system;
 };
 

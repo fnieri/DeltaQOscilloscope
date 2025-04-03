@@ -22,12 +22,16 @@ add_library(${PREFIX}_diagram
     Observable.cpp
 )
 
+
+
+find_package(TBB REQUIRED COMPONENTS tbb)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
         nlohmann_json
         ${PREFIX}_parser
+        tbb
 )
 
 

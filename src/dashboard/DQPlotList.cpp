@@ -1,6 +1,6 @@
 
 #include "DQPlotList.h"
-#include "Application.h"
+#include "../Application.h"
 #include <QLabel>
 #include <QListWidgetItem>
 #include <qlistwidget.h>

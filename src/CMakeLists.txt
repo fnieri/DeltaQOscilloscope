@@ -4,6 +4,9 @@ add_subdirectory(maths)
 add_subdirectory(server)
 add_subdirectory(parser)
 
-add_executable(RealTimeDeltaQSD main.cpp)
+add_executable(RealTimeDeltaQSD main.cpp Application.cpp)
+
+
+target_include_directories(RealTimeDeltaQSD PUBLIC ${CMAKE_SOURCE_DIR})
 
 target_link_libraries(RealTimeDeltaQSD ${PREFIX}_server ${PREFIX}_diagram ${PREFIX}_dashboard ${PREFIX}_parser)

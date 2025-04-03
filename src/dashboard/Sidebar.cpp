@@ -1,8 +1,8 @@
 
 #include "Sidebar.h"
+#include "../Application.h"
 #include "../diagram/SystemParser.h"
 #include "../parser/ParserWrapper.h"
-#include "Application.h"
 #include "NewPlotList.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -99,7 +99,8 @@ void Sidebar::clearOnAdd()
 void Sidebar::onUpdateSystem()
 {
     std::string text = getSystemText();
-    parseAndSaveJson(text);
+    std::string parsedJson = parseJson(text);
+    Application::getInstance().setSystem(parseJsonString(parsedJson));
 }
 
 void Sidebar::onAddPlotClicked()

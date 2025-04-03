@@ -71,3 +71,65 @@ std::string parseAndSaveJson(const std::string &input_string, const std::string 
 
     return result;
 }
+
+std::string parseJson(const std::string &input_string)
+{
+    PyObject *pName, *pModule, *pFunc;
+    PyObject *pArgs, *pValue;
+    std::string result = "Unknown error";
+
+    // Initialize the Python Interpreter
+    Py_Initialize();
+
+    // Add the directory where `parser.py` is located
+    PyRun_SimpleString("import sys; sys.path.append('src/parser');");
+
+    const char *scriptPath = "parser";
+    pName = PyUnicode_DecodeFSDefault(scriptPath);
+    if (!pName) {
+        std::cerr << "Failed to convert script name to Python string!" << std::endl;
+        return "Error: Invalid script name!";
+    }
+
+    // Import the Python module
+    pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+
+    if (pModule) {
+        // Get the function parse_json (instead of parse_and_save_json)
+        pFunc = PyObject_GetAttrString(pModule, "parse_json");
+
+        if (pFunc && PyCallable_Check(pFunc)) {
+            pArgs = PyTuple_New(1); // Only input_string is passed
+            pValue = PyUnicode_FromString(input_string.c_str());
+            PyTuple_SetItem(pArgs, 0, pValue);
+
+            // Call the function
+            pValue = PyObject_CallObject(pFunc, pArgs);
+            Py_DECREF(pArgs);
+
+            // Get JSON string from Python function
+            if (pValue) {
+                result = PyUnicode_AsUTF8(pValue);
+                Py_DECREF(pValue);
+            } else {
+                PyErr_Print();
+                result = "Error: Python function call failed!";
+            }
+        } else {
+            if (PyErr_Occurred())
+                PyErr_Print();
+            result = "Error: Function not found or not callable!";
+        }
+
+        Py_XDECREF(pFunc);
+        Py_DECREF(pModule);
+    } else {
+        PyErr_Print();
+        result = "Error: Failed to load Python module!";
+    }
+
+    // Finalize Python Interpreter
+    Py_FinalizeEx();
+    return result;
+}

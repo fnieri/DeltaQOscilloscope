@@ -152,7 +152,6 @@ std::string parseText(const json &systemJson)
 
 System parseSystemJson(const std::string &fileName)
 {
-    System system;
     std::ifstream ifs(fileName);
     if (!ifs) {
         throw std::runtime_error("Error: Could not open file " + fileName);
@@ -165,7 +164,13 @@ System parseSystemJson(const std::string &fileName)
     if (jsonString.empty()) {
         throw std::runtime_error("Error: JSON file is empty.");
     }
+    return parseJsonString(jsonString);
+}
 
+System parseJsonString(const std::string &jsonString)
+{
+
+    System system;
     json systemJson = json::parse(jsonString);
     if (systemJson.contains("parsed_data")) {
         for (auto &probeJson : systemJson["parsed_data"]["probes"]) {

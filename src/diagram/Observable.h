@@ -2,9 +2,10 @@
 
 #include "DiagramComponent.h"
 #include "Sample.h"
+#include <deque>
 class Observable : virtual public DiagramComponent
 {
-    std::vector<Sample> samples;
+    std::deque<Sample> samples;
 
 public:
     explicit Observable(const std::string &name);
@@ -15,7 +16,13 @@ public:
 
     void addSample(const Sample &sample);
 
+    void addSamples(std::vector<Sample> &&samples);
+
+    void addSamples(const std::vector<Sample> &samples);
+
     [[nodiscard]] double getMax() const;
 
     [[nodiscard]] double getMax(std::vector<long double> samples) const;
+
+    std::vector<Sample> getSamplesInRange(std::uint64_t lowerTime, std::uint64_t upperTime) const;
 };

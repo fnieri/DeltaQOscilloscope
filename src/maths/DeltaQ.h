@@ -9,9 +9,9 @@
 
 #pragma once
 
+#include "../diagram/Sample.h"
 #include <ostream>
 #include <vector>
-
 class DeltaQ
 {
 
@@ -25,6 +25,7 @@ class DeltaQ
      */
     void calculateDeltaQ(std::vector<long double> &outcomeSamples);
     void calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins);
+    void calculateDeltaQ(std::vector<Sample> &samples);
     /**
      * Calculate CDF given PDF values
      */
@@ -40,6 +41,8 @@ public:
     DeltaQ(double binWidth, const std::vector<long double> &values, bool isPdf);
     DeltaQ(double binWidth, const std::vector<long double> outcomeSamples);
     DeltaQ(double binWidth, const std::vector<long double> outcomeSamples, int nBins);
+    DeltaQ(double binWidth, std::vector<Sample>);
+
     /**
      * Processes outcome samples to generate PDF and CDF.
      */

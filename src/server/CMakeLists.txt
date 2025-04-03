@@ -1,8 +1,7 @@
+
 add_library(${PREFIX}_server
     Server.cpp
     Server.h
-    SpansReader.h
-    SpansReader.cpp
 )
 
 target_link_libraries(${PREFIX}_server
@@ -23,6 +22,7 @@ add_executable(server
 target_link_libraries(server
     PRIVATE
     ${PREFIX}_server
+    ei
 )
 
 target_compile_features(server PRIVATE cxx_std_17)

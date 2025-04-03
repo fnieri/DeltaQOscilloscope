@@ -1,16 +1,22 @@
+
 #include "Server.h"
+#include "../Application.h"
 #include <arpa/inet.h>
+#include <cstdint>
 #include <cstring>
-#include <iomanip>
 #include <iostream>
 #include <regex>
 #include <unistd.h>
-Server::Server(int port, std::shared_ptr<System> system)
+
+#define TIMEOUT "to"
+#define EXEC_OK "ok"
+
+Server::Server(int port)
     : port(port)
     , server_fd(0)
     , new_socket(0)
-    , system {system}
 {
+    Application::getInstance().addObserver([this]() { this->updateSystem(); });
 }
 
 Server::~Server()
@@ -26,9 +32,14 @@ void Server::start()
     serverThread = std::thread(&Server::run, this);
 }
 
+void Server::updateSystem()
+{
+    system = Application::getInstance().getSystem();
+    std::cout << "updated \n";
+}
+
 void Server::run()
 {
-
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == 0) {
         perror("Socket failed");
@@ -65,25 +76,52 @@ void Server::run()
     }
 
     char buffer[1024] = {0};
-    std::regex pattern(R"((\w+): Start=(-?\d+) End=(-?\d+))");
-    std::smatch match;
 
     while (true) {
-        int valread = read(new_socket, buffer, 1024);
-        if (valread <= 0)
+        int valread = read(new_socket, buffer, sizeof(buffer));
+        if (valread <= 0) {
             break;
-
-        std::string message(buffer, valread);
-        memset(buffer, 0, sizeof(buffer));
-
-        if (std::regex_search(message, match, pattern)) {
-            std::string workerName = match[1];
-            double startTime = std::abs(std::stold(match[2]));
-            double endTime = std::abs(std::stold(match[3]));
-            Sample sample = {workerName, startTime, endTime};
-            system->addSample(workerName, sample);
-            //            std::cout << "Received: " << workerName << ", Start=" << std::fixed << std::setprecision(12) << startTime << ", End=" << std::fixed
-            //                    << std::setprecision(12) << endTime << std::endl;
         }
+
+        parseErlangMessage(buffer, valread);
     }
+}
+void Server::parseErlangMessage(const char *buffer, int len)
+{
+    std::string message(buffer, len);
+
+    std::regex pattern(R"(n:(\w+);b:(\d+);e:(\d+);s:(\w+))");
+    std::smatch match;
+
+    if (!std::regex_search(message, match, pattern) || match.size() != 5) {
+        std::cerr << "Failed to parse message: " << message << std::endl;
+        return;
+    }
+
+    std::string name = match[1].str();
+    uint64_t startTime = std::stoull(match[2].str());
+    uint64_t endTime;
+    std::string statusStr = match[4].str();
+    Sample sample;
+    Status status = Status::SUCCESS;
+    if (statusStr == TIMEOUT) {
+        status = Status::TIMEDOUT;
+        sample = {startTime, NULL, NULL, status};
+        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT")
+                  << std::endl;
+
+    } else if (statusStr == EXEC_OK) {
+        endTime = std::stoull(match[3].str());
+        std::cout << endTime - startTime;
+        double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
+        Sample sample {startTime, endTime, elapsed, status};
+        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", End=" << sample.endTime << ", Elapsed=" << elapsed
+                  << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT") << std::endl;
+
+    } else if (statusStr != EXEC_OK) {
+        std::cerr << "Unknown status: " << statusStr << std::endl;
+        return;
+    }
+
+    system->addSample(name, sample);
 }

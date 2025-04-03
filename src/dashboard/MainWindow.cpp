@@ -1,7 +1,7 @@
 
 #include "MainWindow.h"
+#include "../Application.h"
 #include "../maths/DeltaQOperations.h"
-#include "Application.h"
 #include "DQPlotList.h"
 #include "DeltaQPlot.h"
 #include "NewPlotList.h"
