@@ -13,9 +13,14 @@ FirstToFinish::FirstToFinish(const std::string &name, const std::vector<std::sha
 {
 }
 
+DeltaQ FirstToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    return DeltaQ();
+}
+/*
 DeltaQ FirstToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
-    /*    std::vector<long double> resultingCdf;
+        std::vector<long double> resultingCdf;
 
         std::vector<DeltaQ> deltaQs;
         deltaQs.reserve(children.size());
@@ -38,25 +43,7 @@ DeltaQ FirstToFinish::calculateDeltaQ(const double &binWidth, std::string curren
             resultingCdf.push_back(resultAtI);
         }
         return {binWidth, resultingCdf, false};
-    */
+
     return DeltaQ();
 }
-
-std::string FirstToFinish::toString() const
-{
-    return "First to finish: " + name + "\n";
-}
-
-void FirstToFinish::print(int depth, std::string currentProbe)
-{
-    std::cout << std::string(depth * 2, ' ') + "First to finish: " + name + "\n";
-
-    int childIdx = 0;
-    for (auto &child : children) {
-        std::cout << std::string(depth * 2, ' ') + "Child: " << childIdx << "\n";
-        child->print(depth + 1, currentProbe);
-        childIdx++;
-    }
-    if (probeNextComponent.count(currentProbe))
-        probeNextComponent.at(currentProbe)->print(depth, currentProbe);
-}
+*/

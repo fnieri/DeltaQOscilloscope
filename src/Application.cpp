@@ -10,11 +10,7 @@ Application &Application::getInstance()
 
 void Application::setSystem(const System newSystem)
 {
-    if (system) {
-        system->replaceSystem(newSystem);
-    } else {
-        system = std::make_shared<System>(newSystem);
-    }
+    system = std::make_shared<System>(newSystem);
     notifyObservers();
 }
 

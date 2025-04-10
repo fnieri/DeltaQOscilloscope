@@ -12,6 +12,7 @@ public:
     FirstToFinish(const std::string &name);
 
     FirstToFinish(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
+
     /**
      * Assume two independent outcomes with the same start event
      * First-to-finish outcome occurs when at least one end event occurs
@@ -19,9 +20,5 @@ public:
      * First-to-finish is defined as
      * ΔQ_{FTF(A,B)} = ΔQ_A + ΔQ_B – ΔQ_A * ΔQ_B
      */
-    DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) override;
-
-    std::string toString() const override;
-
-    void print(int depth, std::string currentProbe) override;
+    [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
 };

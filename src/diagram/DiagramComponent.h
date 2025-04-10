@@ -24,15 +24,12 @@ protected:
 
 public:
     DiagramComponent() = default;
+
     virtual ~DiagramComponent() { };
 
     void setNext(const std::string &probeName, std::shared_ptr<DiagramComponent> next);
 
-    virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) = 0;
+    [[nodiscard]] virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) = 0;
 
     std::string getName() const &;
-
-    virtual void print(int depth, std::string currentProbe) { };
-
-    virtual std::string toString() const = 0;
 };

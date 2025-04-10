@@ -12,9 +12,14 @@ AllToFinish::AllToFinish(const std::string &name, const std::vector<std::shared_
 {
 }
 
+DeltaQ AllToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+
+{
+    return DeltaQ();
+}
+/*
 DeltaQ AllToFinish::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
-    /*
         std::vector<double> resultingCdf;
 
         std::vector<DeltaQ> deltaQs;
@@ -29,25 +34,6 @@ DeltaQ AllToFinish::calculateDeltaQ(const double &binWidth, std::string currentP
             result = result * deltaQs[i];
         }
         return result;
-        */
     return DeltaQ();
 }
-
-std::string AllToFinish::toString() const
-{
-    return "All to finish: " + name + "\n";
-}
-
-void AllToFinish::print(int depth, std::string currentProbe)
-{
-    std::cout << std::string(depth * 2, ' ') + "All to finish: " + name + "\n";
-
-    int childIdx = 0;
-    for (auto &child : children) {
-        std::cout << std::string(depth * 2, ' ') + "Child: " << childIdx << "\n";
-        child->print(depth + 1, currentProbe);
-        childIdx++;
-    }
-    if (probeNextComponent.count(currentProbe))
-        probeNextComponent.at(currentProbe)->print(depth, currentProbe);
-}
+*/

@@ -1,4 +1,3 @@
-
 #include "MainWindow.h"
 #include "../Application.h"
 #include "../maths/DeltaQOperations.h"
@@ -40,9 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
     updateTimer = new QTimer();
     updateTimer->moveToThread(timerThread);
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::updatePlots, Qt::QueuedConnection);
-    connect(timerThread, &QThread::started, [this]() { updateTimer->start(1000); });
+    connect(timerThread, &QThread::started, [this]() { updateTimer->start(200); });
     timerThread->start();
     Application::getInstance().addObserver([this] { this->reset(); });
+    auto now = std::chrono::system_clock::now();
+    auto adjustedTime = now - std::chrono::milliseconds(1000);
+    timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
 }
 
 void MainWindow::reset()
@@ -50,20 +52,27 @@ void MainWindow::reset()
     for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
         DeltaQPlot *plot = it.key();
         QWidget *plotWidget = it.value();
-
-        delete plot;
-        delete plotWidget;
+        if (plot) {
+            delete plot;
+            plot = NULL;
+        }
+        if (plotWidget) {
+            delete plotWidget;
+            plotWidget = NULL;
+        }
     }
     plotContainers.clear();
 }
 
 void MainWindow::updatePlots()
 {
+    timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
+    uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     auto system = Application::getInstance().getSystem();
     system->calculateBinWidth();
     double binWidth = system->getBinWidth();
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
-        plot->update(binWidth);
+        plot->update(binWidth, timeLowerBound, timeUpperBound);
     }
 }
 
@@ -163,13 +172,9 @@ void MainWindow::onRemovePlot(DeltaQPlot *plot)
     QWidget *plotWidget = plotContainers.value(plot, nullptr);
     if (plotWidget) {
         plotLayout->removeWidget(plotWidget);
-        delete plotWidget; // Ensure the widget is deleted
+        plotWidget->deleteLater();
     }
-
     plotContainers.remove(plot);
-    delete plot; // Ensure the plot itself is deleted
-
-    // Reorganize the layout
     int plotCount = 0;
     for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
         int row = plotCount / 3;
@@ -185,16 +190,11 @@ void MainWindow::onRemovePlot(DeltaQPlot *plot)
 
 void MainWindow::onPlotSelected(DeltaQPlot *plot)
 {
-    qDebug() << "onPlotSelected called for plot:" << plot;
     if (!plot)
         return;
-
     DQPlotList *plotList = plot->getPlotList();
     if (!plotList) {
-        qDebug() << "No valid plot list found!";
         return;
     }
-
     sidebar->setCurrentPlotList(plotList);
-    qDebug() << "Sidebar updated.";
 }

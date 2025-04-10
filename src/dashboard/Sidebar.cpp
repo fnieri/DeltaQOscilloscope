@@ -86,10 +86,10 @@ void Sidebar::hideCurrentPlot()
 {
     if (currentPlotList) {
         layout->removeWidget(currentPlotList);
-        currentPlotList->deleteLater(); // Properly delete the widget
+        currentPlotList->deleteLater();
         currentPlotList = nullptr;
     }
-    currentPlotLabel->hide(); // Ensure label is hidden
+    currentPlotLabel->hide();
 }
 void Sidebar::clearOnAdd()
 {
@@ -112,7 +112,7 @@ void Sidebar::onAddPlotClicked()
         return;
     }
 
-    emit addPlotClicked(); // Emit signal to MainWindow to add plot
+    emit addPlotClicked();
 }
 
 void Sidebar::saveSystemTo()

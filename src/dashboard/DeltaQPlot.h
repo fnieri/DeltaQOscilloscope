@@ -8,7 +8,6 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QValueAxis>
-#include <memory>
 #include <vector>
 class DQPlotController;
 class DQPlotList;
@@ -21,7 +20,7 @@ public:
     ~DeltaQPlot();
 
     void addSeries(QLineSeries *series, std::string &name);
-    void update(double binWidth);
+    void update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
     void removeSeries(QAbstractSeries *series);
     void editPlot(const std::vector<std::string> &selectedItems);
     std::vector<std::string> getComponents();

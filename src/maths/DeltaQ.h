@@ -10,21 +10,25 @@
 #pragma once
 
 #include "../diagram/Sample.h"
+#include <array>
 #include <ostream>
 #include <vector>
 class DeltaQ
 {
-
     double binWidth;
-    std::vector<long double> pdfValues {};
-    std::vector<long double> cdfValues {};
-    int size {0};
+    std::vector<int> cumulativeHistogram;
+    std::vector<double> pdfValues;
+    std::vector<double> cdfValues;
+    int bins {0};
+
+    std::vector<Sample> samples;
+    std::array<double, 6> quartiles;
+
+    unsigned int totalSamples;
 
     /**
      * Calculate PDF and CDF values given samples from an outcome
      */
-    void calculateDeltaQ(std::vector<long double> &outcomeSamples);
-    void calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins);
     void calculateDeltaQ(std::vector<Sample> &samples);
     /**
      * Calculate CDF given PDF values
@@ -38,27 +42,19 @@ class DeltaQ
 public:
     DeltaQ() = default;
     DeltaQ(double binWidth);
-    DeltaQ(double binWidth, const std::vector<long double> &values, bool isPdf);
-    DeltaQ(double binWidth, const std::vector<long double> outcomeSamples);
-    DeltaQ(double binWidth, const std::vector<long double> outcomeSamples, int nBins);
+    DeltaQ(double binWidth, const std::vector<double> &values, bool isPdf);
     DeltaQ(double binWidth, std::vector<Sample>);
-
-    /**
-     * Processes outcome samples to generate PDF and CDF.
-     */
-    void processSamples(std::vector<long double> &outcomeSamples);
-    void processSamples(std::vector<long double> &outcomeSamples, int nBins);
-
     /**
      * Getters
      */
-    [[nodiscard]] const std::vector<long double> &getPdfValues() const;
-    [[nodiscard]] const std::vector<long double> &getCdfValues() const;
+    [[nodiscard]] const std::vector<double> &getPdfValues() const;
+    [[nodiscard]] const std::vector<double> &getCdfValues() const;
     [[nodiscard]] double getBinWidth() const;
     [[nodiscard]] int getSize() const;
     [[nodiscard]] double pdfAt(int x) const;
     [[nodiscard]] double cdfAt(int x) const;
-
+    [[nodiscard]] const std::vector<int> &getCumulativeHistogram() const;
+    [[nodiscard]] const unsigned int getTotalSamples() const;
     void setBinWidth(double newWidth);
     /**
      * Operator Overloads

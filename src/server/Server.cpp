@@ -10,6 +10,7 @@
 
 #define TIMEOUT "to"
 #define EXEC_OK "ok"
+#define FAIL "fa"
 
 Server::Server(int port)
     : port(port)
@@ -104,19 +105,20 @@ void Server::parseErlangMessage(const char *buffer, int len)
     std::string statusStr = match[4].str();
     Sample sample;
     Status status = Status::SUCCESS;
-    if (statusStr == TIMEOUT) {
-        status = Status::TIMEDOUT;
+    if (statusStr == TIMEOUT || statusStr == FAIL) {
+        status = Status::FAILED;
+        if (statusStr == TIMEOUT)
+            status = Status::TIMEDOUT;
+
         sample = {startTime, NULL, NULL, status};
-        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT")
-                  << std::endl;
+        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << status << std::endl;
 
     } else if (statusStr == EXEC_OK) {
         endTime = std::stoull(match[3].str());
-        std::cout << endTime - startTime;
         double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
         Sample sample {startTime, endTime, elapsed, status};
-        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", End=" << sample.endTime << ", Elapsed=" << elapsed
-                  << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT") << std::endl;
+        // std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", End=" << sample.endTime << ", Elapsed=" << elapsed
+        // << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT") << std::endl;
 
     } else if (statusStr != EXEC_OK) {
         std::cerr << "Unknown status: " << statusStr << std::endl;

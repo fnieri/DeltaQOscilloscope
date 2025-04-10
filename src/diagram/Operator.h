@@ -16,5 +16,6 @@ public:
     void addChildren(std::shared_ptr<DiagramComponent> children);
 
     std::vector<std::shared_ptr<DiagramComponent>> getChildren();
-    virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe) = 0;
+
+    virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) = 0;
 };

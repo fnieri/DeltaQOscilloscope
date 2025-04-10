@@ -9,6 +9,14 @@
 #include <map>
 #include <memory>
 #include <vector>
+
+struct ProbeAllSeries {
+    QLineSeries *probeS;
+    QLineSeries *calculatedProbeS;
+    QLineSeries *lowerBoundS;
+    QLineSeries *upperBoundS;
+};
+
 class DeltaQPlot;
 class DQPlotController
 {
@@ -21,16 +29,16 @@ public:
     std::vector<std::string> getComponents();
     void removeComponent(std::string &&name);
     void removeComponent(const std::string &name);
-    void update(double binWidth);
+    void update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
 private:
-    void updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth);
-    void updateProbe(QLineSeries *probeSeries, QLineSeries *calculatedProbeSeries, std::shared_ptr<Probe> probe, double binWidth);
+    void updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> probe, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;
 
     std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
-    std::map<std::string, std::tuple<QLineSeries *, QLineSeries *, std::shared_ptr<Probe>>> probes;
+    std::map<std::string, std::pair<ProbeAllSeries, std::shared_ptr<Probe>>> probes;
 };
 
 #endif // DQPLOTCONTROLLER_H

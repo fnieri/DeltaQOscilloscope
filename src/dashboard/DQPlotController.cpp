@@ -2,7 +2,8 @@
 #include "DQPlotController.h"
 #include "../Application.h"
 #include "../maths/DeltaQOperations.h"
-
+#include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <qlineseries.h>
 DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
@@ -20,13 +21,6 @@ DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::stri
 
 DQPlotController::~DQPlotController()
 {
-    for (const auto &[name, outcome] : outcomes) {
-        qDebug() << "Deleting outcome: " << QString::fromStdString(name) << ", use_count: " << std::get<1>(outcome).use_count();
-    }
-    for (const auto &[name, probeTuple] : probes) {
-        qDebug() << "Deleting probe: " << QString::fromStdString(name) << ", use_count: " << std::get<2>(probeTuple).use_count();
-    }
-
     outcomes.clear();
     probes.clear();
 }
@@ -69,16 +63,26 @@ void DQPlotController::addComponent(std::string name, bool isProbe)
         plot->addSeries(series, name);
     } else {
 
+        auto lowerBoundSeries = new QLineSeries();
+        std::string lowerBoundName = name + " lower bound";
+
+        auto upperBoundSeries = new QLineSeries();
+        std::string upperBoundName = name + " upper bound";
+
         auto probeSeries = new QLineSeries();
-        std::string probeSeriesName = "Probe " + name + "time series";
+        std::string probeSeriesName = name + " time series";
 
         auto calculatedProbeSeries = new QLineSeries();
-        std::string calculatedProbeSeriesName = "Probe " + name + "calculated DQ";
+        std::string calculatedProbeSeriesName = name + " calculated DQ";
+        ProbeAllSeries series
+            = {.probeS = probeSeries, .calculatedProbeS = calculatedProbeSeries, .lowerBoundS = lowerBoundSeries, .upperBoundS = upperBoundSeries};
 
-        probes[name] = {probeSeries, calculatedProbeSeries, system->getProbe(name)};
+        probes[name] = {series, system->getProbe(name)};
 
         plot->addSeries(probeSeries, probeSeriesName);
         plot->addSeries(calculatedProbeSeries, calculatedProbeSeriesName);
+        plot->addSeries(lowerBoundSeries, lowerBoundName);
+        plot->addSeries(upperBoundSeries, upperBoundName);
     }
 }
 
@@ -105,8 +109,11 @@ void DQPlotController::removeComponent(const std::string &name)
         return;
     }
     if (probes.count(name)) {
-        plot->removeSeries(std::get<0>(probes[name]));
-        plot->removeSeries(std::get<1>(probes[name]));
+        ProbeAllSeries allSeries = probes[name].first;
+        plot->removeSeries(allSeries.lowerBoundS);
+        plot->removeSeries(allSeries.upperBoundS);
+        plot->removeSeries(allSeries.calculatedProbeS);
+        plot->removeSeries(allSeries.probeS);
         probes.erase(name);
     }
 }
@@ -119,27 +126,30 @@ void DQPlotController::removeComponent(std::string &&name)
         return;
     }
     if (probes.count(name)) {
-        plot->removeSeries(std::get<0>(probes[name]));
-        plot->removeSeries(std::get<1>(probes[name]));
+        ProbeAllSeries allSeries = probes[name].first;
+        plot->removeSeries(allSeries.lowerBoundS);
+        plot->removeSeries(allSeries.upperBoundS);
+        plot->removeSeries(allSeries.calculatedProbeS);
+        plot->removeSeries(allSeries.probeS);
         probes.erase(name);
     }
 }
 
-void DQPlotController::update(double binWidth)
+void DQPlotController::update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     for (auto &[name, seriesOutcome] : outcomes) {
-        updateOutcome(seriesOutcome.first, seriesOutcome.second, binWidth);
+        updateOutcome(seriesOutcome.first, seriesOutcome.second, binWidth, timeLowerBound, timeUpperBound);
     }
 
     for (auto &[name, seriesProbe] : probes) {
-        updateProbe(std::get<0>(seriesProbe), std::get<1>(seriesProbe), std::get<2>(seriesProbe), binWidth);
+        updateProbe(probes[name].first, probes[name].second, binWidth, timeLowerBound, timeUpperBound);
     }
 }
 
-void DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth)
+void DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<std::pair<double, double>> data;
-    DeltaQ deltaQ = outcome->getDeltaQ(binWidth);
+    DeltaQ deltaQ = outcome->getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
     int size = deltaQ.getSize();
 
     for (int i = 0; i < size; i++) {
@@ -149,9 +159,10 @@ void DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcom
     plot->updateSeries(series, data, binWidth * size);
 }
 
-void DQPlotController::updateProbe(QLineSeries *probeSeries, QLineSeries *calculatedProbeSeries, std::shared_ptr<Probe> probe, double binWidth)
+void DQPlotController::updateProbe(
+    ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    ProbeDeltaQ probeDeltaQs = probe->getDeltaQ(binWidth);
+    ProbeDeltaQ probeDeltaQs = probe->getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
     DeltaQ probeDeltaQ = probeDeltaQs.probeDeltaQ;
     int size = probeDeltaQ.getSize();
     double probeBinWidth = probeDeltaQ.getBinWidth();
@@ -160,7 +171,7 @@ void DQPlotController::updateProbe(QLineSeries *probeSeries, QLineSeries *calcul
         probeData.push_back({probeBinWidth * (i + 1), probeDeltaQ.cdfAt(i)});
     }
 
-    plot->updateSeries(probeSeries, probeData, probeBinWidth * size);
+    plot->updateSeries(probeAllSeries.probeS, probeData, probeBinWidth * size);
 
     DeltaQ calculatedProbeDeltaQ = probeDeltaQs.calculatedProbeDeltaQ;
     int calculatedSize = calculatedProbeDeltaQ.getSize();
@@ -168,5 +179,16 @@ void DQPlotController::updateProbe(QLineSeries *probeSeries, QLineSeries *calcul
     for (int i = 0; i < calculatedSize; i++) {
         calculatedProbeData.push_back({binWidth * (i + 1), calculatedProbeDeltaQ.cdfAt(i)});
     }
-    plot->updateSeries(calculatedProbeSeries, calculatedProbeData, binWidth * calculatedSize);
+    plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData, binWidth * calculatedSize);
+
+    ConfidenceInterval interval = probe->getConfidenceInterval();
+    std::vector<Bound> bounds = interval.getBounds();
+    std::vector<std::pair<double, double>> lowerBoundData;
+    std::vector<std::pair<double, double>> upperBoundData;
+    for (int i = 0; i < bounds.size(); i++) {
+        lowerBoundData.push_back({probeBinWidth * (i + 1), bounds[i].lowerBound});
+        upperBoundData.push_back({probeBinWidth * (i + 1), bounds[i].upperBound});
+    }
+    plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData, binWidth * size);
+    plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData, binWidth * size);
 }

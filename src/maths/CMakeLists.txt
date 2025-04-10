@@ -1,8 +1,10 @@
 add_library(${PREFIX}_maths
-        DeltaQ.h
-        DeltaQ.cpp
-        DeltaQOperations.h
-        DeltaQOperations.cpp
+    ConfidenceInterval.h
+    ConfidenceInterval.cpp
+    DeltaQ.h
+    DeltaQ.cpp
+    DeltaQOperations.h
+    DeltaQOperations.cpp
 )
 
 target_include_directories(${PREFIX}_maths

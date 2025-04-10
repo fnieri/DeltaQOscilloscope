@@ -7,16 +7,15 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
-
 DeltaQ::DeltaQ(const double binWidth)
     : binWidth(binWidth)
-    , size(0)
+    , bins(0)
 {
 }
 
-DeltaQ::DeltaQ(const double binWidth, const std::vector<long double> &values, const bool isPdf)
+DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const bool isPdf)
     : binWidth(binWidth)
-    , size(values.size())
+    , bins(values.size()) // Values is binned data
 {
     if (isPdf) {
         pdfValues = values;
@@ -26,122 +25,26 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<long double> &values, co
         calculatePDF();
     }
 }
-
-DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples)
-    : binWidth {binWidth}
-    , size {0}
-{
-    processSamples(outcomeSamples);
-}
-
-DeltaQ::DeltaQ(const double binWidth, std::vector<long double> outcomeSamples, int nBins)
-    : binWidth {binWidth}
-    , size {0}
-{
-    processSamples(outcomeSamples, nBins);
-}
-
 DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
     : binWidth(binWidth)
-    , size {0}
+    , bins {0} // FIXME magic number
+    , samples(samples)
 {
     calculateDeltaQ(samples);
 }
-
-void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples)
-{
-    if (outcomeSamples.empty() || binWidth <= 0)
-        return;
-
-    const int numBins = 10;
-    std::vector<double> histogram(numBins, 0.0); // Initialize to 0
-
-    const auto outcomesSize = static_cast<long long>(outcomeSamples.size());
-    for (auto i = 0; i < outcomesSize; i++) {
-        const double sample = outcomeSamples[i];
-
-        if (binWidth <= std::numeric_limits<double>::epsilon()) {
-            std::cerr << "Error: binWidth is too small" << std::endl;
-            return;
-        }
-
-        // Ensure sample is valid
-        if (std::isnan(sample) || std::isinf(sample)) {
-            std::cerr << "Warning: Invalid sample value: " << sample << std::endl;
-            continue;
-        }
-        // Ensure sample is valid
-        if (sample < 0) {
-            std::cerr << "Warning: Negative sample value: " << sample << std::endl;
-            continue;
-        }
-
-        // Calculate bin
-        int bin = std::floor(sample / binWidth);
-
-        // Check bin value
-        if (bin < 0) {
-            std::cerr << "Warning: Negative bin value: " << bin << ", sample: " << sample << std::endl;
-            continue; // Skip this sample
-        }
-
-        if (bin >= numBins) {
-            bin = numBins - 1; // Clamp to last valid bin
-            std::cerr << "Warning: bin value exceeds the histogram size for sample: " << sample << " - clamping to max" << std::endl;
-        }
-
-        histogram.at(bin)++;
-    }
-
-    // Calculate discrete PDF
-    pdfValues.reserve(numBins);
-    for (const double &binValue : histogram) {
-        pdfValues.push_back(binValue / outcomesSize);
-    }
-
-    calculateCDF();
-    size = pdfValues.size();
-}
-
-void DeltaQ::calculateDeltaQ(std::vector<long double> &outcomeSamples, int nBins)
-{
-    if (outcomeSamples.empty() || binWidth == 0)
-        return;
-    std::vector<double> histogram(nBins);
-    for (const double &sample : outcomeSamples) {
-        int bin = std::floor(std::abs(sample) / binWidth);
-
-        if (bin >= nBins) {
-            bin = nBins - 1; // Clamp to last valid bin
-        }
-
-        histogram[bin]++;
-    }
-
-    // Calculate discrete PDF
-    const auto outcomesSize = static_cast<double>(outcomeSamples.size());
-    for (const double &binValue : histogram) {
-        pdfValues.push_back(binValue / outcomesSize);
-    }
-
-    calculateCDF();
-
-    size = pdfValues.size();
-}
-
 void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
 {
     if (outcomeSamples.empty() || binWidth <= 0)
         return;
 
-    const int numBins = 10;
-    std::vector<double> histogram(numBins, 0.0);
-
-    long long totalSamples = outcomeSamples.size();
+    const int numBins = 50;
+    std::vector<int> histogram = std::vector<int>(numBins, 0);
+    cumulativeHistogram = std::vector<int>(numBins, 0);
+    totalSamples = outcomeSamples.size();
     long long successfulSamples = 0;
 
     for (const auto &sample : outcomeSamples) {
-        if (sample.status == Status::TIMEDOUT) {
+        if (sample.status != Status::SUCCESS) {
             continue; // Exclude failed samples from histogram but count them
         }
 
@@ -164,20 +67,24 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
 
         histogram[bin]++;
     }
-
+    bins = numBins;
     // Calculate PDF
     pdfValues.reserve(numBins);
     for (const double &binValue : histogram) {
         pdfValues.push_back(binValue / totalSamples);
     }
 
+    cumulativeHistogram[0] = histogram[0];
+    for (int i = 1; i < numBins; ++i) {
+        cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
+    }
     calculateCDF();
-    size = pdfValues.size();
 }
 
 void DeltaQ::calculateCDF()
 {
     cdfValues.clear();
+    cdfValues.reserve(bins);
     double cumulativeSum = 0;
     for (const double &pdfValue : pdfValues) {
         cumulativeSum += pdfValue;
@@ -196,28 +103,24 @@ void DeltaQ::calculatePDF()
     }
 }
 
-void DeltaQ::processSamples(std::vector<long double> &outcomeSamples)
-{
-    pdfValues.clear();
-    cdfValues.clear();
-    calculateDeltaQ(outcomeSamples);
-}
-
-void DeltaQ::processSamples(std::vector<long double> &outcomeSamples, int nBins)
-{
-    pdfValues.clear();
-    cdfValues.clear();
-    calculateDeltaQ(outcomeSamples, nBins);
-}
-
-const std::vector<long double> &DeltaQ::getPdfValues() const
+const std::vector<double> &DeltaQ::getPdfValues() const
 {
     return pdfValues;
 }
 
-const std::vector<long double> &DeltaQ::getCdfValues() const
+const std::vector<double> &DeltaQ::getCdfValues() const
 {
     return cdfValues;
+}
+
+const std::vector<int> &DeltaQ::getCumulativeHistogram() const
+{
+    return cumulativeHistogram;
+}
+
+const unsigned int DeltaQ::getTotalSamples() const
+{
+    return totalSamples;
 }
 
 void DeltaQ::setBinWidth(double newWidth)
@@ -232,12 +135,12 @@ double DeltaQ::getBinWidth() const
 
 int DeltaQ::getSize() const
 {
-    return size;
+    return bins;
 }
 
 double DeltaQ::pdfAt(int x) const
 {
-    if (x >= size) {
+    if (x >= bins) {
         return 0.0;
     }
     return pdfValues.at(x);
@@ -245,20 +148,20 @@ double DeltaQ::pdfAt(int x) const
 
 double DeltaQ::cdfAt(int x) const
 {
-    if (x >= size) {
-        return 1.0;
+    if (x >= bins) {
+        return cdfValues.at(bins);
     }
     return cdfValues.at(x);
 }
 
 bool DeltaQ::operator<(const DeltaQ &other) const
 {
-    return this->size < other.size;
+    return this->bins < other.bins;
 }
 
 bool DeltaQ::operator>(const DeltaQ &other) const
 {
-    return this->size > other.size;
+    return this->bins > other.bins;
 }
 
 bool DeltaQ::operator==(const DeltaQ &deltaQ) const
@@ -269,7 +172,7 @@ bool DeltaQ::operator==(const DeltaQ &deltaQ) const
 DeltaQ operator*(const DeltaQ &deltaQ, double constant)
 {
     DeltaQ result(deltaQ.binWidth);
-    result.size = deltaQ.size;
+    result.bins = deltaQ.bins;
 
     result.pdfValues = deltaQ.pdfValues;
     std::transform(result.pdfValues.begin(), result.pdfValues.end(), result.pdfValues.begin(), [constant](double value) { return value * constant; });
@@ -286,7 +189,7 @@ DeltaQ applyBinaryOperation(const DeltaQ &lhs, const DeltaQ &rhs, BinaryOperatio
     const DeltaQ &highestDeltaQ = (lhs > rhs) ? lhs : rhs;
     const DeltaQ &otherDeltaQ = (lhs > rhs) ? rhs : lhs;
 
-    std::vector<long double> resultingCdf;
+    std::vector<double> resultingCdf;
     resultingCdf.reserve(highestDeltaQ.getSize());
 
     for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {

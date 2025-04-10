@@ -18,7 +18,7 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
     axisY->setRange(0, 1.0);
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
-
+    axisX->setRange(0, 0.05);
     controller = new DQPlotController(this, selectedItems);
     plotList = new DQPlotList(controller, this);
 }
@@ -41,9 +41,9 @@ void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
     series->attachAxis(axisY);
 }
 
-void DeltaQPlot::update(double binWidth)
+void DeltaQPlot::update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    controller->update(binWidth);
+    controller->update(binWidth, timeLowerBound, timeUpperBound);
 }
 
 void DeltaQPlot::removeSeries(QAbstractSeries *series)
@@ -63,11 +63,6 @@ void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<d
     series->append(0, 0);
     for (const auto &[x, y] : data)
         series->append(x, y);
-
-    if (currentXRange < xRange) {
-        currentXRange = xRange;
-        axisX->setRange(0, xRange);
-    }
 }
 std::vector<std::string> DeltaQPlot::getComponents()
 {

@@ -20,7 +20,6 @@ public:
     void reset();
 
 private:
-    void create();
     void addCategory(const QString &category);
 
     void addItems();

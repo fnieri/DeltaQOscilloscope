@@ -10,8 +10,8 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QVBoxLayout>
-#include <memory>
 #include <qboxlayout.h>
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,8 +28,9 @@ class MainWindow : public QMainWindow
 
     Sidebar *sidebar;
     QPushButton *addPlotButton;
-
     QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
+    uint64_t timeLowerBound;
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();

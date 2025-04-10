@@ -180,14 +180,16 @@ System parseJsonString(const std::string &jsonString)
     if (!systemJson["parsed_data"]["system"].empty()) {
         auto firstComponent = parser::parse(systemJson["parsed_data"]["system"]["components"], "system");
         system.setFirstComponent(firstComponent);
-        std::cout << firstComponent->toString() << "\n";
     }
     std::string systemText = parser::parseText(systemJson);
     system.setSystemDefinitionText(systemText);
     system.setOutcomes(parser::outcomes);
     system.setOperators(parser::operators);
     system.setProbes(parser::probes);
-    system.toString();
+
+    parser::outcomes.clear();
+    parser::operators.clear();
+    parser::probes.clear();
 
     return system;
 }

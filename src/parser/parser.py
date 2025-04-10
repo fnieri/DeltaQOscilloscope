@@ -11,9 +11,14 @@ definition: IDENTIFIER "=" component+ ";"
 
 system: "system" "=" component+
 
+
 component: outcome ("->" component)?  
-        | BEHAVIOR_TYPE ":" IDENTIFIER "(" component_list ")" ("->" component)?  
+        | BEHAVIOR_TYPE ":" IDENTIFIER ("[" probability_list "]")? "(" component_list ")" ("->" component)?  
         | probe ("->" component)?
+
+
+
+probability_list: NUMBER ("," NUMBER)*
 
 outcome: IDENTIFIER
 probe: PROBE_IDENTIFIER ":" IDENTIFIER 
@@ -23,6 +28,7 @@ PROBE_IDENTIFIER: "s"
 BEHAVIOR_TYPE: "f" | "a" | "p"
 
 IDENTIFIER: /[a-zA-Z0-9_]+/
+NUMBER: /[0-9]*\\.?[0-9]+/  
 %ignore WS
 """
 
@@ -54,14 +60,25 @@ class ComponentTransformer(Transformer):
             return component_data
 
         if len(items) >= 3 and isinstance(items[0], str) and items[0] in ["f", "a", "p"]:
-            behavior, name, children = items[0], items[1], self.flatten_list(items[2:])
-            return {
+            behavior, name = items[0], items[1]
+            probabilities = None
+            children_index = 2
+
+            if isinstance(items[2], list) and all(isinstance(x, float) for x in items[2]):
+                probabilities = items[2]
+                children_index = 3  # Skip to the actual components list
+
+            children = self.flatten_list(items[children_index:])
+            result = {
                 "name": name,
                 "type": behavior,
                 "children": children
             }
 
-        return items
+            if behavior == "p" and probabilities is not None:
+                result["probabilities"] = probabilities  # Add probabilities if present
+
+            return result
 
     def outcome(self, items):
         return {"name": items[0], "type": "o"}  
@@ -71,6 +88,9 @@ class ComponentTransformer(Transformer):
 
     def component_list(self, items):
         return self.flatten_list(items)
+
+    def probability_list(self, items):
+        return [float(item) for item in items]  # Convert numbers to floats
 
     def flatten_list(self, items):
         """Flattens nested lists while ensuring structure remains intact."""
@@ -90,7 +110,6 @@ class ComponentTransformer(Transformer):
 
     def PROBE_IDENTIFIER(self, token):
         return str(token)
-
 # Create the parser
 parser = Lark(grammar, start="start", parser="earley")
 transformer = ComponentTransformer()
@@ -119,5 +138,5 @@ def parse_json(input_string):
 
 #
 # # Example Usage:
-#parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab(o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
+parse_and_save_json("probe1 = o1 -> o2 -> s:o3; probe2 = o4 -> f:ftf1(o5 -> p:probab[1, 2](o6, o7), o8); system = s:probe1 -> s:probe2 -> p:probab(o7, o9);")
 

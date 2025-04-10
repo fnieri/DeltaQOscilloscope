@@ -23,6 +23,7 @@ class System
     std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
     std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
     std::unordered_map<std::string, std::shared_ptr<Observable>> components;
+
     std::string systemDefinitionText;
     std::shared_ptr<DiagramComponent> firstComponent;
     double binWidth {0};
@@ -64,19 +65,7 @@ public:
 
     void setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap);
 
-    void toString() const;
-
-    void toString(const std::string &probeName) const;
-
     void setSystemDefinitionText(std::string &text);
 
     std::string getSystemDefinitionText();
-
-    void replaceSystem(const System &other);
-
-    void addSamplesBatch(const std::unordered_map<std::string, std::vector<Sample>> &samples);
-
-    void addSamples(const std::string &componentName, const std::vector<Sample> &samples);
-    void addSamples(const std::string &componentName, std::vector<Sample> &&samples);
-    void addSamplesBatch(std::unordered_map<std::string, std::vector<Sample>> &&batchSamples);
 };

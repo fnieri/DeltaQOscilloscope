@@ -23,7 +23,5 @@ int main(int argc, char *argv[])
 
     int result = app.exec(); // Start Qt event loop
 
-    // Signal the monitoring thread to exit and wait for it
-
     return result;
 }

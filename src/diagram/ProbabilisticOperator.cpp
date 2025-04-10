@@ -20,11 +20,16 @@ ProbabilisticOperator::ProbabilisticOperator(const std::string &name, const std:
 {
 }
 
+DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    return DeltaQ();
+}
+/*
 DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {
-    std::vector<long double> resultingCdf;
+    std::vector<double> resultingCdf;
     std::vector<DeltaQ> scaledDeltaQs;
-    /*
+
     for (const auto &entry : followingComponentAndProbabilities) {
         const std::shared_ptr<DiagramComponent> component = entry.first;
         const double probability = entry.second;
@@ -39,25 +44,8 @@ DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::strin
         result = result + scaledDeltaQs[i];
     }
     return result;
-    */
+
     // TODO Calculate Probabilities
     return {0, resultingCdf, false};
 }
-
-std::string ProbabilisticOperator::toString() const
-{
-    return "Probabilistic operator: " + name + "\n";
-}
-
-void ProbabilisticOperator::print(int depth, std::string currentProbe)
-{
-    std::cout << std::string(depth * 2, ' ') + "Probabilistic operator: " + getName() + "\n";
-    int childIdx = 0;
-    for (auto &child : children) {
-        std::cout << std::string(depth * 2, ' ') + "Child: " << childIdx << "\n";
-        child->print(depth + 1, currentProbe);
-        childIdx++;
-    }
-    if (probeNextComponent.count(currentProbe))
-        probeNextComponent.at(currentProbe)->print(depth, currentProbe);
-}
+*/
