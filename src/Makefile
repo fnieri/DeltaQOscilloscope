@@ -158,6 +158,30 @@ RealTimeDeltaQSD_autogen/fast:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD_autogen.dir/build.make src/CMakeFiles/RealTimeDeltaQSD_autogen.dir/build
 .PHONY : RealTimeDeltaQSD_autogen/fast
 
+Application.o: Application.cpp.o
+.PHONY : Application.o
+
+# target to build an object file
+Application.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD.dir/build.make src/CMakeFiles/RealTimeDeltaQSD.dir/Application.cpp.o
+.PHONY : Application.cpp.o
+
+Application.i: Application.cpp.i
+.PHONY : Application.i
+
+# target to preprocess a source file
+Application.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD.dir/build.make src/CMakeFiles/RealTimeDeltaQSD.dir/Application.cpp.i
+.PHONY : Application.cpp.i
+
+Application.s: Application.cpp.s
+.PHONY : Application.s
+
+# target to generate assembly for a file
+Application.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/RealTimeDeltaQSD.dir/build.make src/CMakeFiles/RealTimeDeltaQSD.dir/Application.cpp.s
+.PHONY : Application.cpp.s
+
 RealTimeDeltaQSD_autogen/mocs_compilation.o: RealTimeDeltaQSD_autogen/mocs_compilation.cpp.o
 .PHONY : RealTimeDeltaQSD_autogen/mocs_compilation.o
 
@@ -217,6 +241,9 @@ help:
 	@echo "... RealTimeDeltaQSD_autogen"
 	@echo "... RealTimeDeltaQSD_autogen_timestamp_deps"
 	@echo "... RealTimeDeltaQSD"
+	@echo "... Application.o"
+	@echo "... Application.i"
+	@echo "... Application.s"
 	@echo "... RealTimeDeltaQSD_autogen/mocs_compilation.o"
 	@echo "... RealTimeDeltaQSD_autogen/mocs_compilation.i"
 	@echo "... RealTimeDeltaQSD_autogen/mocs_compilation.s"

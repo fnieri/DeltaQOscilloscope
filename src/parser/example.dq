@@ -1,0 +1,2 @@
+probe1 = o1 -> o2 -> s:o3;
+system = s:probe1 -> f:ftf1(c, d, e, g, h) -> p:q[0.1, 0.2](c, b);

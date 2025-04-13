@@ -1,4 +1,16 @@
+#include "ParserWrapper.h"
+#include <string>
+std::string parseAndSaveJson(const std::string &input_string, const std::string &filename)
+{
+    return "a";
+}
 
+std::string parseJson(const std::string &input_string)
+{
+    return "A";
+}
+
+/*
 #include "ParserWrapper.h"
 #include <Python.h>
 #include <iostream>
@@ -132,4 +144,4 @@ std::string parseJson(const std::string &input_string)
     // Finalize Python Interpreter
     Py_FinalizeEx();
     return result;
-}
+} */

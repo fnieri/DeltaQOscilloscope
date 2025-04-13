@@ -216,6 +216,30 @@ FirstToFinish.cpp.s:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/FirstToFinish.cpp.s
 .PHONY : FirstToFinish.cpp.s
 
+Observable.o: Observable.cpp.o
+.PHONY : Observable.o
+
+# target to build an object file
+Observable.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Observable.cpp.o
+.PHONY : Observable.cpp.o
+
+Observable.i: Observable.cpp.i
+.PHONY : Observable.i
+
+# target to preprocess a source file
+Observable.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Observable.cpp.i
+.PHONY : Observable.cpp.i
+
+Observable.s: Observable.cpp.s
+.PHONY : Observable.s
+
+# target to generate assembly for a file
+Observable.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/diagram/CMakeFiles/DQ_diagram.dir/build.make src/diagram/CMakeFiles/DQ_diagram.dir/Observable.cpp.s
+.PHONY : Observable.cpp.s
+
 Operator.o: Operator.cpp.o
 .PHONY : Operator.o
 
@@ -403,6 +427,9 @@ help:
 	@echo "... FirstToFinish.o"
 	@echo "... FirstToFinish.i"
 	@echo "... FirstToFinish.s"
+	@echo "... Observable.o"
+	@echo "... Observable.i"
+	@echo "... Observable.s"
 	@echo "... Operator.o"
 	@echo "... Operator.i"
 	@echo "... Operator.s"

@@ -5,8 +5,6 @@
  */
 
 #include "System.h"
-#include <execution>
-#include <iostream>
 #include <utility>
 
 void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
