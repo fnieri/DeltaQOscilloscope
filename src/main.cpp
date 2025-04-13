@@ -4,9 +4,6 @@
 #include "diagram/System.h"
 #include "server/Server.h"
 #include <QApplication>
-#include <atomic>
-#include <memory>
-#include <thread>
 int main(int argc, char *argv[])
 {
     Application &application = Application::getInstance();

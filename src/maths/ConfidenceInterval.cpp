@@ -29,6 +29,33 @@ void ConfidenceInterval::addCumulativeHistogram(const std::vector<int> &cumulati
     totalSamples += numSamples;
 }
 
+void ConfidenceInterval::removeCumulativeHistogram(const std::vector<int> &cumulative, unsigned int numSamples)
+{
+    if (cumulative.size() != summedCumulativeHistogram.size()) {
+        throw std::invalid_argument("Size mismatch in removeDeltaQ");
+    }
+
+    for (size_t i = 0; i < cumulative.size(); ++i) {
+        summedCumulativeHistogram[i] -= cumulative[i];
+    }
+
+    if (totalSamples < numSamples) {
+        throw std::runtime_error("Removing more samples than stored");
+    }
+
+    totalSamples -= numSamples;
+}
+
+std::vector<Bound> ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
+{
+    const auto &cumulative = deltaQ.getCumulativeHistogram();
+    unsigned int numSamples = deltaQ.getTotalSamples();
+
+    removeCumulativeHistogram(cumulative, numSamples);
+    updateConfidenceInterval();
+    return getBounds();
+}
+
 std::vector<double> ConfidenceInterval::calculateECDF() const
 {
     std::vector<double> ecdf(summedCumulativeHistogram.size());

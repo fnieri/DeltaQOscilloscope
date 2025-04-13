@@ -17,12 +17,17 @@ private:
     unsigned int totalSamples;
 
     void addCumulativeHistogram(const std::vector<int> &cumulativeHistogram, unsigned int numSamples);
+    void removeCumulativeHistogram(const std::vector<int> &cumulativeHistogram, unsigned int numSamples);
+
     std::vector<double> calculateECDF() const;
     double getDKWEpsilon() const;
     void updateConfidenceInterval();
 
 public:
     ConfidenceInterval(int numBins, double alpha);
+
     [[nodiscard]] std::vector<Bound> addDeltaQ(const DeltaQ &);
+    [[nodiscard]] std::vector<Bound> removeDeltaQ(const DeltaQ &);
+
     const std::vector<Bound> getBounds() const;
 };

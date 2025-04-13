@@ -3,8 +3,6 @@
 #include "../Application.h"
 #include "../maths/DeltaQOperations.h"
 #include <algorithm>
-#include <chrono>
-#include <iostream>
 #include <qlineseries.h>
 DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
     : plot(plot)
