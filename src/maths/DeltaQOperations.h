@@ -35,6 +35,9 @@ DeltaQ firstToFinish(const std::vector<DeltaQ> &deltaQs);
  * ΔQ_{PC(A,B)} = p/(p+q) ΔQ_A + q/(p+q) ΔQ_B
  */
 DeltaQ probabilisticChoice(const std::vector<double> &probabilities, const std::vector<DeltaQ> &deltaQs);
+
+DeltaQ rebin(const DeltaQ &source, double targetBinWidth);
+
 /**
  * Choose the highest size from a list of DeltaQs
  */

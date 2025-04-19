@@ -10,11 +10,10 @@ ConfidenceInterval::ConfidenceInterval(int numBins, double alpha)
     , totalSamples(0)
 {
 }
-std::vector<Bound> ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
+void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 {
     addCumulativeHistogram(deltaQ.getCumulativeHistogram(), deltaQ.getTotalSamples());
     updateConfidenceInterval();
-    return getBounds();
 }
 
 void ConfidenceInterval::addCumulativeHistogram(const std::vector<int> &cumulative, unsigned int numSamples)
@@ -46,14 +45,13 @@ void ConfidenceInterval::removeCumulativeHistogram(const std::vector<int> &cumul
     totalSamples -= numSamples;
 }
 
-std::vector<Bound> ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
+void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
 {
     const auto &cumulative = deltaQ.getCumulativeHistogram();
     unsigned int numSamples = deltaQ.getTotalSamples();
 
     removeCumulativeHistogram(cumulative, numSamples);
     updateConfidenceInterval();
-    return getBounds();
 }
 
 std::vector<double> ConfidenceInterval::calculateECDF() const

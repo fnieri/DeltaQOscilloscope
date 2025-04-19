@@ -1,12 +1,38 @@
 #include "DeltaQOperations.h"
 #include "DeltaQ.h"
-
 #include <iostream>
+#include <math.h>
 #include <vector>
+
+DeltaQ rebin(const DeltaQ &source, double targetBinWidth)
+{
+    double originalBinWidth = source.getBinWidth();
+
+    if (std::abs(originalBinWidth - targetBinWidth) < 1e-9) {
+        return source; // Already same bin width
+    }
+
+    if (targetBinWidth < originalBinWidth) {
+        throw std::invalid_argument("Target bin width must be greater than or equal to original.");
+    }
+
+    int factor = static_cast<int>(std::round(targetBinWidth / originalBinWidth));
+    const auto &originalPdf = source.getPdfValues();
+
+    int newNumBins = static_cast<int>(std::ceil(originalPdf.size() / static_cast<double>(factor)));
+    std::vector<double> newPdf(newNumBins, 0.0);
+
+    for (size_t i = 0; i < originalPdf.size(); ++i) {
+        newPdf[i / factor] += originalPdf[i];
+    }
+
+    return DeltaQ(targetBinWidth, newPdf, true);
+}
 
 DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
 {
-    // If one of the two DeltaQs is empty, return the other DeltaQ
+    double commonBinWidth = std::max(lhs.getBinWidth(), rhs.getBinWidth());
+
     if (lhs == DeltaQ()) {
         return rhs;
     }
@@ -14,25 +40,22 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
         return lhs;
     }
 
-    // Determine the "higher" and "lower" DeltaQ objects based on their maximum values
-    const DeltaQ &highestDeltaQ = (lhs > rhs) ? lhs : rhs;
-    const DeltaQ &otherDeltaQ = (lhs > rhs) ? rhs : lhs;
+    DeltaQ lhsRebinned = rebin(lhs, commonBinWidth);
+    DeltaQ rhsRebinned = rebin(rhs, commonBinWidth);
 
-    double binWidth = lhs.getBinWidth();
-    const int totalSteps = (highestDeltaQ.getSize() * 2) - (highestDeltaQ.getSize() - otherDeltaQ.getSize()) - 1;
-    std::vector<double> convolutedPdf;
-    convolutedPdf.reserve(totalSteps);
-    // Perform convolution
-    for (size_t i = 0; i < totalSteps; ++i) {
-        double result = 0.0;
+    const auto &lhsPdf = lhsRebinned.getPdfValues();
+    const auto &rhsPdf = rhsRebinned.getPdfValues();
 
-        // Sum the products of PDF values at offset bins
-        for (size_t j = 0; j <= i; ++j) {
-            result += highestDeltaQ.pdfAt(j) * otherDeltaQ.pdfAt(i - j);
+    int resultSize = lhsPdf.size() + rhsPdf.size() - 1;
+    std::vector<double> resultPdf(resultSize, 0.0);
+
+    for (size_t i = 0; i < lhsPdf.size(); ++i) {
+        for (size_t j = 0; j < rhsPdf.size(); ++j) {
+            resultPdf[i + j] += lhsPdf[i] * rhsPdf[j];
         }
-        convolutedPdf.push_back(result);
     }
-    return {binWidth, convolutedPdf, true};
+
+    return DeltaQ(commonBinWidth, resultPdf, true);
 }
 
 DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)

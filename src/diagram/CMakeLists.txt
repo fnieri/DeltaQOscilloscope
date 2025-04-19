@@ -15,8 +15,6 @@ add_library(${PREFIX}_diagram
     Probe.cpp
     System.h
     System.cpp
-    SystemParser.cpp
-    SystemParser.h
     Sample.h
     Observable.h
     Observable.cpp
@@ -28,7 +26,6 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
-        nlohmann_json
         ${PREFIX}_parser
 )
 

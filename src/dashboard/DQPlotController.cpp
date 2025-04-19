@@ -179,13 +179,12 @@ void DQPlotController::updateProbe(
     }
     plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData, binWidth * calculatedSize);
 
-    ConfidenceInterval interval = probe->getConfidenceInterval();
-    std::vector<Bound> bounds = interval.getBounds();
+    std::vector<Bound> bounds = probeDeltaQs.bounds;
     std::vector<std::pair<double, double>> lowerBoundData;
     std::vector<std::pair<double, double>> upperBoundData;
     for (int i = 0; i < bounds.size(); i++) {
-        lowerBoundData.push_back({probeBinWidth * (i + 1), bounds[i].lowerBound});
-        upperBoundData.push_back({probeBinWidth * (i + 1), bounds[i].upperBound});
+        lowerBoundData.push_back({binWidth * (i + 1), bounds[i].lowerBound});
+        upperBoundData.push_back({binWidth * (i + 1), bounds[i].upperBound});
     }
     plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData, binWidth * size);
     plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData, binWidth * size);

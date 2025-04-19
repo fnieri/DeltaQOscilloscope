@@ -25,7 +25,7 @@ public:
 
     virtual std::any visitSystem(DQGrammarParser::SystemContext *context) = 0;
 
-    virtual std::any visitOutcomeComponent(DQGrammarParser::OutcomeComponentContext *context) = 0;
+    virtual std::any visitComponent(DQGrammarParser::ComponentContext *context) = 0;
 
     virtual std::any visitBehaviorComponent(DQGrammarParser::BehaviorComponentContext *context) = 0;
 

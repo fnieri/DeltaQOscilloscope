@@ -18,9 +18,9 @@ system: 'system' '=' component+ ('->' component)*  ';'?;
 
 
 component
-    : behaviorComponent   #behavior
-    | probeComponent       #probe
-    | outcome                                    #plainOutcome
+    : behaviorComponent 
+    | probeComponent  
+    | outcome  
 ;
 
 behaviorComponent

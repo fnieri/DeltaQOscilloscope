@@ -19,7 +19,7 @@ public:
 
     void reset();
 
-private slots:
+private Q_SLOTS:
     void onConfirmSelection();
     void onRemoveSelection();
 

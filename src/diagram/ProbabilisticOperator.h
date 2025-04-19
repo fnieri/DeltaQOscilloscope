@@ -13,11 +13,14 @@
 
 class ProbabilisticOperator : public Operator
 {
+    std::vector<double> probabilities;
 
 public:
     ProbabilisticOperator(const std::string &name);
 
     ProbabilisticOperator(const std::string &name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
+
+    void setProbabilities(std::vector<double> &);
     /**
      * Assume there are two possible outcomes OA and OB and
      * exactly one outcome is chosen during each occurrence of a start event

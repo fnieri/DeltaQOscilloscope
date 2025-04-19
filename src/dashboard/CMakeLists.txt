@@ -20,7 +20,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Charts Widgets Graphs)
 target_link_libraries(${PREFIX}_dashboard
         PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::Graphs
         ${PREFIX}_maths
-        nlohmann_json
         ${PREFIX}_server
         ${PREFIX}_parser
     )
@@ -29,6 +28,7 @@ target_include_directories(${PREFIX}_dashboard
         PUBLIC
         ${CMAKE_SOURCE_DIR}
          
+        ${PREFIX}_parser
     )
 
 

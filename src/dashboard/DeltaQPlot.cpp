@@ -76,5 +76,5 @@ DQPlotList *DeltaQPlot::getPlotList()
 
 void DeltaQPlot::mousePressEvent(QMouseEvent *event)
 {
-    emit plotSelected(this);
+    Q_EMIT plotSelected(this);
 }

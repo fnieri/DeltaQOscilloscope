@@ -13,13 +13,14 @@ class  DQGrammarParser : public antlr4::Parser {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
-    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, WS = 12, IDENTIFIER = 13, 
-    NUMBER = 14, BEHAVIOR_TYPE = 15
+    T__7 = 8, T__8 = 9, T__9 = 10, PROBE_ID = 11, BEHAVIOR_TYPE = 12, NUMBER = 13, 
+    IDENTIFIER = 14, WS = 15
   };
 
   enum {
     RuleStart = 0, RuleDefinition = 1, RuleSystem = 2, RuleComponent = 3, 
-    RuleProbability_list = 4, RuleComponent_list = 5, RuleOutcome = 6
+    RuleBehaviorComponent = 4, RuleProbeComponent = 5, RuleProbability_list = 6, 
+    RuleComponent_list = 7, RuleOutcome = 8
   };
 
   explicit DQGrammarParser(antlr4::TokenStream *input);
@@ -43,6 +44,8 @@ public:
   class DefinitionContext;
   class SystemContext;
   class ComponentContext;
+  class BehaviorComponentContext;
+  class ProbeComponentContext;
   class Probability_listContext;
   class Component_listContext;
   class OutcomeContext; 
@@ -95,50 +98,47 @@ public:
   class  ComponentContext : public antlr4::ParserRuleContext {
   public:
     ComponentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-   
-    ComponentContext() = default;
-    void copyFrom(ComponentContext *context);
-    using antlr4::ParserRuleContext::copyFrom;
-
     virtual size_t getRuleIndex() const override;
+    BehaviorComponentContext *behaviorComponent();
+    ProbeComponentContext *probeComponent();
+    OutcomeContext *outcome();
 
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  class  ProbeComponentContext : public ComponentContext {
+  ComponentContext* component();
+
+  class  BehaviorComponentContext : public antlr4::ParserRuleContext {
   public:
-    ProbeComponentContext(ComponentContext *ctx);
-
-    antlr4::tree::TerminalNode *IDENTIFIER();
-    ComponentContext *component();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  OutcomeComponentContext : public ComponentContext {
-  public:
-    OutcomeComponentContext(ComponentContext *ctx);
-
-    OutcomeContext *outcome();
-    ComponentContext *component();
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  BehaviorComponentContext : public ComponentContext {
-  public:
-    BehaviorComponentContext(ComponentContext *ctx);
-
+    BehaviorComponentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BEHAVIOR_TYPE();
     antlr4::tree::TerminalNode *IDENTIFIER();
     Component_listContext *component_list();
     Probability_listContext *probability_list();
-    ComponentContext *component();
+
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
   };
 
-  ComponentContext* component();
+  BehaviorComponentContext* behaviorComponent();
+
+  class  ProbeComponentContext : public antlr4::ParserRuleContext {
+  public:
+    ProbeComponentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *PROBE_ID();
+    antlr4::tree::TerminalNode *IDENTIFIER();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ProbeComponentContext* probeComponent();
 
   class  Probability_listContext : public antlr4::ParserRuleContext {
   public:

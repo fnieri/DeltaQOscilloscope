@@ -26,8 +26,8 @@ private:
 public:
     ConfidenceInterval(int numBins, double alpha);
 
-    [[nodiscard]] std::vector<Bound> addDeltaQ(const DeltaQ &);
-    [[nodiscard]] std::vector<Bound> removeDeltaQ(const DeltaQ &);
+    void addDeltaQ(const DeltaQ &);
+    void removeDeltaQ(const DeltaQ &);
 
     const std::vector<Bound> getBounds() const;
 };

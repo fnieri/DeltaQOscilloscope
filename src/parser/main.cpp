@@ -1,24 +1,18 @@
 
-#include "DQGrammarLexer.h"
-#include "DQGrammarParser.h"
-#include <fstream>
-#include <iostream>
+#include "SystemParserInterface.h"
 
-using namespace antlr4;
-
-int main(int argc, const char *argv[])
+int main()
 {
-    std::ifstream stream("./src/parser/example.dq");
-    // std::cout << stream.rdbuf() << "\n";
-    ANTLRInputStream input(stream);
+    std::string path = "src/parser/example.dq";
+    auto result = SystemParserInterface::parseFile(path);
 
-    parser::DQGrammarLexer lexer(&input);
-    CommonTokenStream tokens(&lexer);
-    parser::DQGrammarParser parser(&tokens);
+    if (!result) {
+        std::cerr << "Failed to parse system.\n";
+        return 1;
+    }
 
-    tree::ParseTree *tree = parser.start(); // entry rule
-    std::cout << tree->toStringTree(&parser) << std::endl;
-    std::cout << "Parsed successfully!" << std::endl;
+    System system = *result;
+    std::cout << "System parsed successfully.\n";
 
     return 0;
 }

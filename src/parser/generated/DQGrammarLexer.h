@@ -13,8 +13,8 @@ class  DQGrammarLexer : public antlr4::Lexer {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
-    T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, WS = 12, IDENTIFIER = 13, 
-    NUMBER = 14, BEHAVIOR_TYPE = 15
+    T__7 = 8, T__8 = 9, T__9 = 10, PROBE_ID = 11, BEHAVIOR_TYPE = 12, NUMBER = 13, 
+    IDENTIFIER = 14, WS = 15
   };
 
   explicit DQGrammarLexer(antlr4::CharStream *input);

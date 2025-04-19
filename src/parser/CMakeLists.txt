@@ -27,7 +27,7 @@ find_program(ANTLR_EXECUTABLE antlr4)
 execute_process(
     COMMAND ${ANTLR_EXECUTABLE} 
         -Dlanguage=Cpp 
-        -visitor 
+        -visitor -no-listener 
         -o ${ANTLR_GENERATED_DIR}
         -package parser
         ${CMAKE_CURRENT_SOURCE_DIR}/DQGrammar.g4
@@ -43,19 +43,23 @@ endif()
 message(STATUS "ANTLR generated: ${ANTLR_OUTPUT}")
 
 add_library(${PREFIX}_parser 
-    ParserWrapper.h
-    ParserWrapper.cpp
-    ${ANTLR_GENERATED_DIR}/DQGrammarLexer.cpp
+    ${ANTLR_GENERATED_DIR}/DQGrammarLexer.h
+    ${ANTLR_GENERATED_DIR}/DQGrammarLexer.cpp 
+    ${ANTLR_GENERATED_DIR}/DQGrammarParser.h
     ${ANTLR_GENERATED_DIR}/DQGrammarParser.cpp
     ${ANTLR_GENERATED_DIR}/DQGrammarBaseVisitor.cpp
     ${ANTLR_GENERATED_DIR}/DQGrammarVisitor.cpp
-    ${ANTLR_GENERATED_DIR}/DQGrammarLexer.h
-    ${ANTLR_GENERATED_DIR}/DQGrammarParser.h
     ${ANTLR_GENERATED_DIR}/DQGrammarBaseVisitor.h
     ${ANTLR_GENERATED_DIR}/DQGrammarVisitor.h
-
+     SystemBuilder.h
+     SystemBuilder.cpp
+     SystemErrorListener.h
+     SystemParserInterface.h
+     SystemParserInterface.cpp
 )
-
+target_link_libraries(${PREFIX}_parser
+    PUBLIC antlr4-runtime
+)
 
 target_include_directories(${PREFIX}_parser
     PUBLIC
@@ -73,6 +77,7 @@ target_link_libraries(parser
     PRIVATE
     ${PREFIX}_parser
     antlr4-runtime
+ ${PREFIX}_diagram
 )
 #[[ target_link_libraries(${PREFIX}_parser
     PRIVATE Python3::Python 

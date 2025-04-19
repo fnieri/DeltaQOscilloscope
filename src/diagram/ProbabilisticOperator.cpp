@@ -5,10 +5,15 @@
  */
 
 #include "ProbabilisticOperator.h"
-
 #include "../maths/DeltaQOperations.h"
+#include <cassert>
 #include <iostream>
-#include <utility>
+#include <limits>
+#include <math.h>
+#include <numeric>
+#include <stdexcept>
+#define EPSILON std::numeric_limits<double>::epsilon()
+
 ProbabilisticOperator::ProbabilisticOperator(const std::string &name)
     : DiagramComponent(name)
     , Operator(name)
@@ -24,6 +29,15 @@ DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::strin
 {
     return DeltaQ();
 }
+
+void ProbabilisticOperator::setProbabilities(std::vector<double> &newProbabilities)
+{
+    double result = std::reduce(newProbabilities.begin(), newProbabilities.end());
+    if (std::fabs(1 - result) > EPSILON)
+        throw std::logic_error("Result should approximate to 1");
+    probabilities = newProbabilities;
+}
+
 /*
 DeltaQ ProbabilisticOperator::calculateDeltaQ(const double &binWidth, std::string currentProbe)
 {

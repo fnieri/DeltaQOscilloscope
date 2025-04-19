@@ -81,7 +81,7 @@ protected:
      */
     void mousePressEvent(QMouseEvent *event) override;
 
-signals:
+Q_SIGNALS:
     /**
      * @brief Emitted when this plot is selected by the user.
      */

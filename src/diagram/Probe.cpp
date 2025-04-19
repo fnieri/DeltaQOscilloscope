@@ -22,13 +22,18 @@ Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> fi
 ProbeDeltaQ Probe::getDeltaQ(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
+    std::cout << "called \n";
     DeltaQ probeDeltaQ;
-    std::vector<Bound> bounds;
+    double bW = getBinWidth();
+    DeltaQ calculatedDeltaQ = this->calculateDeltaQ(binWidth, name, timeLowerBound, timeUpperBound);
     if (samplesInRange.size() > 0) {
         probeDeltaQ = {binWidth, getSamplesInRange(timeLowerBound, timeUpperBound)};
-        bounds = interval.addDeltaQ(probeDeltaQ);
+        interval.addDeltaQ(probeDeltaQ);
     }
-    DeltaQ calculatedDeltaQ = this->calculateDeltaQ(binWidth, name, timeLowerBound, timeUpperBound);
+    std::vector<Bound> bounds = interval.getBounds();
+    for (auto &bound : bounds) {
+        std::cout << bound.lowerBound << " " << bound.upperBound << "\n";
+    }
     ProbeDeltaQ deltaQ {probeDeltaQ, calculatedDeltaQ, bounds};
     deltaQs[timeLowerBound] = deltaQ;
     return deltaQ;

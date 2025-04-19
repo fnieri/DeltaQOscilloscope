@@ -36,7 +36,7 @@ public:
     ~MainWindow();
     void reset();
 
-private slots:
+private Q_SLOTS:
     void updatePlots();
     void onUpdateSystem();
     void onAddPlotClicked();

@@ -1,8 +1,11 @@
 
 #include "Sidebar.h"
+
+// @note Undef emit as it clashes with ANTLR emit!
+// Must do it before ANTLR include!
+#include "../parser/SystemParserInterface.h"
+
 #include "../Application.h"
-#include "../diagram/SystemParser.h"
-#include "../parser/ParserWrapper.h"
 #include "NewPlotList.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -15,6 +18,7 @@
 #include <qlogging.h>
 #include <qpushbutton.h>
 #include <qtextedit.h>
+
 Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
 {
@@ -99,8 +103,10 @@ void Sidebar::clearOnAdd()
 void Sidebar::onUpdateSystem()
 {
     std::string text = getSystemText();
-    std::string parsedJson = parseJson(text);
-    Application::getInstance().setSystem(parseJsonString(parsedJson));
+    auto system = SystemParserInterface::parseString(text);
+
+    if (system.has_value())
+        Application::getInstance().setSystem(system.value());
 }
 
 void Sidebar::onAddPlotClicked()
@@ -112,24 +118,44 @@ void Sidebar::onAddPlotClicked()
         return;
     }
 
-    emit addPlotClicked();
+    Q_EMIT addPlotClicked();
 }
 
 void Sidebar::saveSystemTo()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
-    std::string filename = dialog.getSaveFileName(this, "Save file", " ", ".json").toStdString();
-    std::string systemText = getSystemText();
-    parseAndSaveJson(systemText, filename);
-    Application::getInstance().setSystem(parseSystemJson(filename));
+    QString filename = dialog.getSaveFileName(this, "Save file", "", "JSON Files (*.json)");
+
+    if (!filename.isEmpty()) {
+        std::string systemText = getSystemText();
+        auto system = SystemParserInterface::parseString(systemText);
+
+        if (system.has_value()) {
+            std::ofstream outFile(filename.toStdString());
+            if (outFile.is_open()) {
+                outFile << systemText;
+                outFile.close();
+                QMessageBox::information(this, "Success", "File saved successfully.");
+            } else {
+                QMessageBox::critical(this, "Error", "Could not open file for writing.");
+            }
+        } else {
+            QMessageBox::warning(this, "Error", "System parsing failed. File not saved.");
+        }
+    }
 }
 
 void Sidebar::loadSystem()
 {
     QFileDialog dialog(this);
     std::string filename = dialog.getOpenFileName(this, "Select file", " ", ".json").toStdString();
-    Application::getInstance().setSystem(parseSystemJson(filename));
+
+    std::string text = getSystemText();
+    auto system = SystemParserInterface::parseFile(filename);
+
+    if (system.has_value())
+        Application::getInstance().setSystem(system.value());
     std::string systemText = Application::getInstance().getSystem()->getSystemDefinitionText();
     systemTextEdit->setText(QString::fromStdString(systemText));
 }

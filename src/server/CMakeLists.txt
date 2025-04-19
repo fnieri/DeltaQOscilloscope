@@ -1,4 +1,3 @@
-
 add_library(${PREFIX}_server
     Server.cpp
     Server.h
@@ -19,10 +18,10 @@ add_executable(server
         main.cpp
 )
 
+
 target_link_libraries(server
     PRIVATE
     ${PREFIX}_server
-    ei
 )
 
 target_compile_features(server PRIVATE cxx_std_17)

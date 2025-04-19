@@ -32,10 +32,10 @@ class Sidebar : public QWidget
 
     QVBoxLayout *layout;
 
-signals:
+Q_SIGNALS:
     void addPlotClicked();
 
-private slots:
+private Q_SLOTS:
     void onUpdateSystem();
     void saveSystemTo();
     void loadSystem();

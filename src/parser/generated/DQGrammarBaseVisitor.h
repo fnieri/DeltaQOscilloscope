@@ -27,7 +27,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitOutcomeComponent(DQGrammarParser::OutcomeComponentContext *ctx) override {
+  virtual std::any visitComponent(DQGrammarParser::ComponentContext *ctx) override {
     return visitChildren(ctx);
   }
 
