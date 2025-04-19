@@ -16,9 +16,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+#[[ This is required so QT keywoards don't clash with ANTLR ]]
+add_definitions(-DQT_NO_KEYWORDS)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include(cmake/CPM.cmake)
-include(cmake/AddJson.cmake)
+
 add_subdirectory(src)
 
 
