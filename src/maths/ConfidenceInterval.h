@@ -11,16 +11,13 @@ struct Bound {
 class ConfidenceInterval
 {
 private:
-    std::vector<int> summedCumulativeHistogram;
     std::vector<Bound> bounds;
-    double alpha;
     unsigned int totalSamples;
 
-    void addCumulativeHistogram(const std::vector<int> &cumulativeHistogram, unsigned int numSamples);
-    void removeCumulativeHistogram(const std::vector<int> &cumulativeHistogram, unsigned int numSamples);
+    std::vector<double> cdfSum;
+    std::vector<double> cdfSumSquares;
+    std::vector<unsigned int> cdfSampleCounts;
 
-    std::vector<double> calculateECDF() const;
-    double getDKWEpsilon() const;
     void updateConfidenceInterval();
 
 public:

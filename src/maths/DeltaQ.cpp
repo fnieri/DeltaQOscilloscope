@@ -27,19 +27,26 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const b
 }
 DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
     : binWidth(binWidth)
-    , bins {0} // FIXME magic number
+    , bins {50} // FIXME magic number
+    , samples(samples)
+{
+    calculateDeltaQ(samples);
+}
+
+DeltaQ::DeltaQ(double binWidth, std::vector<Sample> &samples, int bins)
+    : binWidth(binWidth)
+    , bins(bins)
     , samples(samples)
 {
     calculateDeltaQ(samples);
 }
 void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
 {
-    if (outcomeSamples.empty() || binWidth <= 0)
+    if (outcomeSamples.empty() || binWidth <= 0) {
+        bins = 0;
         return;
-
-    const int numBins = 50;
-    std::vector<int> histogram = std::vector<int>(numBins, 0);
-    cumulativeHistogram = std::vector<int>(numBins, 0);
+    }
+    std::vector<int> histogram = std::vector<int>(bins, 0);
     totalSamples = outcomeSamples.size();
     long long successfulSamples = 0;
 
@@ -61,22 +68,16 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             std::cerr << "Warning: Negative bin value: " << bin << std::endl;
             continue;
         }
-        if (bin >= numBins) {
-            bin = numBins - 1;
+        if (bin >= bins) {
+            bin = bins - 1;
         }
 
         histogram[bin]++;
     }
-    bins = numBins;
     // Calculate PDF
-    pdfValues.reserve(numBins);
+    pdfValues.reserve(bins);
     for (const double &binValue : histogram) {
         pdfValues.push_back(binValue / totalSamples);
-    }
-
-    cumulativeHistogram[0] = histogram[0];
-    for (int i = 1; i < numBins; ++i) {
-        cumulativeHistogram[i] = cumulativeHistogram[i - 1] + histogram[i];
     }
     calculateCDF();
 }
@@ -111,11 +112,6 @@ const std::vector<double> &DeltaQ::getPdfValues() const
 const std::vector<double> &DeltaQ::getCdfValues() const
 {
     return cdfValues;
-}
-
-const std::vector<int> &DeltaQ::getCumulativeHistogram() const
-{
-    return cumulativeHistogram;
 }
 
 const unsigned int DeltaQ::getTotalSamples() const

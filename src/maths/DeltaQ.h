@@ -16,7 +16,6 @@
 class DeltaQ
 {
     double binWidth;
-    std::vector<int> cumulativeHistogram;
     std::vector<double> pdfValues;
     std::vector<double> cdfValues;
     int bins {0};
@@ -44,6 +43,7 @@ public:
     DeltaQ(double binWidth);
     DeltaQ(double binWidth, const std::vector<double> &values, bool isPdf);
     DeltaQ(double binWidth, std::vector<Sample>);
+    DeltaQ(double binWidth, std::vector<Sample> &, int);
     /**
      * Getters
      */
@@ -53,8 +53,8 @@ public:
     [[nodiscard]] int getSize() const;
     [[nodiscard]] double pdfAt(int x) const;
     [[nodiscard]] double cdfAt(int x) const;
-    [[nodiscard]] const std::vector<int> &getCumulativeHistogram() const;
     [[nodiscard]] const unsigned int getTotalSamples() const;
+
     void setBinWidth(double newWidth);
     /**
      * Operator Overloads

@@ -30,3 +30,8 @@ void Application::notifyObservers()
         observer();
     }
 }
+
+void Application::sendDelayChange(std::string &name, double newDelay)
+{
+    sender.sendToErlang("set_timeout;" + name + ';' + std::to_string(newDelay));
+}

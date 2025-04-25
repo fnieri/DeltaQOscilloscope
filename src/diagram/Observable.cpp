@@ -31,9 +31,10 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
     return selectedSamples;
 }
 
-void Observable::setNewParameters(int newExp, int newNBins)
+double Observable::setNewParameters(int newExp, int newNBins)
 {
     deltaTExp = newExp;
     nBins = newNBins;
-    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins; // Update maxDelay to maintain relationship
+    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
+    return maxDelay;
 }

@@ -1,0 +1,14 @@
+CPMAddPackage(
+    NAME FFTW
+    VERSION 3.3.9
+    URL http://fftw.org/fftw-3.3.9.tar.gz
+    URL_HASH SHA256=bf2c7ce40b04ae811af714deb512510cc2c17b9ab9d6ddcf49fe4487eea7af3d
+    OPTIONS
+    "BUILD_SHARED_LIBS OFF"
+    "BUILD_TESTS OFF"
+    "ENABLE_FLOAT OFF"
+    "ENABLE_AVX ON"
+    "ENABLE_AVX2 ${WITH_FFTW_AVX2}"
+)
+
+  set_target_properties(fftw3 PROPERTIES POSITION_INDEPENDENT_CODE ON)

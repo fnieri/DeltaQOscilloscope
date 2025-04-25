@@ -59,12 +59,13 @@ Sidebar::Sidebar(QWidget *parent)
     layout->addWidget(newPlotList);
     layout->addWidget(addNewPlotButton);
 
+    delaySettingsWidget = new DelaySettingsWidget(this);
+    layout->addWidget(delaySettingsWidget);
     currentPlotLabel = new QLabel("Modify current plot:", this);
     currentPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     currentPlotLabel->hide(); // Initially hidden
     layout->addWidget(currentPlotLabel);
 }
-
 void Sidebar::setCurrentPlotList(DQPlotList *plotList)
 {
     if (currentPlotList == plotList) {

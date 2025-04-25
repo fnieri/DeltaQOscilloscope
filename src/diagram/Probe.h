@@ -26,7 +26,7 @@ public:
 
     [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
 
-    ProbeDeltaQ getDeltaQ(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    ProbeDeltaQ getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     void setFirstComponent(std::shared_ptr<DiagramComponent> component);
 

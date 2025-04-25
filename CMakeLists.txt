@@ -20,7 +20,8 @@ set(CMAKE_AUTOUIC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
+include(cmake/CPM.cmake)
+include(cmake/AddFFTW.cmake)
 add_subdirectory(src)
 
 

@@ -12,6 +12,11 @@ target_include_directories(${PREFIX}_maths
         ${CMAKE_SOURCE_DIR}
 )
 
+target_link_libraries(${PREFIX}_maths
+    PRIVATE
+    fftw3
+)
+
 add_executable(maths
         main.cpp
 )

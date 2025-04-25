@@ -1,0 +1,12 @@
+
+{application, otel_wrapper,
+ [
+  {description, "OpenTelemetry Wrapper for C Integration"},
+  {vsn, "0.1.0"},
+  {modules, [otel_wrapper, otel_wrapper_sup]},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {otel_wrapper, []}},
+  {env, []}
+ ]}.
+

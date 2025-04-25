@@ -1,9 +1,9 @@
 #include "DeltaQOperations.h"
 #include "DeltaQ.h"
+#include <fftw3.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
-
 DeltaQ rebin(const DeltaQ &source, double targetBinWidth)
 {
     double originalBinWidth = source.getBinWidth();
@@ -58,6 +58,72 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
     return DeltaQ(commonBinWidth, resultPdf, true);
 }
 
+DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
+{
+    double commonBinWidth = std::max(lhs.getBinWidth(), rhs.getBinWidth());
+
+    if (lhs == DeltaQ()) {
+        return rhs;
+    }
+    if (rhs == DeltaQ()) {
+        return lhs;
+    }
+
+    DeltaQ lhsRebinned = rebin(lhs, commonBinWidth);
+    DeltaQ rhsRebinned = rebin(rhs, commonBinWidth);
+
+    const auto &lhsPdf = lhsRebinned.getPdfValues();
+    const auto &rhsPdf = rhsRebinned.getPdfValues();
+
+    size_t lhsSize = lhsPdf.size();
+    size_t rhsSize = rhsPdf.size();
+    size_t convSize = lhsSize + rhsSize - 1;
+    size_t fftSize = 1;
+    while (fftSize < convSize)
+        fftSize <<= 1;
+
+    std::vector<double> lhsPadded(fftSize, 0.0);
+    std::vector<double> rhsPadded(fftSize, 0.0);
+    std::copy(lhsPdf.begin(), lhsPdf.end(), lhsPadded.begin());
+    std::copy(rhsPdf.begin(), rhsPdf.end(), rhsPadded.begin());
+
+    fftw_complex *lhsFreq = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
+    fftw_complex *rhsFreq = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
+    double *lhsTime = lhsPadded.data();
+    double *rhsTime = rhsPadded.data();
+
+    fftw_plan planLhs = fftw_plan_dft_r2c_1d(fftSize, lhsTime, lhsFreq, FFTW_ESTIMATE);
+    fftw_plan planRhs = fftw_plan_dft_r2c_1d(fftSize, rhsTime, rhsFreq, FFTW_ESTIMATE);
+    fftw_execute(planLhs);
+    fftw_execute(planRhs);
+
+    fftw_complex *resultFreq = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
+    for (size_t i = 0; i < fftSize / 2 + 1; ++i) {
+        double a = lhsFreq[i][0], b = lhsFreq[i][1];
+        double c = rhsFreq[i][0], d = rhsFreq[i][1];
+        resultFreq[i][0] = a * c - b * d;
+        resultFreq[i][1] = a * d + b * c;
+    }
+
+    std::vector<double> resultTime(fftSize);
+    fftw_plan planInv = fftw_plan_dft_c2r_1d(fftSize, resultFreq, resultTime.data(), FFTW_ESTIMATE);
+    fftw_execute(planInv);
+
+    for (auto &val : resultTime)
+        val /= fftSize;
+
+    resultTime.resize(convSize);
+
+    fftw_destroy_plan(planLhs);
+    fftw_destroy_plan(planRhs);
+    fftw_destroy_plan(planInv);
+    fftw_free(lhsFreq);
+    fftw_free(rhsFreq);
+    fftw_free(resultFreq);
+
+    return {lhsRebinned.getBinWidth(), resultTime, true};
+}
+
 DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
 {
     if (deltaQs.empty())
@@ -66,7 +132,7 @@ DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
     DeltaQ result = deltaQs[0];
 
     for (size_t i = 1; i < deltaQs.size(); ++i) {
-        result = convolve(result, deltaQs[i]);
+        result = convolveFFT(result, deltaQs[i]);
     }
     return result;
 }

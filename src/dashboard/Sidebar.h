@@ -4,14 +4,16 @@
 #define SIDEBAR_H
 
 #include "DQPlotList.h"
+#include "DelaySettingsWidget.h"
 #include "NewPlotList.h"
+#include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <qboxlayout.h>
-
 class Sidebar : public QWidget
 {
     Q_OBJECT
@@ -19,6 +21,7 @@ class Sidebar : public QWidget
     QHBoxLayout *systemButtonsLayout;
     QLabel *systemLabel;
     QTextEdit *systemTextEdit;
+
     QPushButton *updateSystemButton;
     QPushButton *saveSystemButton;
     QPushButton *loadSystemButton;
@@ -31,7 +34,7 @@ class Sidebar : public QWidget
     DQPlotList *currentPlotList = nullptr;
 
     QVBoxLayout *layout;
-
+    DelaySettingsWidget *delaySettingsWidget;
 Q_SIGNALS:
     void addPlotClicked();
 

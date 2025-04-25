@@ -11,5 +11,5 @@ setup:
 
 .PHONY: build
 build:
-	cmake --build  build 
+	cmake --build build 
 	echo -e "\e[32m== SUCCESSFUL BUILDING! ==\e[0m\n"

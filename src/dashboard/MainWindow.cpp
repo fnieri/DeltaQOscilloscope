@@ -69,10 +69,8 @@ void MainWindow::updatePlots()
     timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     auto system = Application::getInstance().getSystem();
-    system->calculateBinWidth();
-    double binWidth = system->getBinWidth();
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
-        plot->update(binWidth, timeLowerBound, timeUpperBound);
+        plot->update(timeLowerBound, timeUpperBound);
     }
 }
 

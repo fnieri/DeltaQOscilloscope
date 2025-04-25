@@ -1,0 +1,79 @@
+
+#include "DelaySettingsWidget.h"
+#include "../Application.h"
+#include <qpushbutton.h>
+DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
+    : QWidget(parent)
+{
+    auto *mainLayout = new QVBoxLayout(this);
+    auto *settingsLayout = new QHBoxLayout();
+
+    observableComboBox = new QComboBox();
+    settingsLayout->addWidget(observableComboBox);
+
+    delaySlider = new QSlider(Qt::Horizontal);
+    delaySlider->setRange(-10, 10);
+    delaySlider->setTickInterval(1);
+    delaySlider->setTickPosition(QSlider::TicksBelow);
+    settingsLayout->addWidget(delaySlider);
+
+    binSpinBox = new QSpinBox();
+    binSpinBox->setRange(1, 1000);
+    binSpinBox->setValue(10);
+    settingsLayout->addWidget(binSpinBox);
+
+    mainLayout->addLayout(settingsLayout);
+
+    maxDelayLabel = new QLabel("Max delay is: ");
+    mainLayout->addWidget(maxDelayLabel);
+    saveDelayButton = new QPushButton("Save delay");
+    mainLayout->addWidget(saveDelayButton);
+    connect(delaySlider, &QSlider::valueChanged, this, &DelaySettingsWidget::updateMaxDelay);
+    connect(binSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DelaySettingsWidget::updateMaxDelay);
+    connect(saveDelayButton, &QPushButton::clicked, this, &DelaySettingsWidget::onSaveDelayClicked);
+    Application::getInstance().addObserver([this]() { this->populateComboBox(); });
+}
+
+void DelaySettingsWidget::populateComboBox()
+{
+    auto system = Application::getInstance().getSystem();
+    if (!system)
+        return;
+    observableComboBox->clear();
+    for (const auto [name, _] : system->getProbes()) {
+        observableComboBox->addItem(QString::fromStdString(name));
+    }
+    for (const auto &[name, _] : system->getOutcomes()) {
+        observableComboBox->addItem(QString::fromStdString(name));
+    }
+}
+
+double DelaySettingsWidget::getMaxDelayMs() const
+{
+    int exponent = delaySlider->value();
+    int bins = binSpinBox->value();
+    return 1.0 * std::pow(2.0, exponent) * bins;
+}
+
+void DelaySettingsWidget::updateMaxDelay()
+{
+    double delay = getMaxDelayMs();
+    maxDelayLabel->setText(QString("Max delay is: %1 ms").arg(delay, 0, 'f', 2));
+    Q_EMIT delayParametersChanged();
+}
+
+void DelaySettingsWidget::onSaveDelayClicked()
+{
+    auto system = Application::getInstance().getSystem();
+    if (!system)
+        return;
+
+    QString name = observableComboBox->currentText();
+    if (name.isEmpty())
+        return;
+
+    int exponent = delaySlider->value();
+    int bins = binSpinBox->value();
+    std::string nameString = name.toStdString();
+    system->setObservableParameters(nameString, exponent, bins);
+}

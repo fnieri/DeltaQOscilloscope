@@ -12,9 +12,9 @@ protected:
     std::deque<Sample> samples;
     mutable bool sorted;
 
-    double maxDelay;
-    int deltaTExp; // Exponent for dynamic binning
-    int nBins; // Number of bins
+    double maxDelay {0.05};
+    int deltaTExp {0}; // Exponent for dynamic binning
+    int nBins {50}; // Number of bins
 
 public:
     explicit Observable(const std::string &name);
@@ -25,10 +25,20 @@ public:
 
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
 
-    void setNewParameters(int newExp, int newNBins);
+    double setNewParameters(int newExp, int newNBins);
 
     double getBinWidth() const
     {
         return DELTA_T_BASE * std::pow(2, deltaTExp);
+    }
+
+    int getNBins() const
+    {
+        return nBins;
+    }
+
+    double getMaxDelay() const
+    {
+        return maxDelay;
     }
 };

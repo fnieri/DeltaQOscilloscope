@@ -77,11 +77,11 @@ public:
     /**
      * @brief Updates the data of all series based on provided time range and bin width.
      */
-    void update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
 private:
-    void updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
-    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> probe, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;
 

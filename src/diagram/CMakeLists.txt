@@ -20,20 +20,17 @@ add_library(${PREFIX}_diagram
     Observable.cpp
 )
 
-
-
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
         ${PREFIX}_parser
+        ${PREFIX}_application
 )
 
 
 target_include_directories(${PREFIX}_diagram
         PUBLIC
         ${CMAKE_SOURCE_DIR}
-PRIVATE ${Python3_INCLUDE_DIRS}
 )
 
 add_executable(diagram
@@ -44,5 +41,4 @@ add_executable(diagram
 target_link_libraries(diagram
         PRIVATE
         ${PREFIX}_diagram
-${Python3_LIBRARIES}
 )

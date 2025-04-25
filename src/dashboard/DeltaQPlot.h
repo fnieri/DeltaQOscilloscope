@@ -47,7 +47,7 @@ public:
     /**
      * @brief Updates the plot data using provided time range and bin width.
      */
-    void update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     /**
      * @brief Removes a series from the chart.
@@ -68,8 +68,9 @@ public:
     /**
      * @brief Updates an existing series with new data points.
      */
-    void updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data, double xRange);
+    void updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data);
 
+    void updateXRange(double xRange);
     /**
      * @brief Returns the associated plot list.
      */
@@ -94,7 +95,6 @@ private:
     QLineSeries *operationSeries;
     DQPlotController *controller;
     DQPlotList *plotList;
-    double currentXRange {0};
 };
 
 #endif // DELTAQPLOT_H

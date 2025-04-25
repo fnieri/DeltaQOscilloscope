@@ -7,7 +7,10 @@
  * Perform discrete convolution between two DeltaQs
  */
 DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs);
-
+/**
+ * Perform Fast Fourier Transform on two DeltaQs
+ */
+DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs);
 DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs);
 
 /**

@@ -41,9 +41,9 @@ void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
     series->attachAxis(axisY);
 }
 
-void DeltaQPlot::update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+void DeltaQPlot::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    controller->update(binWidth, timeLowerBound, timeUpperBound);
+    controller->update(timeLowerBound, timeUpperBound);
 }
 
 void DeltaQPlot::removeSeries(QAbstractSeries *series)
@@ -56,14 +56,19 @@ void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
     controller->editPlot(selectedItems);
 }
 
-void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data, double xRange)
+void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data)
 {
-
     series->clear();
     series->append(0, 0);
     for (const auto &[x, y] : data)
         series->append(x, y);
 }
+
+void DeltaQPlot::updateXRange(double xRange)
+{
+    axisX->setRange(0, xRange);
+}
+
 std::vector<std::string> DeltaQPlot::getComponents()
 {
     return controller->getComponents();

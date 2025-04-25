@@ -64,7 +64,6 @@ target_link_libraries(${PREFIX}_parser
 target_include_directories(${PREFIX}_parser
     PUBLIC
     ${CMAKE_SOURCE_DIR}
-    ${Python3_INCLUDE_DIRS}
     ${ANTLR_GENERATED_DIR}
     ${ANTLR4_INCLUDE_DIR}
 )
@@ -79,8 +78,4 @@ target_link_libraries(parser
     antlr4-runtime
  ${PREFIX}_diagram
 )
-#[[ target_link_libraries(${PREFIX}_parser
-    PRIVATE Python3::Python 
-    antlr4-runtime
-) ]]
 

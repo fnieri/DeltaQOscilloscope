@@ -8,7 +8,8 @@
         stdlib,
         opentelemetry,
         opentelemetry_api,
-    opentelemetry_exporter
+    opentelemetry_exporter,
+    otel_wrapper
     ]},
     {env, []},
     {modules, [ example]},

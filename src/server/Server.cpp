@@ -37,10 +37,8 @@ void Server::start()
 void Server::updateSystem()
 {
     system = Application::getInstance().getSystem();
-    std::cout << "updated \n";
 }
 
-// Server.cpp modifications
 void Server::run()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -49,7 +47,6 @@ void Server::run()
         return;
     }
 
-    // Socket options (reuse address, non-blocking)
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
@@ -89,7 +86,6 @@ void Server::run()
             continue;
         }
 
-        // Handle client in separate thread
         std::lock_guard<std::mutex> lock(clientsMutex);
         clientThreads.emplace_back(&Server::handleClient, this, client_socket);
     }
@@ -143,6 +139,10 @@ void Server::stop()
 }
 void Server::parseErlangMessage(const char *buffer, int len)
 {
+    if (buffer == nullptr || len <= 0 || len >= 1024) {
+        std::cerr << "Invalid buffer or length" << std::endl;
+        return;
+    }
     std::string message(buffer, len);
 
     std::regex pattern(R"(n:(\w+);b:(\d+);e:(\d+);s:(\w+))");
@@ -171,8 +171,6 @@ void Server::parseErlangMessage(const char *buffer, int len)
         endTime = std::stoull(match[3].str());
         double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
         Sample sample {startTime, endTime, elapsed, status};
-        // std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", End=" << sample.endTime << ", Elapsed=" << elapsed
-        // << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT") << std::endl;
 
     } else if (statusStr != EXEC_OK) {
         std::cerr << "Unknown status: " << statusStr << std::endl;

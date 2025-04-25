@@ -14,9 +14,7 @@
 #include "Probe.h"
 #include <memory>
 #include <unordered_map>
-class DiagramComponent;
-class Operator;
-class Probe;
+
 class System
 {
     std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
@@ -26,7 +24,6 @@ class System
 
     std::string systemDefinitionText;
     std::shared_ptr<DiagramComponent> firstComponent;
-    double binWidth {0};
 
 public:
     System() = default;
@@ -53,10 +50,6 @@ public:
      */
     DeltaQ calculateDeltaQ();
 
-    void calculateBinWidth();
-
-    double getBinWidth() const;
-
     bool hasOutcome(std::string &name);
 
     bool hasProbe(const std::string &name);
@@ -68,4 +61,6 @@ public:
     void setSystemDefinitionText(std::string &text);
 
     std::string getSystemDefinitionText();
+
+    void setObservableParameters(std::string &, int, int);
 };

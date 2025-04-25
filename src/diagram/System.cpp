@@ -5,8 +5,8 @@
  */
 
 #include "System.h"
+#include "../Application.h"
 #include <utility>
-
 void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
 {
     firstComponent = std::move(component);
@@ -37,9 +37,16 @@ std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
     return outcomes[name];
 }
 
-void System::calculateBinWidth()
+void System::setObservableParameters(std::string &componentName, int exponent, int numBins)
 {
-    binWidth = 0.001; // FIXME
+    if (auto it = outcomes.find(componentName); it != outcomes.end()) {
+        double maxDelay = it->second->setNewParameters(exponent, numBins);
+        Application::getInstance().sendDelayChange(componentName, maxDelay * 1000);
+    }
+    if (auto it = probes.find(componentName); it != probes.end()) {
+        double maxDelay = it->second->setNewParameters(exponent, numBins);
+        Application::getInstance().sendDelayChange(componentName, maxDelay * 1000);
+    }
 }
 
 void System::addSample(std::string &componentName, Sample &sample)
@@ -52,15 +59,11 @@ void System::addSample(std::string &componentName, Sample &sample)
     }
 }
 
-double System::getBinWidth() const
-{
-    return binWidth;
-}
-
 DeltaQ System::calculateDeltaQ()
 {
-    calculateBinWidth();
-    return firstComponent->calculateDeltaQ(binWidth, "system", 0, 0);
+
+    //   return firstComponent->calculateDeltaQ(binWidth, "system", 0, 0);
+    return DeltaQ();
 }
 
 [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &System::getOutcomes()

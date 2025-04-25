@@ -1,4 +1,6 @@
 add_library(${PREFIX}_dashboard
+    DelaySettingsWidget.h
+    DelaySettingsWidget.cpp
     DQPlotController.h
     DQPlotController.cpp
     DQPlotList.h
@@ -26,19 +28,7 @@ target_link_libraries(${PREFIX}_dashboard
 
 target_include_directories(${PREFIX}_dashboard
         PUBLIC
-        ${CMAKE_SOURCE_DIR}
-         
+        ${CMAKE_SOURCE_DIR}         
         ${PREFIX}_parser
-    )
-
-
-add_executable(dashboard
-        main.cpp
 )
 
-target_link_libraries(dashboard
-        PRIVATE
-        ${PREFIX}_dashboard
-)
-
-target_compile_features(dashboard PRIVATE cxx_std_17)

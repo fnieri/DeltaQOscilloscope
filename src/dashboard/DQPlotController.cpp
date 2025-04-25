@@ -133,59 +133,68 @@ void DQPlotController::removeComponent(std::string &&name)
     }
 }
 
-void DQPlotController::update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
+    double outcomeMax = 0;
     for (auto &[name, seriesOutcome] : outcomes) {
-        updateOutcome(seriesOutcome.first, seriesOutcome.second, binWidth, timeLowerBound, timeUpperBound);
+        double outcomeRange = updateOutcome(seriesOutcome.first, seriesOutcome.second, timeLowerBound, timeUpperBound);
+        if (outcomeRange > outcomeMax)
+            outcomeMax = outcomeRange;
+        plot->updateXRange(outcomeMax);
     }
 
     for (auto &[name, seriesProbe] : probes) {
-        updateProbe(probes[name].first, probes[name].second, binWidth, timeLowerBound, timeUpperBound);
+        updateProbe(probes[name].first, probes[name].second, timeLowerBound, timeUpperBound);
     }
 }
 
-void DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+double DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<std::pair<double, double>> data;
-    DeltaQ deltaQ = outcome->getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
+    DeltaQ deltaQ = outcome->getDeltaQ(timeLowerBound, timeUpperBound);
     int size = deltaQ.getSize();
-
+    double binWidth = deltaQ.getBinWidth();
     for (int i = 0; i < size; i++) {
         data.push_back({binWidth * (i + 1), deltaQ.cdfAt(i)});
     }
 
-    plot->updateSeries(series, data, binWidth * size);
+    plot->updateSeries(series, data);
+    return outcome->getMaxDelay();
 }
 
-void DQPlotController::updateProbe(
-    ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    ProbeDeltaQ probeDeltaQs = probe->getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
+    ProbeDeltaQ probeDeltaQs = probe->getDeltaQ(timeLowerBound, timeUpperBound);
     DeltaQ probeDeltaQ = probeDeltaQs.probeDeltaQ;
     int size = probeDeltaQ.getSize();
     double probeBinWidth = probeDeltaQ.getBinWidth();
     std::vector<std::pair<double, double>> probeData;
+
     for (int i = 0; i < size; i++) {
         probeData.push_back({probeBinWidth * (i + 1), probeDeltaQ.cdfAt(i)});
     }
 
-    plot->updateSeries(probeAllSeries.probeS, probeData, probeBinWidth * size);
+    plot->updateSeries(probeAllSeries.probeS, probeData);
 
     DeltaQ calculatedProbeDeltaQ = probeDeltaQs.calculatedProbeDeltaQ;
     int calculatedSize = calculatedProbeDeltaQ.getSize();
     std::vector<std::pair<double, double>> calculatedProbeData;
+
     for (int i = 0; i < calculatedSize; i++) {
-        calculatedProbeData.push_back({binWidth * (i + 1), calculatedProbeDeltaQ.cdfAt(i)});
+        calculatedProbeData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), calculatedProbeDeltaQ.cdfAt(i)});
     }
-    plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData, binWidth * calculatedSize);
+
+    plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData);
 
     std::vector<Bound> bounds = probeDeltaQs.bounds;
     std::vector<std::pair<double, double>> lowerBoundData;
     std::vector<std::pair<double, double>> upperBoundData;
+
     for (int i = 0; i < bounds.size(); i++) {
-        lowerBoundData.push_back({binWidth * (i + 1), bounds[i].lowerBound});
-        upperBoundData.push_back({binWidth * (i + 1), bounds[i].upperBound});
+        lowerBoundData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), bounds[i].lowerBound});
+        upperBoundData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), bounds[i].upperBound});
     }
-    plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData, binWidth * size);
-    plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData, binWidth * size);
+
+    plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData);
+    plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData);
 }

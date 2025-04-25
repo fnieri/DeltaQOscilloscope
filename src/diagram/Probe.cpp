@@ -4,6 +4,8 @@
 #include "src/maths/ConfidenceInterval.h"
 #include <iostream>
 #include <memory>
+
+#define MAX_DQ 30
 Probe::Probe(const std::string &name)
     : DiagramComponent(name)
     , Observable(name)
@@ -19,23 +21,26 @@ Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> fi
 {
 }
 
-ProbeDeltaQ Probe::getDeltaQ(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+ProbeDeltaQ Probe::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
-    std::cout << "called \n";
     DeltaQ probeDeltaQ;
     double bW = getBinWidth();
-    DeltaQ calculatedDeltaQ = this->calculateDeltaQ(binWidth, name, timeLowerBound, timeUpperBound);
+    DeltaQ calculatedDeltaQ = this->calculateDeltaQ(getBinWidth(), name, timeLowerBound, timeUpperBound);
     if (samplesInRange.size() > 0) {
-        probeDeltaQ = {binWidth, getSamplesInRange(timeLowerBound, timeUpperBound)};
+
+        probeDeltaQ = {getBinWidth(), samplesInRange};
         interval.addDeltaQ(probeDeltaQ);
     }
     std::vector<Bound> bounds = interval.getBounds();
-    for (auto &bound : bounds) {
-        std::cout << bound.lowerBound << " " << bound.upperBound << "\n";
-    }
     ProbeDeltaQ deltaQ {probeDeltaQ, calculatedDeltaQ, bounds};
     deltaQs[timeLowerBound] = deltaQ;
+
+    if (deltaQs.size() > MAX_DQ) {
+        auto earliest = deltaQs.begin(); // map is sorted by key
+        interval.removeDeltaQ(earliest->second.probeDeltaQ); // remove from CI
+        deltaQs.erase(earliest); // remove from map
+    }
     return deltaQ;
 }
 
