@@ -1,3 +1,4 @@
+
 #include "SystemBuilder.h"
 #include "../diagram/AllToFinish.h"
 #include "../diagram/FirstToFinish.h"
@@ -12,20 +13,37 @@ System SystemBuilderVisitor::getSystem() const
 
 std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext *context)
 {
-    // Visit all definitions first
     for (auto definition : context->definition()) {
         visitDefinition(definition);
     }
 
-    // Then visit system if it exists
     if (context->system()) {
         visitSystem(context->system());
     }
 
-    // Set the collected components in the system
     system.setOutcomes(outcomes);
     system.setOperators(operators);
     system.setProbes(probes);
+
+    for (auto [name, link] : definitionLinks) {
+        std::cout << name << " [ ";
+        for (auto &name2 : link) {
+            std::cout << name2 << " ";
+        }
+        std::cout << "]\n";
+    }
+
+    for (auto [name, op] : operatorLinks) {
+        std::cout << name << " [ ";
+        for (auto link : op) {
+            std::cout << " [";
+            for (auto lill : link) {
+                std::cout << lill << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]\n";
+    }
 
     return nullptr;
 }
@@ -33,39 +51,45 @@ std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext 
 std::any SystemBuilderVisitor::visitDefinition(parser::DQGrammarParser::DefinitionContext *context)
 {
     std::string probeName = context->IDENTIFIER()->getText();
-
-    std::vector<std::shared_ptr<DiagramComponent>> components;
-    for (auto comp : context->component()) {
-        auto component = std::any_cast<std::shared_ptr<DiagramComponent>>(visitComponent(comp));
-        components.push_back(component);
+    if (std::find(definedProbes.begin(), definedProbes.end(), probeName) != definedProbes.end()) {
+        throw std::invalid_argument("Probe has already been defined");
     }
 
-    for (size_t i = 0; i < components.size() - 1; i++) {
-        components[i]->setNext(probeName, components[i + 1]);
+    auto chainComponents = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(context->component_chain()));
+
+    std::vector<std::string> links;
+    for (auto &comp : chainComponents) {
+        links.push_back(comp->getName());
     }
 
     auto probe = std::make_shared<Probe>(probeName);
-    probe->setFirstComponent(components[0]);
+
+    if (!chainComponents.empty()) {
+        probe->setFirstComponent(chainComponents[0]);
+    }
+
     probes[probeName] = probe;
+    definedProbes.push_back(probeName);
+
+    definitionLinks[probeName] = links;
+
     return nullptr;
 }
 
 std::any SystemBuilderVisitor::visitSystem(parser::DQGrammarParser::SystemContext *context)
 {
-    std::vector<std::shared_ptr<DiagramComponent>> components;
-    for (auto comp : context->component()) {
-        auto component = std::any_cast<std::shared_ptr<DiagramComponent>>(visitComponent(comp));
-        components.push_back(component);
+    auto chainComponents = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(context->component_chain()));
+
+    std::vector<std::string> links;
+    for (auto &comp : chainComponents) {
+        links.push_back(comp->getName());
     }
 
-    // Process the chain of components (-> operator)
-    for (size_t i = 0; i < components.size() - 1; i++) {
-        components[i]->setNext("system", components[i + 1]);
+    if (!chainComponents.empty()) {
+        system.setFirstComponent(chainComponents[0]);
     }
 
-    if (!components.empty()) {
-        system.setFirstComponent(components[0]);
-    }
+    systemLinks = links;
 
     return nullptr;
 }
@@ -87,21 +111,24 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
     std::string type = context->BEHAVIOR_TYPE()->getText();
     std::string name = context->IDENTIFIER()->getText();
 
-    // Check if operator already exists
     if (operators.find(name) != operators.end()) {
         return std::dynamic_pointer_cast<DiagramComponent>(operators[name]);
     }
 
-    // Create a new operator
     std::shared_ptr<Operator> systemOperator;
     if (type == "f") {
         systemOperator = std::make_shared<FirstToFinish>(name);
+        if (context->probability_list()) {
+            throw std::invalid_argument("First to finish operator cannot have probabilities");
+        }
     } else if (type == "a") {
         systemOperator = std::make_shared<AllToFinish>(name);
+        if (context->probability_list()) {
+            throw std::invalid_argument("All to finish operator cannot have probabilities");
+        }
     } else if (type == "p") {
         systemOperator = std::make_shared<ProbabilisticOperator>(name);
 
-        // Add probabilities if they exist
         if (context->probability_list()) {
             auto probabilities = std::any_cast<std::vector<double>>(visitProbability_list(context->probability_list()));
             auto probOperator = std::dynamic_pointer_cast<ProbabilisticOperator>(systemOperator);
@@ -111,12 +138,24 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
         throw std::invalid_argument("Unknown operator type: " + type);
     }
 
-    // Add children
     if (context->component_list()) {
-        auto children = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_list(context->component_list()));
-        for (auto child : children) {
-            systemOperator->addChildren(child);
+        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<DiagramComponent>>>>(visitComponent_list(context->component_list()));
+
+        std::vector<std::vector<std::string>> childrenLinks;
+
+        for (auto &chain : childrenChains) {
+            if (!chain.empty()) {
+                systemOperator->addChildren(chain[0]);
+
+                std::vector<std::string> chainNames;
+                for (auto &comp : chain) {
+                    chainNames.push_back(comp->getName());
+                }
+                childrenLinks.push_back(chainNames);
+            }
         }
+
+        operatorLinks[name] = childrenLinks;
     }
 
     operators[name] = systemOperator;
@@ -127,7 +166,6 @@ std::any SystemBuilderVisitor::visitProbeComponent(parser::DQGrammarParser::Prob
 {
     std::string name = context->IDENTIFIER()->getText();
 
-    // Check if probe already exists
     if (probes.find(name) != probes.end()) {
         return std::dynamic_pointer_cast<DiagramComponent>(probes[name]);
     }
@@ -148,11 +186,29 @@ std::any SystemBuilderVisitor::visitProbability_list(parser::DQGrammarParser::Pr
 
 std::any SystemBuilderVisitor::visitComponent_list(parser::DQGrammarParser::Component_listContext *context)
 {
+    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> componentsChains;
+
+    for (auto chainCtx : context->component_chain()) {
+        auto chain = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(chainCtx));
+        componentsChains.push_back(chain);
+    }
+
+    return componentsChains;
+}
+
+std::any SystemBuilderVisitor::visitComponent_chain(parser::DQGrammarParser::Component_chainContext *context)
+{
     std::vector<std::shared_ptr<DiagramComponent>> components;
-    for (auto comp : context->component()) {
-        auto component = std::any_cast<std::shared_ptr<DiagramComponent>>(visitComponent(comp));
+
+    for (auto compCtx : context->component()) {
+        auto component = std::any_cast<std::shared_ptr<DiagramComponent>>(visitComponent(compCtx));
         components.push_back(component);
     }
+
+    for (size_t i = 0; i + 1 < components.size(); ++i) {
+        components[i]->setNext("chain", components[i + 1]);
+    }
+
     return components;
 }
 
@@ -160,7 +216,6 @@ std::any SystemBuilderVisitor::visitOutcome(parser::DQGrammarParser::OutcomeCont
 {
     std::string name = context->IDENTIFIER()->getText();
 
-    // Check if outcome already exists
     if (outcomes.find(name) != outcomes.end()) {
         return std::dynamic_pointer_cast<DiagramComponent>(outcomes[name]);
     }

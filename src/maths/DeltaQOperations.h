@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DeltaQ.h"
-#include <vector>
 
 /**
  * Perform discrete convolution between two DeltaQs

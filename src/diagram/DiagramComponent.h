@@ -10,8 +10,6 @@
 #include "../maths/DeltaQ.h"
 #include <memory>
 #include <unordered_map>
-class System;
-
 class DiagramComponent
 {
 
@@ -32,4 +30,6 @@ public:
     [[nodiscard]] virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) = 0;
 
     std::string getName() const &;
+
+    std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> getProbeNextComponent();
 };

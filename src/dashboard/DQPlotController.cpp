@@ -32,14 +32,13 @@ void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
 {
     std::vector<std::string> existingItems = getComponents();
 
-    // Remove unselected items
     for (const auto &name : existingItems) {
         if (std::find(selectedItems.begin(), selectedItems.end(), name) == selectedItems.end()) {
             removeComponent(name);
         }
     }
     auto system = Application::getInstance().getSystem();
-    // Add new selections
+
     for (const auto &name : selectedItems) {
         if (!containsComponent(name)) {
             if (system->hasProbe(name)) {
@@ -151,9 +150,11 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 double DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<std::pair<double, double>> data;
-    DeltaQ deltaQ = outcome->getDeltaQ(timeLowerBound, timeUpperBound);
+
+    DeltaQ deltaQ = outcome->getDeltaQAtTime(timeLowerBound);
     int size = deltaQ.getSize();
     double binWidth = deltaQ.getBinWidth();
+
     for (int i = 0; i < size; i++) {
         data.push_back({binWidth * (i + 1), deltaQ.cdfAt(i)});
     }
@@ -164,10 +165,12 @@ double DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outc
 
 void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    ProbeDeltaQ probeDeltaQs = probe->getDeltaQ(timeLowerBound, timeUpperBound);
+    ProbeDeltaQ probeDeltaQs = probe->getDeltaQAtTime(timeLowerBound);
+
     DeltaQ probeDeltaQ = probeDeltaQs.probeDeltaQ;
     int size = probeDeltaQ.getSize();
     double probeBinWidth = probeDeltaQ.getBinWidth();
+
     std::vector<std::pair<double, double>> probeData;
 
     for (int i = 0; i < size; i++) {

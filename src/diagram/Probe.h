@@ -15,6 +15,7 @@ struct ProbeDeltaQ {
 
 class Probe : public Observable
 {
+    // Deprecated
     std::shared_ptr<DiagramComponent> firstComponent;
     std::map<uint64_t, ProbeDeltaQ> deltaQs;
     ConfidenceInterval interval;
@@ -23,6 +24,8 @@ public:
     explicit Probe(const std::string &name);
 
     explicit Probe(const std::string &name, std::shared_ptr<DiagramComponent> firstComponent);
+
+    ProbeDeltaQ getDeltaQAtTime(uint64_t);
 
     [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
 

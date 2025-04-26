@@ -16,5 +16,7 @@ public:
     Outcome(const std::string &name);
     [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
 
-    [[nodiscard]] DeltaQ getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
+    DeltaQ getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
+
+    DeltaQ getDeltaQAtTime(uint64_t);
 };

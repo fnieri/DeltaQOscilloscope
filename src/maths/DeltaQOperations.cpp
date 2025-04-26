@@ -58,9 +58,9 @@ DeltaQ convolve(const DeltaQ &lhs, const DeltaQ &rhs)
     return DeltaQ(commonBinWidth, resultPdf, true);
 }
 
+// Inspired by https://github.com/jeremyfix/FFTConvolution/blob/master/Convolution/src/convolution_fftw.h
 DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
 {
-    double commonBinWidth = std::max(lhs.getBinWidth(), rhs.getBinWidth());
 
     if (lhs == DeltaQ()) {
         return rhs;
@@ -69,12 +69,16 @@ DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
         return lhs;
     }
 
+    // Find a common bin width and rebin accordingly
+    double commonBinWidth = std::max(lhs.getBinWidth(), rhs.getBinWidth());
+
     DeltaQ lhsRebinned = rebin(lhs, commonBinWidth);
     DeltaQ rhsRebinned = rebin(rhs, commonBinWidth);
 
     const auto &lhsPdf = lhsRebinned.getPdfValues();
     const auto &rhsPdf = rhsRebinned.getPdfValues();
 
+    // Find the power of 2 nearest to the convolution size
     size_t lhsSize = lhsPdf.size();
     size_t rhsSize = rhsPdf.size();
     size_t convSize = lhsSize + rhsSize - 1;
@@ -82,6 +86,7 @@ DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
     while (fftSize < convSize)
         fftSize <<= 1;
 
+    // Pad pdf with zeroes until end of PDF
     std::vector<double> lhsPadded(fftSize, 0.0);
     std::vector<double> rhsPadded(fftSize, 0.0);
     std::copy(lhsPdf.begin(), lhsPdf.end(), lhsPadded.begin());
@@ -92,11 +97,13 @@ DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
     double *lhsTime = lhsPadded.data();
     double *rhsTime = rhsPadded.data();
 
+    // Transform real input to complex output
     fftw_plan planLhs = fftw_plan_dft_r2c_1d(fftSize, lhsTime, lhsFreq, FFTW_ESTIMATE);
     fftw_plan planRhs = fftw_plan_dft_r2c_1d(fftSize, rhsTime, rhsFreq, FFTW_ESTIMATE);
     fftw_execute(planLhs);
     fftw_execute(planRhs);
 
+    // Do complex multiplication, r: ac - bd i : ad + bc
     fftw_complex *resultFreq = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * (fftSize / 2 + 1));
     for (size_t i = 0; i < fftSize / 2 + 1; ++i) {
         double a = lhsFreq[i][0], b = lhsFreq[i][1];
@@ -105,6 +112,7 @@ DeltaQ convolveFFT(const DeltaQ &lhs, const DeltaQ &rhs)
         resultFreq[i][1] = a * d + b * c;
     }
 
+    // Invert from complex plane to real plane
     std::vector<double> resultTime(fftSize);
     fftw_plan planInv = fftw_plan_dft_c2r_1d(fftSize, resultFreq, resultTime.data(), FFTW_ESTIMATE);
     fftw_execute(planInv);

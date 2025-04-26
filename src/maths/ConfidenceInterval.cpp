@@ -2,9 +2,12 @@
 #include <iostream>
 #include <math.h>
 #include <stdexcept>
+#include <vector>
 
-ConfidenceInterval::ConfidenceInterval(int numBins, double alpha)
-    : cdfSum(numBins, 0.0)
+ConfidenceInterval::ConfidenceInterval(int numBins)
+
+    : numBins(numBins)
+    , cdfSum(numBins, 0.0)
     , cdfSumSquares(numBins, 0.0)
     , cdfSampleCounts(numBins, 0)
     , bounds(numBins)
@@ -13,8 +16,6 @@ ConfidenceInterval::ConfidenceInterval(int numBins, double alpha)
 }
 void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 {
-    // addCumulativeHistogram(deltaQ.getCumulativeHistogram(), deltaQ.getTotalSamples());
-
     auto cdf = deltaQ.getCdfValues();
     auto numSamples = deltaQ.getTotalSamples();
     if (cdf.size() != cdfSum.size()) {
@@ -26,7 +27,7 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
         double weightedCDF = cdfValue * numSamples;
 
         cdfSum[i] += weightedCDF;
-        cdfSumSquares[i] += weightedCDF * cdfValue; // Note: weightedCDF * original cdfValue
+        cdfSumSquares[i] += weightedCDF * cdfValue;
         cdfSampleCounts[i] += numSamples;
     }
 
@@ -84,6 +85,20 @@ void ConfidenceInterval::updateConfidenceInterval()
         bounds[i].lowerBound = std::max(0.0, mean - stddev);
         bounds[i].upperBound = std::min(1.0, mean + stddev);
     }
+}
+
+void ConfidenceInterval::reset()
+{
+    bounds = std::vector<Bound>(numBins);
+    cdfSum = std::vector<double>(numBins);
+    cdfSumSquares = std::vector<double>(numBins);
+    cdfSampleCounts = std::vector<unsigned int>(numBins);
+}
+
+void ConfidenceInterval::setNumBins(int newNumBins)
+{
+    numBins = newNumBins;
+    reset();
 }
 
 const std::vector<Bound> ConfidenceInterval::getBounds() const

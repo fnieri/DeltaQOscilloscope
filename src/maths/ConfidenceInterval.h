@@ -13,7 +13,7 @@ class ConfidenceInterval
 private:
     std::vector<Bound> bounds;
     unsigned int totalSamples;
-
+    unsigned int numBins;
     std::vector<double> cdfSum;
     std::vector<double> cdfSumSquares;
     std::vector<unsigned int> cdfSampleCounts;
@@ -21,10 +21,14 @@ private:
     void updateConfidenceInterval();
 
 public:
-    ConfidenceInterval(int numBins, double alpha);
+    ConfidenceInterval(int numBins);
+
+    void setNumBins(int newNumBins);
 
     void addDeltaQ(const DeltaQ &);
     void removeDeltaQ(const DeltaQ &);
 
     const std::vector<Bound> getBounds() const;
+
+    void reset();
 };

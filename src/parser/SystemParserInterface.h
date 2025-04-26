@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "../diagram/System.h"
 #include "DQGrammarLexer.h"
 #include "DQGrammarParser.h"
 #include "SystemBuilder.h"

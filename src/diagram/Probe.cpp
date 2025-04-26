@@ -9,7 +9,7 @@
 Probe::Probe(const std::string &name)
     : DiagramComponent(name)
     , Observable(name)
-    , interval(50, 0.05) // FIXME
+    , interval(50)
 {
 }
 
@@ -17,7 +17,7 @@ Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> fi
     : DiagramComponent(name)
     , Observable(name)
     , firstComponent(firstComponent)
-    , interval(50, 0.05) // FIXME
+    , interval(50)
 {
 }
 
@@ -27,6 +27,7 @@ ProbeDeltaQ Probe::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     DeltaQ probeDeltaQ;
     double bW = getBinWidth();
     DeltaQ calculatedDeltaQ = this->calculateDeltaQ(getBinWidth(), name, timeLowerBound, timeUpperBound);
+
     if (samplesInRange.size() > 0) {
 
         probeDeltaQ = {getBinWidth(), samplesInRange};
@@ -37,9 +38,9 @@ ProbeDeltaQ Probe::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     deltaQs[timeLowerBound] = deltaQ;
 
     if (deltaQs.size() > MAX_DQ) {
-        auto earliest = deltaQs.begin(); // map is sorted by key
-        interval.removeDeltaQ(earliest->second.probeDeltaQ); // remove from CI
-        deltaQs.erase(earliest); // remove from map
+        auto earliest = deltaQs.begin();
+        interval.removeDeltaQ(earliest->second.probeDeltaQ);
+        deltaQs.erase(earliest);
     }
     return deltaQ;
 }
@@ -65,6 +66,13 @@ DeltaQ Probe::calculateDeltaQ(const double &binWidth, std::string currentProbe, 
         }
     }
     return DeltaQ();
+}
+
+ProbeDeltaQ Probe::getDeltaQAtTime(uint64_t time)
+{
+    if (deltaQs.count(time))
+        return deltaQs[time];
+    return {DeltaQ(), DeltaQ(), interval.getBounds()};
 }
 
 ConfidenceInterval Probe::getConfidenceInterval()

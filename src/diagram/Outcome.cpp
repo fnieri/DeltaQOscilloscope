@@ -1,16 +1,16 @@
 #include "Outcome.h"
 #include "../maths/DeltaQOperations.h"
 #include "DiagramComponent.h"
-#include "System.h"
 #include <algorithm>
 #include <iostream>
+
+#define MAX_DQ 30
 Outcome::Outcome(const std::string &name)
     : DiagramComponent(name)
     , Observable(name)
 {
 }
 
-// TODO implement
 DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     if (probeNextComponent.count(currentProbe)) {
@@ -38,12 +38,16 @@ DeltaQ Outcome::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     sorted = true;
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
     deltaQs[timeLowerBound] = deltaQ;
+    if (deltaQs.size() > MAX_DQ) {
+        auto earliest = deltaQs.begin();
+        deltaQs.erase(earliest);
+    }
     return deltaQ;
 }
-/*
-DeltaQ Outcome::getDeltaQ(double binWidth) const
+
+DeltaQ Outcome::getDeltaQAtTime(uint64_t time)
 {
-    std::vector<long double> outcomeSamples = getTimeSeries();
-    return {binWidth, outcomeSamples};
+    if (deltaQs.count(time))
+        return deltaQs[time];
+    return DeltaQ();
 }
-*/

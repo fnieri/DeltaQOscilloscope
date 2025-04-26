@@ -32,6 +32,25 @@ Server::~Server()
 void Server::start()
 {
     serverThread = std::thread(&Server::run, this);
+
+    workerThread = std::thread([this]() {
+        while (!shutdownWorker) {
+            std::unique_lock lock(queueMutex);
+            queueCond.wait(lock, [this] { return !sampleQueue.empty() || shutdownWorker; });
+
+            while (!sampleQueue.empty()) {
+                auto [name, sample] = sampleQueue.front();
+                sampleQueue.pop();
+                lock.unlock(); // Unlock during processing (non-blocking)
+
+                if (system) {
+                    system->addSample(name, sample); // Now OK to block if needed
+                }
+
+                lock.lock();
+            }
+        }
+    });
 }
 
 void Server::updateSystem()
@@ -136,7 +155,16 @@ void Server::cleanupThreads()
 void Server::stop()
 {
     running = false;
+
+    {
+        std::lock_guard lock(queueMutex);
+        shutdownWorker = true;
+    }
+    queueCond.notify_all();
+    if (workerThread.joinable())
+        workerThread.join();
 }
+
 void Server::parseErlangMessage(const char *buffer, int len)
 {
     if (buffer == nullptr || len <= 0 || len >= 1024) {
@@ -159,6 +187,7 @@ void Server::parseErlangMessage(const char *buffer, int len)
     std::string statusStr = match[4].str();
     Sample sample;
     Status status = Status::SUCCESS;
+
     if (statusStr == TIMEOUT || statusStr == FAIL) {
         status = Status::FAILED;
         if (statusStr == TIMEOUT)
@@ -177,5 +206,9 @@ void Server::parseErlangMessage(const char *buffer, int len)
         return;
     }
 
-    system->addSample(name, sample);
+    {
+        std::lock_guard lock(queueMutex);
+        sampleQueue.emplace(name, sample);
+    }
+    queueCond.notify_one();
 }

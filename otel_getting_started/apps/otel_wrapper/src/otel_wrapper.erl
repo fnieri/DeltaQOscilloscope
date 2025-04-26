@@ -3,26 +3,30 @@
 
 -export([start/0, start_span/1, end_span/1, fail_span/1, span_process/2]).
 -export([start/2, stop/1]).
--export([connection_manager/1]).
+-export([start_tcp_server/0, connection_manager/1]).
+-export([init_ets/0, start_connection_manager/0]).
 
 %%%=======================
 %%% Application Callbacks
 %%%=======================
 
+
 start(_Type, _Args) ->
-    ets:new(timeout_registry, [named_table, public, set]),
-    ets:new(otel_connections, [named_table, public, set]),
-    ConnectionPid = spawn_link(?MODULE, connection_manager, [undefined]),
-    register(otel_connection_manager, ConnectionPid),
-    spawn(fun start_tcp_server/0),
-    {ok, self()}.
+    otel_wrapper_sup:start_link().
 
 stop(_State) ->
-    case whereis(otel_connection_manager) of
-        undefined -> ok;
-        Pid -> exit(Pid, normal)
-    end,
     ok.
+
+init_ets() ->
+    ets:new(timeout_registry, [named_table, public, set]),
+    ets:new(otel_connections, [named_table, public, set]),
+    {ok, self()}.
+
+start_connection_manager() ->
+    ConnectionPid = spawn_link(?MODULE, connection_manager, [undefined]),
+    register(otel_connection_manager, ConnectionPid),
+    {ok, ConnectionPid}.
+
 
 %%%=======================
 %%% Public API
@@ -111,6 +115,8 @@ handle_c_message(Bin) when is_binary(Bin) ->
 %%% Connection Manager
 %%%=======================
 
+
+
 connection_manager(Socket) ->
     receive
         {get_connection, From} ->
@@ -135,6 +141,7 @@ connection_manager(Socket) ->
             end,
             exit(normal)
     end.
+
 
 ensure_connection(Socket) ->
     case Socket of

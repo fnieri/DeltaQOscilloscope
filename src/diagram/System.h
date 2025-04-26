@@ -26,6 +26,8 @@ class System
     std::shared_ptr<DiagramComponent> firstComponent;
 
 public:
+    void calculateAllComponentsDeltaQ(uint64_t, uint64_t);
+
     System() = default;
 
     void setFirstComponent(std::shared_ptr<DiagramComponent> component);
@@ -39,6 +41,8 @@ public:
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
+
+    void setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap);
 
     void addSample(std::string &componentName, Sample &sample);
 
@@ -55,8 +59,6 @@ public:
     bool hasProbe(const std::string &name);
 
     std::shared_ptr<Probe> getProbe(const std::string &name);
-
-    void setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> probesMap);
 
     void setSystemDefinitionText(std::string &text);
 

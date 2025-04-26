@@ -102,10 +102,13 @@ void test_DeltaConvolution()
     std::vector<double> pdf = {0.1, 0.2, 0.4, 0.2, 0.1};
 
     DeltaQ lhs(1.0, delta, true);
+    std::cout << "lhs num bins " << lhs.getSize() << "\n";
     DeltaQ rhs(1.0, pdf, true);
+    std::cout << "rhs num bins " << rhs.getSize() << "\n";
     auto result = convolveFFT(lhs, rhs);
 
     ASSERT_TRUE(pdfsAlmostEqual(result.getPdfValues(), pdf));
+    printPdf(result, "convolution FFT");
     std::cout << "✅ test_DeltaConvolution passed.\n";
 }
 
@@ -122,6 +125,7 @@ void test_UniformConvolution()
     std::vector<double> expected = {0.0625, 0.125, 0.1875, 0.25, 0.1875, 0.125, 0.0625};
 
     ASSERT_TRUE(pdfsAlmostEqual(out, expected, 1e-6));
+
     std::cout << "✅ test_UniformConvolution passed.\n";
 }
 

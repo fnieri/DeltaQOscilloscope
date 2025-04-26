@@ -1,12 +1,10 @@
-
 {application, otel_wrapper,
  [
-  {description, "OpenTelemetry Wrapper for C Integration"},
+  {description, "An OpenTelemetry Wrapper for the DeltaQ Oscilloscope"},
   {vsn, "0.1.0"},
   {modules, [otel_wrapper, otel_wrapper_sup]},
-  {registered, []},
+  {registered, [otel_wrapper_sup, otel_connection_manager]},
   {applications, [kernel, stdlib]},
   {mod, {otel_wrapper, []}},
   {env, []}
  ]}.
-
