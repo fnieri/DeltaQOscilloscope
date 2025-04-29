@@ -23,6 +23,8 @@ struct ProbeAllSeries {
     QLineSeries *calculatedProbeS;
     QLineSeries *lowerBoundS;
     QLineSeries *upperBoundS;
+    QLineSeries *meanS;
+    QLineSeries *qtaS;
 };
 
 class DeltaQPlot;
@@ -80,7 +82,7 @@ public:
     void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
 private:
-    double updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome>& outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
     void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;

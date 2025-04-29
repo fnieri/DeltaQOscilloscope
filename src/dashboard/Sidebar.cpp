@@ -1,8 +1,6 @@
 
 #include "Sidebar.h"
 
-// @note Undef emit as it clashes with ANTLR emit!
-// Must do it before ANTLR include!
 #include "../parser/SystemParserInterface.h"
 
 #include "../Application.h"
@@ -59,8 +57,17 @@ Sidebar::Sidebar(QWidget *parent)
     layout->addWidget(newPlotList);
     layout->addWidget(addNewPlotButton);
 
+
+    qtaInputWidget = new QTAInputWidget(this);
+    layout->addWidget(qtaInputWidget);
+
+
     delaySettingsWidget = new DelaySettingsWidget(this);
     layout->addWidget(delaySettingsWidget);
+    connect(delaySettingsWidget, &DelaySettingsWidget::delayParametersChanged,
+            qtaInputWidget, &QTAInputWidget::loadObservableSettings);
+
+
     currentPlotLabel = new QLabel("Modify current plot:", this);
     currentPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     currentPlotLabel->hide(); // Initially hidden
@@ -73,19 +80,19 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
     }
 
     if (currentPlotList) {
-        if (!currentPlotList->parent()) {
-            qDebug() << "Sidebar: currentPlotList is already deleted!";
-        } else {
-            layout->removeWidget(currentPlotList);
-            currentPlotList->hide(); // <-- Avoids segfault if it's valid
-        }
+        layout->removeWidget(currentPlotList);
+        currentPlotList->hide();
+        currentPlotList = nullptr;
     }
 
-    currentPlotList = plotList;
-    layout->addWidget(currentPlotList);
-    currentPlotList->show();
-    currentPlotLabel->show();
+    if (plotList) {
+        currentPlotList = plotList;
+        layout->addWidget(currentPlotList);
+        currentPlotList->show();
+        currentPlotLabel->show();
+    }
 }
+
 
 void Sidebar::hideCurrentPlot()
 {

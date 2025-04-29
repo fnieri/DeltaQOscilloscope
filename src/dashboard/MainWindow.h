@@ -12,6 +12,8 @@
 #include <QVBoxLayout>
 #include <qboxlayout.h>
 
+#include "TriggersTab.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -25,6 +27,11 @@ class MainWindow : public QMainWindow
 
     QThread *timerThread;
     QTimer *updateTimer;
+
+    QTabWidget* sideTabWidget;  // NEW
+    TriggersTab* triggersTab;   // NEW
+
+
 
     Sidebar *sidebar;
     QPushButton *addPlotButton;

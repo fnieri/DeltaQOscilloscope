@@ -1,3 +1,4 @@
+#pragma once
 #include "antlr4-runtime.h"
 #include <iostream>
 #include <stdexcept>

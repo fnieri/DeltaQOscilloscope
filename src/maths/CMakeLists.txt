@@ -5,6 +5,12 @@ add_library(${PREFIX}_maths
     DeltaQ.cpp
     DeltaQOperations.h
     DeltaQOperations.cpp
+    QTA.h
+    Triggers.h
+    Triggers.cpp
+        TriggerTypes.h
+        TriggerManager.cpp
+        TriggerManager.h
 )
 
 target_include_directories(${PREFIX}_maths

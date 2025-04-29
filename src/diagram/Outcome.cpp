@@ -11,25 +11,8 @@ Outcome::Outcome(const std::string &name)
 {
 }
 
-DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    if (probeNextComponent.count(currentProbe)) {
-        DeltaQ outcomeDeltaQ = DeltaQ();
-        if (deltaQs.count(timeLowerBound)) {
-            outcomeDeltaQ = deltaQs[timeLowerBound];
-        } else {
-            outcomeDeltaQ = getDeltaQ(timeLowerBound, timeUpperBound);
-        }
-        return convolve(outcomeDeltaQ, probeNextComponent.at(currentProbe)->calculateDeltaQ(binWidth, currentProbe, timeLowerBound, timeUpperBound));
-    }
-    return getDeltaQ(timeLowerBound, timeUpperBound);
-}
 
-DeltaQ Outcome::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    if (deltaQs.count(timeLowerBound)) {
-        return deltaQs[timeLowerBound];
-    }
+DeltaQ Outcome::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound) {
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
 
     auto it = std::lower_bound(samples.begin(), samples.end(), timeUpperBound, [](const Sample &s, long long time) { return s.startTime < time; });
@@ -37,17 +20,11 @@ DeltaQ Outcome::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     samples.erase(samples.begin(), it);
     sorted = true;
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
-    deltaQs[timeLowerBound] = deltaQ;
-    if (deltaQs.size() > MAX_DQ) {
-        auto earliest = deltaQs.begin();
-        deltaQs.erase(earliest);
+    observedDeltaQs[timeLowerBound] = deltaQ;
+    if (observedDeltaQs.size() > MAX_DQ) {
+        auto earliest = observedDeltaQs.begin();
+        observedDeltaQs.erase(earliest);
     }
+    triggerManager.evaluate(deltaQ, qta);
     return deltaQ;
-}
-
-DeltaQ Outcome::getDeltaQAtTime(uint64_t time)
-{
-    if (deltaQs.count(time))
-        return deltaQs[time];
-    return DeltaQ();
 }

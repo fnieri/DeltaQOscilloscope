@@ -1,16 +1,10 @@
 add_library(${PREFIX}_diagram
-    AllToFinish.h
-    AllToFinish.cpp
     DiagramComponent.h
     DiagramComponent.cpp
-    FirstToFinish.h
-    FirstToFinish.cpp
     Outcome.h
     Outcome.cpp
     Operator.h
     Operator.cpp
-    ProbabilisticOperator.h
-    ProbabilisticOperator.cpp
     Probe.h
     Probe.cpp
     System.h

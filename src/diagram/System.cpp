@@ -7,10 +7,6 @@
 #include "System.h"
 #include "../Application.h"
 #include <utility>
-void System::setFirstComponent(std::shared_ptr<DiagramComponent> component)
-{
-    firstComponent = std::move(component);
-}
 
 void System::setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap)
 {
@@ -66,13 +62,6 @@ DeltaQ System::calculateDeltaQ()
     return DeltaQ();
 }
 
-void System::calculateAllComponentsDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    for (auto &[_, outcome] : outcomes)
-        outcome->getDeltaQ(timeLowerBound, timeUpperBound);
-    for (auto &[_, probe] : probes)
-        probe->getDeltaQ(timeLowerBound, timeUpperBound);
-}
 
 [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &System::getOutcomes()
 {
@@ -126,4 +115,8 @@ void System::setSystemDefinitionText(std::string &text)
 std::string System::getSystemDefinitionText()
 {
     return systemDefinitionText;
+}
+
+std::shared_ptr<Observable> System::getObservable(const std::string& name) {
+    return components[name];
 }

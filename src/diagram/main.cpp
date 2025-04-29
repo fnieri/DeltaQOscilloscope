@@ -102,9 +102,9 @@ void test_DeltaConvolution()
     std::vector<double> pdf = {0.1, 0.2, 0.4, 0.2, 0.1};
 
     DeltaQ lhs(1.0, delta, true);
-    std::cout << "lhs num bins " << lhs.getSize() << "\n";
+    std::cout << "lhs num bins " << lhs.getBins() << "\n";
     DeltaQ rhs(1.0, pdf, true);
-    std::cout << "rhs num bins " << rhs.getSize() << "\n";
+    std::cout << "rhs num bins " << rhs.getBins() << "\n";
     auto result = convolveFFT(lhs, rhs);
 
     ASSERT_TRUE(pdfsAlmostEqual(result.getPdfValues(), pdf));

@@ -9,14 +9,7 @@
 #include <map>
 class Outcome : public Observable
 {
-    // timeLowerBound when DeltaQ is created
-    std::map<uint64_t, DeltaQ> deltaQs;
-
+    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
 public:
     Outcome(const std::string &name);
-    [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
-
-    DeltaQ getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
-
-    DeltaQ getDeltaQAtTime(uint64_t);
 };

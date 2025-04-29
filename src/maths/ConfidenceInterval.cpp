@@ -11,63 +11,56 @@ ConfidenceInterval::ConfidenceInterval(int numBins)
     , cdfSumSquares(numBins, 0.0)
     , cdfSampleCounts(numBins, 0)
     , bounds(numBins)
-    , totalSamples(0)
 {
 }
 void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 {
-    auto cdf = deltaQ.getCdfValues();
-    auto numSamples = deltaQ.getTotalSamples();
+    const auto& cdf = deltaQ.getCdfValues();
+
     if (cdf.size() != cdfSum.size()) {
         throw std::invalid_argument("CDF size mismatch in addDeltaQ");
     }
 
     for (size_t i = 0; i < cdf.size(); ++i) {
-        double cdfValue = cdf[i];
-        double weightedCDF = cdfValue * numSamples;
+        const double cdfValue = cdf[i];
 
-        cdfSum[i] += weightedCDF;
-        cdfSumSquares[i] += weightedCDF * cdfValue;
-        cdfSampleCounts[i] += numSamples;
+        cdfSum[i] += cdfValue;
+        cdfSumSquares[i] += cdfValue * cdfValue;
+        cdfSampleCounts[i] += 1; // One more sample for this bin
     }
 
-    totalSamples += numSamples;
     updateConfidenceInterval();
 }
+
 
 void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
 {
     if (deltaQ == DeltaQ()) {
         return;
     }
-    auto cdf = deltaQ.getCdfValues();
-    unsigned int numSamples = deltaQ.getTotalSamples();
+
+    const auto& cdf = deltaQ.getCdfValues();
 
     if (cdf.size() != cdfSum.size()) {
         throw std::invalid_argument("CDF size mismatch in removeDeltaQ");
     }
 
     for (size_t i = 0; i < cdf.size(); ++i) {
-        double cdfValue = cdf[i];
-        double weightedCDF = cdfValue * numSamples;
+        const double cdfValue = cdf[i];
 
-        cdfSum[i] -= weightedCDF;
-        cdfSumSquares[i] -= weightedCDF * cdfValue;
+        cdfSum[i] -= cdfValue;
+        cdfSumSquares[i] -= cdfValue * cdfValue;
 
-        if (cdfSampleCounts[i] < numSamples) {
-            throw std::runtime_error("Removing more CDF samples than stored in bin");
+        if (cdfSampleCounts[i] == 0) {
+            throw std::runtime_error("Cannot remove from empty bin");
         }
 
-        cdfSampleCounts[i] -= numSamples;
+        cdfSampleCounts[i] -= 1;
     }
 
-    if (totalSamples < numSamples) {
-        throw std::runtime_error("Removing more total samples than stored");
-    }
-
-    totalSamples -= numSamples;
     updateConfidenceInterval();
 }
+
 
 void ConfidenceInterval::updateConfidenceInterval()
 {
@@ -79,13 +72,16 @@ void ConfidenceInterval::updateConfidenceInterval()
         }
 
         double mean = cdfSum[i] / cdfSampleCounts[i];
-        double variance = (cdfSumSquares[i] / cdfSampleCounts[i]) - (mean * mean);
+        double meanSquare = cdfSumSquares[i] / cdfSampleCounts[i];
+        double variance = meanSquare - (mean * mean);
         double stddev = std::sqrt(std::max(variance, 0.0));
 
         bounds[i].lowerBound = std::max(0.0, mean - stddev);
         bounds[i].upperBound = std::min(1.0, mean + stddev);
+        bounds[i].mean = mean;
     }
 }
+
 
 void ConfidenceInterval::reset()
 {
@@ -98,10 +94,10 @@ void ConfidenceInterval::reset()
 void ConfidenceInterval::setNumBins(int newNumBins)
 {
     numBins = newNumBins;
-    reset();
+    reset(  );
 }
 
-const std::vector<Bound> ConfidenceInterval::getBounds() const
+std::vector<Bound> ConfidenceInterval::getBounds() const
 {
     return bounds;
 }

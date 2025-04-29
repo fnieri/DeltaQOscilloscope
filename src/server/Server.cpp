@@ -193,7 +193,7 @@ void Server::parseErlangMessage(const char *buffer, int len)
         if (statusStr == TIMEOUT)
             status = Status::TIMEDOUT;
 
-        sample = {startTime, NULL, NULL, status};
+        sample = {startTime, 0, 0, status};
         std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << status << std::endl;
 
     } else if (statusStr == EXEC_OK) {

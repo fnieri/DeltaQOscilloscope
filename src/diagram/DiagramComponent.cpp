@@ -6,6 +6,9 @@
  */
 
 #include "DiagramComponent.h"
+
+#include <iostream>
+
 DiagramComponent::DiagramComponent(const std::string &name)
     : name {name}
 {
@@ -16,12 +19,9 @@ std::string DiagramComponent::getName() const &
     return name;
 }
 
-void DiagramComponent::setNext(const std::string &probeName, std::shared_ptr<DiagramComponent> next)
+DeltaQ DiagramComponent::getObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    probeNextComponent[probeName] = next;
-}
-
-std::unordered_map<std::string, std::shared_ptr<DiagramComponent>> DiagramComponent::getProbeNextComponent()
-{
-    return probeNextComponent;
+    if (observedDeltaQs.count(timeLowerBound))
+        return observedDeltaQs[timeLowerBound];
+    return calculateObservableDeltaQ(timeLowerBound, timeUpperBound);
 }

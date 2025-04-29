@@ -12,13 +12,22 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
     std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
     std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
+
     std::vector<std::string> definedProbes;
     System system;
-    std::string currentProbe; // Track current probe context for setting next components
-    std::unordered_map<std::string, std::vector<std::string>> definitionLinks;
+
+    std::string currentlyBuildingProbe;
+    std::map<std::string, std::vector<std::string>> dependencies;
+
+    std::unordered_map<std::string, std::vector<std::string>> definitionLinks; // For debugging
     std::unordered_map<std::string, std::vector<std::vector<std::string>>> operatorLinks;
     std::vector<std::string> systemLinks;
+    std::unordered_set<std::string> allNames;
 
+    void checkForCycles() const;
+    bool hasCycle(const std::string& node,
+                                    std::set<std::string>& visited,
+                                    std::set<std::string>& recursionStack) const;
 public:
     System getSystem() const;
 

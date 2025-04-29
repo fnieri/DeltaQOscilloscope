@@ -23,10 +23,10 @@ public:
 
 Q_SIGNALS:
     void delayParametersChanged();
-
 private Q_SLOTS:
     void updateMaxDelay();
     void onSaveDelayClicked();
+    void loadObservableSettings();
 
 private:
     QComboBox *observableComboBox;

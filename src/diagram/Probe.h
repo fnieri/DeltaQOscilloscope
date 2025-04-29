@@ -7,31 +7,23 @@
 #include "DiagramComponent.h"
 #include "Observable.h"
 #include <map>
-struct ProbeDeltaQ {
-    DeltaQ probeDeltaQ;
-    DeltaQ calculatedProbeDeltaQ;
-    std::vector<Bound> bounds;
-};
+#include <memory>
 
 class Probe : public Observable
 {
-    // Deprecated
-    std::shared_ptr<DiagramComponent> firstComponent;
-    std::map<uint64_t, ProbeDeltaQ> deltaQs;
+    std::map<uint64_t, DeltaQ> calculatedDeltaQs;
     ConfidenceInterval interval;
+    std::vector<std::shared_ptr<DiagramComponent>> causalLinks;
+    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
 
 public:
-    explicit Probe(const std::string &name);
+    Probe(const std::string &name);
 
-    explicit Probe(const std::string &name, std::shared_ptr<DiagramComponent> firstComponent);
+    Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>>);
 
-    ProbeDeltaQ getDeltaQAtTime(uint64_t);
+    DeltaQ getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
-    [[nodiscard]] DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) override;
+    std::vector<Bound> getBounds() const;
 
-    ProbeDeltaQ getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
-
-    void setFirstComponent(std::shared_ptr<DiagramComponent> component);
-
-    ConfidenceInterval getConfidenceInterval();
+    double setNewParameters(int, int) override;
 };

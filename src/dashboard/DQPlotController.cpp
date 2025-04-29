@@ -67,12 +67,25 @@ void DQPlotController::addComponent(std::string name, bool isProbe)
         std::string upperBoundName = name + " upper bound";
 
         auto probeSeries = new QLineSeries();
-        std::string probeSeriesName = name + " time series";
+        std::string probeSeriesName = name + " observed";
 
         auto calculatedProbeSeries = new QLineSeries();
-        std::string calculatedProbeSeriesName = name + " calculated DQ";
+        std::string calculatedProbeSeriesName = name + " calculated";
+
+        auto meanSeries = new QLineSeries();
+        std::string meanSeriesName = name + " mean";
+
+        auto qtaSeries = new QLineSeries();
+        std::string qtaSeriesName = name + " qta";
+
         ProbeAllSeries series
-            = {.probeS = probeSeries, .calculatedProbeS = calculatedProbeSeries, .lowerBoundS = lowerBoundSeries, .upperBoundS = upperBoundSeries};
+            = {.probeS = probeSeries,
+            .calculatedProbeS = calculatedProbeSeries,
+            .lowerBoundS = lowerBoundSeries,
+            .upperBoundS = upperBoundSeries,
+            .meanS = meanSeries,
+            .qtaS = qtaSeries
+            };
 
         probes[name] = {series, system->getProbe(name)};
 
@@ -80,6 +93,8 @@ void DQPlotController::addComponent(std::string name, bool isProbe)
         plot->addSeries(calculatedProbeSeries, calculatedProbeSeriesName);
         plot->addSeries(lowerBoundSeries, lowerBoundName);
         plot->addSeries(upperBoundSeries, upperBoundName);
+        plot->addSeries(meanSeries, meanSeriesName);
+        plot->addSeries(qtaSeries, qtaSeriesName);
     }
 }
 
@@ -111,6 +126,8 @@ void DQPlotController::removeComponent(const std::string &name)
         plot->removeSeries(allSeries.upperBoundS);
         plot->removeSeries(allSeries.calculatedProbeS);
         plot->removeSeries(allSeries.probeS);
+        plot->removeSeries(allSeries.meanS);
+        plot->removeSeries(allSeries.qtaS);
         probes.erase(name);
     }
 }
@@ -128,6 +145,9 @@ void DQPlotController::removeComponent(std::string &&name)
         plot->removeSeries(allSeries.upperBoundS);
         plot->removeSeries(allSeries.calculatedProbeS);
         plot->removeSeries(allSeries.probeS);
+        plot->removeSeries(allSeries.meanS);
+        plot->removeSeries(allSeries.qtaS);
+
         probes.erase(name);
     }
 }
@@ -147,16 +167,16 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
     }
 }
 
-double DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outcome> outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
+double DQPlotController::updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome>& outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<std::pair<double, double>> data;
 
-    DeltaQ deltaQ = outcome->getDeltaQAtTime(timeLowerBound);
-    int size = deltaQ.getSize();
+    DeltaQ deltaQ = outcome->getObservableDeltaQ(timeLowerBound, timeUpperBound);
+    int size = deltaQ.getBins();
     double binWidth = deltaQ.getBinWidth();
 
     for (int i = 0; i < size; i++) {
-        data.push_back({binWidth * (i + 1), deltaQ.cdfAt(i)});
+        data.emplace_back(binWidth * (i + 1), deltaQ.cdfAt(i));
     }
 
     plot->updateSeries(series, data);
@@ -165,39 +185,64 @@ double DQPlotController::updateOutcome(QLineSeries *series, std::shared_ptr<Outc
 
 void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    ProbeDeltaQ probeDeltaQs = probe->getDeltaQAtTime(timeLowerBound);
+    // Plot observed DeltaQ
 
-    DeltaQ probeDeltaQ = probeDeltaQs.probeDeltaQ;
-    int size = probeDeltaQ.getSize();
-    double probeBinWidth = probeDeltaQ.getBinWidth();
-
+    DeltaQ observedDeltaQ = probe->getObservableDeltaQ(timeLowerBound, timeUpperBound);
+    int observedBins = observedDeltaQ.getBins();
+    double observedBinWidth = observedDeltaQ.getBinWidth();
     std::vector<std::pair<double, double>> probeData;
 
-    for (int i = 0; i < size; i++) {
-        probeData.push_back({probeBinWidth * (i + 1), probeDeltaQ.cdfAt(i)});
+    for (int i = 0; i < observedBins; i++) {
+        probeData.emplace_back(observedBinWidth * (i + 1), observedDeltaQ.cdfAt(i));
     }
-
     plot->updateSeries(probeAllSeries.probeS, probeData);
 
-    DeltaQ calculatedProbeDeltaQ = probeDeltaQs.calculatedProbeDeltaQ;
-    int calculatedSize = calculatedProbeDeltaQ.getSize();
+    //Update calculated deltaQ
+
+    DeltaQ probeCalculatedDeltaQ = probe->getProbeDeltaQ(timeLowerBound, timeUpperBound);
+
+    int calculatedBins = probeCalculatedDeltaQ.getBins();
+    auto calculatedBinWidth = probeCalculatedDeltaQ.getBinWidth();
     std::vector<std::pair<double, double>> calculatedProbeData;
 
-    for (int i = 0; i < calculatedSize; i++) {
-        calculatedProbeData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), calculatedProbeDeltaQ.cdfAt(i)});
+    for (int i = 0; i < calculatedBins; i++) {
+        calculatedProbeData.emplace_back(calculatedBinWidth * (i + 1), probeCalculatedDeltaQ.cdfAt(i));
     }
 
     plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData);
 
-    std::vector<Bound> bounds = probeDeltaQs.bounds;
+
+    // Update confidence bounds
+
+    std::vector<Bound> bounds = probe->getBounds();
+
     std::vector<std::pair<double, double>> lowerBoundData;
     std::vector<std::pair<double, double>> upperBoundData;
+    std::vector<std::pair<double, double>> meanData;
 
     for (int i = 0; i < bounds.size(); i++) {
-        lowerBoundData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), bounds[i].lowerBound});
-        upperBoundData.push_back({calculatedProbeDeltaQ.getBinWidth() * (i + 1), bounds[i].upperBound});
+        double x = observedBinWidth * (i + 1);
+        lowerBoundData.emplace_back(x, bounds[i].lowerBound);
+        upperBoundData.emplace_back(x, bounds[i].upperBound);
+        meanData.emplace_back(x, bounds[i].mean);
     }
 
     plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData);
     plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData);
+    plot->updateSeries(probeAllSeries.meanS, meanData);
+
+    // Plot QTA
+
+    auto qta = probe->getQTA();
+    std::vector<std::pair<double, double>> qtaData;
+    qtaData.emplace_back(qta.perc_25, 0);
+    qtaData.emplace_back(qta.perc_25, 0.25);
+    qtaData.emplace_back(qta.perc_50, 0.25);
+    qtaData.emplace_back(qta.perc_50, 0.5);
+    qtaData.emplace_back(qta.perc_75, 0.5);
+    qtaData.emplace_back(qta.perc_75, 0.75);
+    qtaData.emplace_back(probe->getMaxDelay(), 0.75);
+    qtaData.emplace_back(probe->getMaxDelay(), qta.cdfMax);
+
+    plot->updateSeries(probeAllSeries.qtaS, qtaData);
 }

@@ -1,5 +1,5 @@
 
-// Generated from DQGrammar.g4 by ANTLR 4.13.2
+// Generated from /home/francy/Desktop/RealTimeDeltaQSD/./src/parser/DQGrammar.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "antlr4-runtime.h"
 
 
+namespace parser {
 
 
 class  DQGrammarParser : public antlr4::Parser {
@@ -18,9 +19,9 @@ public:
   };
 
   enum {
-    RuleStart = 0, RuleDefinition = 1, RuleSystem = 2, RuleComponent = 3, 
-    RuleBehaviorComponent = 4, RuleProbeComponent = 5, RuleProbability_list = 6, 
-    RuleComponent_list = 7, RuleOutcome = 8
+    RuleStart = 0, RuleDefinition = 1, RuleSystem = 2, RuleComponent_chain = 3, 
+    RuleComponent = 4, RuleBehaviorComponent = 5, RuleProbeComponent = 6, 
+    RuleProbability_list = 7, RuleComponent_list = 8, RuleOutcome = 9
   };
 
   explicit DQGrammarParser(antlr4::TokenStream *input);
@@ -43,6 +44,7 @@ public:
   class StartContext;
   class DefinitionContext;
   class SystemContext;
+  class Component_chainContext;
   class ComponentContext;
   class BehaviorComponentContext;
   class ProbeComponentContext;
@@ -71,8 +73,7 @@ public:
     DefinitionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *IDENTIFIER();
-    std::vector<ComponentContext *> component();
-    ComponentContext* component(size_t i);
+    Component_chainContext *component_chain();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -85,6 +86,19 @@ public:
   public:
     SystemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    Component_chainContext *component_chain();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  SystemContext* system();
+
+  class  Component_chainContext : public antlr4::ParserRuleContext {
+  public:
+    Component_chainContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     std::vector<ComponentContext *> component();
     ComponentContext* component(size_t i);
 
@@ -93,7 +107,7 @@ public:
    
   };
 
-  SystemContext* system();
+  Component_chainContext* component_chain();
 
   class  ComponentContext : public antlr4::ParserRuleContext {
   public:
@@ -158,8 +172,8 @@ public:
   public:
     Component_listContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<ComponentContext *> component();
-    ComponentContext* component(size_t i);
+    std::vector<Component_chainContext *> component_chain();
+    Component_chainContext* component_chain(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -190,3 +204,4 @@ public:
 private:
 };
 
+}  // namespace parser

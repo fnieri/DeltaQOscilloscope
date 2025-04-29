@@ -13,6 +13,9 @@
 #include <array>
 #include <ostream>
 #include <vector>
+
+#include "QTA.h"
+
 class DeltaQ
 {
     double binWidth;
@@ -21,9 +24,8 @@ class DeltaQ
     int bins {0};
 
     std::vector<Sample> samples;
-    std::array<double, 6> quartiles;
-
-    unsigned int totalSamples;
+    QTA qta;
+    unsigned int totalSamples {0};
 
     /**
      * Calculate PDF and CDF values given samples from an outcome
@@ -50,11 +52,12 @@ public:
     [[nodiscard]] const std::vector<double> &getPdfValues() const;
     [[nodiscard]] const std::vector<double> &getCdfValues() const;
     [[nodiscard]] double getBinWidth() const;
-    [[nodiscard]] int getSize() const;
+    [[nodiscard]] int getBins() const;
     [[nodiscard]] double pdfAt(int x) const;
     [[nodiscard]] double cdfAt(int x) const;
     [[nodiscard]] const unsigned int getTotalSamples() const;
-
+    [[nodiscard]] QTA getQTA() const;
+    void calculateQuartiles();
     void setBinWidth(double newWidth);
     /**
      * Operator Overloads

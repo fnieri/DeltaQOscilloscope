@@ -6,13 +6,13 @@
 struct Bound {
     double lowerBound {0};
     double upperBound {1};
+    double mean {0};
 };
 
 class ConfidenceInterval
 {
 private:
     std::vector<Bound> bounds;
-    unsigned int totalSamples;
     unsigned int numBins;
     std::vector<double> cdfSum;
     std::vector<double> cdfSumSquares;
@@ -28,7 +28,7 @@ public:
     void addDeltaQ(const DeltaQ &);
     void removeDeltaQ(const DeltaQ &);
 
-    const std::vector<Bound> getBounds() const;
+    std::vector<Bound> getBounds() const;
 
     void reset();
 };

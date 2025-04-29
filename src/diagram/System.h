@@ -23,11 +23,8 @@ class System
     std::unordered_map<std::string, std::shared_ptr<Observable>> components;
 
     std::string systemDefinitionText;
-    std::shared_ptr<DiagramComponent> firstComponent;
 
 public:
-    void calculateAllComponentsDeltaQ(uint64_t, uint64_t);
-
     System() = default;
 
     void setFirstComponent(std::shared_ptr<DiagramComponent> component);
@@ -48,6 +45,7 @@ public:
 
     std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
 
+    std::shared_ptr<Observable> getObservable(const std::string &observableName);
     std::vector<std::string> getAllComponentsName();
     /**
      * Calculate the resulting DeltaQ for the whole system

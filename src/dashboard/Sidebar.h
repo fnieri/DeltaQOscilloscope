@@ -14,6 +14,9 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <qboxlayout.h>
+
+#include "QTAInputWidget.h"
+
 class Sidebar : public QWidget
 {
     Q_OBJECT
@@ -35,6 +38,7 @@ class Sidebar : public QWidget
 
     QVBoxLayout *layout;
     DelaySettingsWidget *delaySettingsWidget;
+    QTAInputWidget *qtaInputWidget;
 Q_SIGNALS:
     void addPlotClicked();
 

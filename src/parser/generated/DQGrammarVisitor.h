@@ -1,5 +1,5 @@
 
-// Generated from DQGrammar.g4 by ANTLR 4.13.2
+// Generated from /home/francy/Desktop/RealTimeDeltaQSD/./src/parser/DQGrammar.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -8,6 +8,7 @@
 #include "DQGrammarParser.h"
 
 
+namespace parser {
 
 /**
  * This class defines an abstract visitor for a parse tree
@@ -25,6 +26,8 @@ public:
 
     virtual std::any visitSystem(DQGrammarParser::SystemContext *context) = 0;
 
+    virtual std::any visitComponent_chain(DQGrammarParser::Component_chainContext *context) = 0;
+
     virtual std::any visitComponent(DQGrammarParser::ComponentContext *context) = 0;
 
     virtual std::any visitBehaviorComponent(DQGrammarParser::BehaviorComponentContext *context) = 0;
@@ -40,3 +43,4 @@ public:
 
 };
 
+}  // namespace parser

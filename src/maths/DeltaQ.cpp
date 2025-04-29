@@ -10,12 +10,14 @@
 DeltaQ::DeltaQ(const double binWidth)
     : binWidth(binWidth)
     , bins(0)
+    , qta()
 {
 }
 
 DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const bool isPdf)
     : binWidth(binWidth)
     , bins(values.size()) // Values is binned data
+    , qta()
 {
     if (isPdf) {
         pdfValues = values;
@@ -29,6 +31,7 @@ DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
     : binWidth(binWidth)
     , bins {50} // FIXME magic number
     , samples(samples)
+    , qta()
 {
     calculateDeltaQ(samples);
 }
@@ -37,6 +40,7 @@ DeltaQ::DeltaQ(double binWidth, std::vector<Sample> &samples, int bins)
     : binWidth(binWidth)
     , bins(bins)
     , samples(samples)
+    , qta()
 {
     calculateDeltaQ(samples);
 }
@@ -46,9 +50,10 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
         bins = 0;
         return;
     }
-    std::vector<int> histogram = std::vector<int>(bins, 0);
+    auto histogram = std::vector<int>(bins, 0);
     totalSamples = outcomeSamples.size();
     long long successfulSamples = 0;
+    std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.elapsedTime < b.elapsedTime ; });
 
     for (const auto &sample : outcomeSamples) {
         if (sample.status != Status::SUCCESS) {
@@ -80,7 +85,38 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
         pdfValues.push_back(binValue / totalSamples);
     }
     calculateCDF();
+    calculateQuartiles();
 }
+
+void DeltaQ::calculateQuartiles()
+{
+    if (samples.empty()) {
+        return;
+    }
+    const size_t n = samples.size();
+
+    auto getElapsedAt = [&](size_t index) -> double {
+        return samples[index].elapsedTime;
+    };
+
+    auto getPercentile = [&](double p) -> double {
+        double pos = p * (n - 1);
+        auto idx = static_cast<size_t>(pos);
+        double frac = pos - idx;
+
+        if (idx + 1 < n) {
+            // Linear interpolation between samples[idx] and samples[idx + 1]
+            return getElapsedAt(idx) * (1.0 - frac) + getElapsedAt(idx + 1) * frac;
+        }
+        // If exactly at the last element
+        return getElapsedAt(idx);
+    };
+    qta = QTA::create(getPercentile(0.25),
+        getPercentile(0.50),
+        getPercentile(0.75),
+        ((cdfAt(bins - 1)) > 1) ? 1 : cdfAt(bins - 1)) ;
+}
+
 
 void DeltaQ::calculateCDF()
 {
@@ -102,6 +138,10 @@ void DeltaQ::calculatePDF()
         pdfValues.push_back(cdfValue - previous);
         previous = cdfValue;
     }
+}
+
+QTA DeltaQ::getQTA() const {
+    return qta;
 }
 
 const std::vector<double> &DeltaQ::getPdfValues() const
@@ -129,7 +169,7 @@ double DeltaQ::getBinWidth() const
     return binWidth;
 }
 
-int DeltaQ::getSize() const
+int DeltaQ::getBins() const
 {
     return bins;
 }
@@ -145,7 +185,7 @@ double DeltaQ::pdfAt(int x) const
 double DeltaQ::cdfAt(int x) const
 {
     if (x >= bins) {
-        return cdfValues.at(bins);
+        return cdfValues.at(bins - 1);
     }
     return cdfValues.at(x);
 }
@@ -186,9 +226,9 @@ DeltaQ applyBinaryOperation(const DeltaQ &lhs, const DeltaQ &rhs, BinaryOperatio
     const DeltaQ &otherDeltaQ = (lhs > rhs) ? rhs : lhs;
 
     std::vector<double> resultingCdf;
-    resultingCdf.reserve(highestDeltaQ.getSize());
+    resultingCdf.reserve(highestDeltaQ.getBins());
 
-    for (size_t i = 0; i < highestDeltaQ.getSize(); i++) {
+    for (size_t i = 0; i < highestDeltaQ.getBins(); i++) {
         double result = op(highestDeltaQ.cdfAt(i), otherDeltaQ.cdfAt(i));
         resultingCdf.push_back(result);
     }

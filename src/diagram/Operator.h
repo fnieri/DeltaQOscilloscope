@@ -1,21 +1,25 @@
 #pragma once
 
 #include "DiagramComponent.h"
+#include "OperatorType.h"
+#include "../maths/DeltaQ.h"
 #include <memory>
 
 class Operator : virtual public DiagramComponent
 {
-protected:
-    std::vector<std::shared_ptr<DiagramComponent>> children;
+    OperatorType type;
+    std::vector<double> probabilities;
+    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> causalLinks;
 
+    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
 public:
-    Operator(const std::string name, const std::vector<std::shared_ptr<DiagramComponent>> &children);
+    Operator(const std::string name, OperatorType);
 
-    Operator(const std::string name);
-
-    void addChildren(std::shared_ptr<DiagramComponent> children);
+    void setProbabilities(const std::vector<double> &);
 
     std::vector<std::shared_ptr<DiagramComponent>> getChildren();
 
-    virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) = 0;
+    void setCausalLinks(std::vector<std::vector<std::shared_ptr<DiagramComponent>>> links) {
+        causalLinks = links;
+    }
 };

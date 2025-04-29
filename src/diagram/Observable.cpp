@@ -38,3 +38,18 @@ double Observable::setNewParameters(int newExp, int newNBins)
     maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
     return maxDelay;
 }
+
+void Observable::setQTA(const QTA& newQTA) {
+    if (newQTA.perc_25 > maxDelay || newQTA.perc_50 > maxDelay || newQTA.perc_75 > maxDelay)
+        throw std::invalid_argument("Percentages should not be bigger than maximum delay " + std::to_string(maxDelay));
+    qta = newQTA;
+}
+
+void Observable::addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled) {
+    triggerManager.addTrigger(type, condition, action, enabled);
+}
+
+void Observable::removeTrigger(TriggerType type) {
+    triggerManager.removeTriggersByType(type);
+}
+

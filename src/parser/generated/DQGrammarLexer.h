@@ -1,5 +1,5 @@
 
-// Generated from DQGrammar.g4 by ANTLR 4.13.2
+// Generated from /home/francy/Desktop/RealTimeDeltaQSD/./src/parser/DQGrammar.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "antlr4-runtime.h"
 
 
+namespace parser {
 
 
 class  DQGrammarLexer : public antlr4::Lexer {
@@ -49,3 +50,4 @@ private:
 
 };
 
+}  // namespace parser

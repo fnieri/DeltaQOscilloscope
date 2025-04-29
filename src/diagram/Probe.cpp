@@ -1,7 +1,7 @@
 #include "Probe.h"
 #include "../maths/DeltaQOperations.h"
 #include "DiagramComponent.h"
-#include "src/maths/ConfidenceInterval.h"
+#include "../maths/ConfidenceInterval.h"
 #include <iostream>
 #include <memory>
 
@@ -13,69 +13,61 @@ Probe::Probe(const std::string &name)
 {
 }
 
-Probe::Probe(const std::string &name, const std::shared_ptr<DiagramComponent> firstComponent)
+Probe::Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>> causalLinks)
     : DiagramComponent(name)
     , Observable(name)
-    , firstComponent(firstComponent)
     , interval(50)
+    , causalLinks(causalLinks)
 {
 }
 
-ProbeDeltaQ Probe::getDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Probe::getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
-    DeltaQ probeDeltaQ;
-    double bW = getBinWidth();
-    DeltaQ calculatedDeltaQ = this->calculateDeltaQ(getBinWidth(), name, timeLowerBound, timeUpperBound);
-
-    if (samplesInRange.size() > 0) {
-
-        probeDeltaQ = {getBinWidth(), samplesInRange};
-        interval.addDeltaQ(probeDeltaQ);
+    std::vector<DeltaQ> deltaQs;
+    for (const auto &component : causalLinks) {
+        deltaQs.push_back(component->getObservableDeltaQ(timeLowerBound, timeUpperBound));
     }
-    std::vector<Bound> bounds = interval.getBounds();
-    ProbeDeltaQ deltaQ {probeDeltaQ, calculatedDeltaQ, bounds};
-    deltaQs[timeLowerBound] = deltaQ;
 
     if (deltaQs.size() > MAX_DQ) {
-        auto earliest = deltaQs.begin();
-        interval.removeDeltaQ(earliest->second.probeDeltaQ);
-        deltaQs.erase(earliest);
+        const auto earliest = calculatedDeltaQs.begin();
+        interval.removeDeltaQ(earliest->second);
+        calculatedDeltaQs.erase(earliest);
     }
+    return convolveN(deltaQs);
+}
+
+
+DeltaQ Probe::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
+    DeltaQ deltaQ;
+
+    if (!samplesInRange.empty()) {
+        deltaQ = {getBinWidth(), samplesInRange};
+        interval.addDeltaQ(deltaQ);
+    }
+    std::vector<Bound> bounds = interval.getBounds();
+    observedDeltaQs[timeLowerBound] = deltaQ;
+
+    if (observedDeltaQs.size() > MAX_DQ) {
+        auto earliest = observedDeltaQs.begin();
+        interval.removeDeltaQ(earliest->second);
+        observedDeltaQs.erase(earliest);
+    }
+    triggerManager.evaluate(deltaQ, qta);
     return deltaQ;
 }
 
-void Probe::setFirstComponent(std::shared_ptr<DiagramComponent> component)
+std::vector<Bound> Probe::getBounds() const
 {
-    firstComponent = component;
+    return interval.getBounds();
 }
 
-DeltaQ Probe::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    if (currentProbe == name) {
-        if (firstComponent)
-            return firstComponent->calculateDeltaQ(binWidth, currentProbe, timeLowerBound, timeUpperBound);
+double Probe::setNewParameters(int newExp, int newNBins) {
+    Observable::setNewParameters(newExp, newNBins);
+    if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
+        qta = QTA::create(0, 0, 0, qta.cdfMax);
     }
-
-    if (firstComponent) {
-        DeltaQ probeDeltaQ = firstComponent->calculateDeltaQ(binWidth, name, timeLowerBound, timeUpperBound);
-        if (probeNextComponent.at(currentProbe)) {
-            return convolve(probeDeltaQ, probeNextComponent.at(currentProbe)->calculateDeltaQ(binWidth, currentProbe, timeLowerBound, timeUpperBound));
-        } else {
-            return probeDeltaQ;
-        }
-    }
-    return DeltaQ();
-}
-
-ProbeDeltaQ Probe::getDeltaQAtTime(uint64_t time)
-{
-    if (deltaQs.count(time))
-        return deltaQs[time];
-    return {DeltaQ(), DeltaQ(), interval.getBounds()};
-}
-
-ConfidenceInterval Probe::getConfidenceInterval()
-{
-    return interval;
+    interval.setNumBins(nBins);
+    return maxDelay;
 }

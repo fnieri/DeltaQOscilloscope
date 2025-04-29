@@ -4,11 +4,14 @@
 #include "Sample.h"
 #include <deque>
 #include <math.h>
+
+#include "src/maths/TriggerManager.h"
 #define DELTA_T_BASE 0.001
 
 class Observable : virtual public DiagramComponent
 {
 protected:
+
     std::deque<Sample> samples;
     mutable bool sorted;
 
@@ -16,16 +19,19 @@ protected:
     int deltaTExp {0}; // Exponent for dynamic binning
     int nBins {50}; // Number of bins
 
+    TriggerManager triggerManager;
+    QTA qta;
+
 public:
     explicit Observable(const std::string &name);
-
-    [[nodiscard]] virtual DeltaQ calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound) = 0;
 
     void addSample(const Sample &sample);
 
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
 
-    double setNewParameters(int newExp, int newNBins);
+    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override = 0;
+
+    virtual double setNewParameters(int newExp, int newNBins);
 
     double getBinWidth() const
     {
@@ -41,4 +47,24 @@ public:
     {
         return maxDelay;
     }
+
+    QTA getQTA() const {
+        return qta;
+    }
+
+    int getDeltaTExp() const {
+        return deltaTExp;
+    }
+
+    const TriggerManager& getTriggerManager() const {
+        return triggerManager;
+    }
+
+
+    void setQTA(const QTA& newQTA);
+
+    void addTrigger(TriggerType type, TriggerDefs::Condition condition,
+                              TriggerDefs::Action action, bool enabled);
+
+    void removeTrigger(TriggerType type);
 };

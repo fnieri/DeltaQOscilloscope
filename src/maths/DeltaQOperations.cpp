@@ -138,7 +138,6 @@ DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
         return DeltaQ();
 
     DeltaQ result = deltaQs[0];
-
     for (size_t i = 1; i < deltaQs.size(); ++i) {
         result = convolveFFT(result, deltaQs[i]);
     }
@@ -199,8 +198,8 @@ int chooseLongestDeltaQSize(const std::vector<DeltaQ> &deltaQs)
 {
     int highestSize = 0;
     for (const DeltaQ &deltaQ : deltaQs) {
-        if (deltaQ.getSize() > highestSize) {
-            highestSize = deltaQ.getSize();
+        if (deltaQ.getBins() > highestSize) {
+            highestSize = deltaQ.getBins();
         }
     }
     return highestSize;

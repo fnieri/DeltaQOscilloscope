@@ -1,5 +1,5 @@
 
-// Generated from DQGrammar.g4 by ANTLR 4.13.2
+// Generated from /home/francy/Desktop/RealTimeDeltaQSD/./src/parser/DQGrammar.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #include "antlr4-runtime.h"
 #include "DQGrammarVisitor.h"
 
+
+namespace parser {
 
 /**
  * This class provides an empty implementation of DQGrammarVisitor, which can be
@@ -24,6 +26,10 @@ public:
   }
 
   virtual std::any visitSystem(DQGrammarParser::SystemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitComponent_chain(DQGrammarParser::Component_chainContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -54,3 +60,4 @@ public:
 
 };
 
+}  // namespace parser
