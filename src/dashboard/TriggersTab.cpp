@@ -1,6 +1,7 @@
 #include "TriggersTab.h"
 
 #include <QLabel>
+#include <unordered_set>
 
 TriggersTab::TriggersTab(QWidget *parent)
     : QWidget(parent)
@@ -13,17 +14,32 @@ TriggersTab::TriggersTab(QWidget *parent)
             this, &TriggersTab::onObservableChanged);
     formLayout->addRow("Observable:", observableComboBox);
 
-    sampleLimitCheckBox = new QCheckBox("Sample Limit > 500", this);
+    sampleLimitCheckBox = new QCheckBox("Sample Limit >", this);
+    sampleLimitSpinBox = new QSpinBox(this);
+    sampleLimitSpinBox->setRange(1, 100000); // or whatever range makes sense
+    sampleLimitSpinBox->setValue(sampleLimitThreshold); // initialize to default value
+
+    sampleLimitLayout = new QHBoxLayout();
+    sampleLimitLayout->addWidget(sampleLimitCheckBox);
+    sampleLimitLayout->addWidget(sampleLimitSpinBox);
+
+    sampleLimitWidget = new QWidget(this);
+    sampleLimitWidget->setLayout(sampleLimitLayout);
+
+    formLayout->addRow(sampleLimitWidget);
+
+
     qtaBoundsCheckBox = new QCheckBox("QTA Bound Violation", this);
     failureRateCheckBox = new QCheckBox("Failure Rate < 0.95", this);
 
-    formLayout->addRow(sampleLimitCheckBox);
     formLayout->addRow(qtaBoundsCheckBox);
     formLayout->addRow(failureRateCheckBox);
 
-    connect(sampleLimitCheckBox, &QCheckBox::stateChanged, this, &TriggersTab::onTriggerChanged);
-    connect(qtaBoundsCheckBox, &QCheckBox::stateChanged, this, &TriggersTab::onTriggerChanged);
-    connect(failureRateCheckBox, &QCheckBox::stateChanged, this, &TriggersTab::onTriggerChanged);
+    connect(sampleLimitCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
+    connect(sampleLimitSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &TriggersTab::onTriggerChanged);
+
+    connect(qtaBoundsCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
+    connect(failureRateCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
 
     mainLayout->addLayout(formLayout);
 
@@ -39,13 +55,12 @@ TriggersTab::TriggersTab(QWidget *parent)
 
     Application::getInstance().addObserver([this]() { this->populateObservables(); });
 
-
     populateObservables();
 }
 
 TriggersTab::~TriggersTab() {
+
     delete mainLayout;
-    delete formLayout;
 }
 
 void TriggersTab::populateObservables() {
@@ -65,46 +80,53 @@ void TriggersTab::populateObservables() {
 void TriggersTab::onObservableChanged(const QString&) {
     updateCheckboxStates();
 }
-
 void TriggersTab::onTriggerChanged() {
     try {
-        auto manager = triggerManagerForCurrentObservable();
+        auto observable = getCurrentObservable();
 
-        manager.clearAllTriggers();
-
+        // Sample Limit Trigger
         if (sampleLimitCheckBox->isChecked()) {
-            manager.addTrigger(
+            observable->addTrigger(
                 TriggerType::SampleLimit,
-                TriggerDefs::Conditions::SampleLimit(sampleLimitThreshold),
-                [this](const DeltaQ& dq, const QTA&) {
+                TriggerDefs::Conditions::SampleLimit(sampleLimitSpinBox->value()),
+                [this](const DeltaQ&, const QTA&) {
                     addTriggeredMessage("Sample limit exceeded");
-                }
+                },
+                true,
+                sampleLimitSpinBox->value()
             );
+        } else {
+            observable->removeTrigger(TriggerType::SampleLimit);
         }
 
+        // QTA Bounds Trigger
         if (qtaBoundsCheckBox->isChecked()) {
-            manager.addTrigger(
+            observable->addTrigger(
                 TriggerType::QTAViolation,
                 TriggerDefs::Conditions::QTABounds(),
                 [this](const DeltaQ&, const QTA&) {
                     addTriggeredMessage("QTA bounds violated");
-                }
+                },
+                true,
+                std::nullopt
             );
+        } else {
+            observable->removeTrigger(TriggerType::QTAViolation);
         }
 
+        // Failure Rate Trigger
         if (failureRateCheckBox->isChecked()) {
-            auto system = Application::getInstance().getSystem();
-
-
-            std::string name = observableComboBox->currentText().toStdString();
-            auto observable = system->getObservable(name);
-            manager.addTrigger(
+            observable->addTrigger(
                 TriggerType::Failure,
                 TriggerDefs::Conditions::FailureRate(observable->getQTA().cdfMax),
                 [this](const DeltaQ&, const QTA&) {
                     addTriggeredMessage("Failure rate below threshold");
-                }
+                },
+                true,
+                std::nullopt
             );
+        } else {
+            observable->removeTrigger(TriggerType::Failure);
         }
     }
     catch (std::exception& e) {
@@ -113,13 +135,38 @@ void TriggersTab::onTriggerChanged() {
 }
 
 void TriggersTab::updateCheckboxStates() {
-    // You can query from the manager to update actual state (optional)
-    sampleLimitCheckBox->setChecked(false);
-    qtaBoundsCheckBox->setChecked(false);
-    failureRateCheckBox->setChecked(false);
+    try {
+        auto observable = getCurrentObservable();
+        auto& manager = observable->getTriggerManager();
+
+        auto all = manager.getAllTriggers();
+        std::unordered_set<TriggerType> activeTypes;
+        for (const auto& trigger : all) {
+            if (trigger.enabled)
+                activeTypes.insert(trigger.type);
+        }
+
+        sampleLimitCheckBox->setChecked(activeTypes.count(TriggerType::SampleLimit));
+        qtaBoundsCheckBox->setChecked(activeTypes.count(TriggerType::QTAViolation));
+        failureRateCheckBox->setChecked(activeTypes.count(TriggerType::Failure));
+
+        for (const auto& t : all) {
+            if (t.type == TriggerType::SampleLimit) {
+                if (auto limit = t.sampleLimitValue) {
+                    sampleLimitSpinBox->setValue(*limit);
+                }
+            }
+        }
+    } catch (std::exception &e) {
+        sampleLimitCheckBox->setChecked(false);
+        qtaBoundsCheckBox->setChecked(false);
+        failureRateCheckBox->setChecked(false);
+    }
 }
 
-TriggerManager TriggersTab::triggerManagerForCurrentObservable() {
+
+
+std::shared_ptr<Observable> TriggersTab::getCurrentObservable() {
     auto system = Application::getInstance().getSystem();
 
     if (!system) throw std::runtime_error("System does not exist");
@@ -128,7 +175,7 @@ TriggerManager TriggersTab::triggerManagerForCurrentObservable() {
     auto observable = system->getObservable(name);
     if (!observable) throw std::runtime_error("Observable does not exist");
 
-    return observable->getTriggerManager(); // Must be implemented in Observable
+    return observable;
 }
 
 void TriggersTab::addTriggeredMessage(const QString& msg) {

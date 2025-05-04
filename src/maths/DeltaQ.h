@@ -23,7 +23,6 @@ class DeltaQ
     std::vector<double> cdfValues;
     int bins {0};
 
-    std::vector<Sample> samples;
     QTA qta;
     unsigned int totalSamples {0};
 
@@ -57,7 +56,7 @@ public:
     [[nodiscard]] double cdfAt(int x) const;
     [[nodiscard]] const unsigned int getTotalSamples() const;
     [[nodiscard]] QTA getQTA() const;
-    void calculateQuartiles();
+    void calculateQuartiles(std::vector<Sample> &);
     void setBinWidth(double newWidth);
     /**
      * Operator Overloads

@@ -11,8 +11,8 @@ Outcome::Outcome(const std::string &name)
 {
 }
 
-
-DeltaQ Outcome::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound) {
+DeltaQ Outcome::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
 
     auto it = std::lower_bound(samples.begin(), samples.end(), timeUpperBound, [](const Sample &s, long long time) { return s.startTime < time; });
@@ -20,6 +20,7 @@ DeltaQ Outcome::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t time
     samples.erase(samples.begin(), it);
     sorted = true;
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
+    std::lock_guard<std::mutex> lock(observedMutex);
     observedDeltaQs[timeLowerBound] = deltaQ;
     if (observedDeltaQs.size() > MAX_DQ) {
         auto earliest = observedDeltaQs.begin();

@@ -168,7 +168,6 @@ void Server::stop()
 void Server::parseErlangMessage(const char *buffer, int len)
 {
     if (buffer == nullptr || len <= 0 || len >= 1024) {
-        std::cerr << "Invalid buffer or length" << std::endl;
         return;
     }
     std::string message(buffer, len);
@@ -177,7 +176,7 @@ void Server::parseErlangMessage(const char *buffer, int len)
     std::smatch match;
 
     if (!std::regex_search(message, match, pattern) || match.size() != 5) {
-        std::cerr << "Failed to parse message: " << message << std::endl;
+        // std::cerr << "Failed to parse message: " << message << std::endl;
         return;
     }
 
@@ -187,14 +186,12 @@ void Server::parseErlangMessage(const char *buffer, int len)
     std::string statusStr = match[4].str();
     Sample sample;
     Status status = Status::SUCCESS;
-
     if (statusStr == TIMEOUT || statusStr == FAIL) {
         status = Status::FAILED;
         if (statusStr == TIMEOUT)
             status = Status::TIMEDOUT;
 
         sample = {startTime, 0, 0, status};
-        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << status << std::endl;
 
     } else if (statusStr == EXEC_OK) {
         endTime = std::stoull(match[3].str());

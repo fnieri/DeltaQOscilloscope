@@ -30,10 +30,9 @@ send(X, Worker1Buffer) ->
     timer:sleep(trunc(Delay * 1000)),
    
     B = maps:new(),
-
-    Pid = otel_wrapper:start_span(probe),
-    ProbeCtx = ?start_span(<<"probe">>),
+    {ProbeCtx, Pid} = otel_wrapper:start_span(<<"probe">>),
     B1 = maps:put(<<"probe_id">>, Pid, B),
+
     Baggage = maps:put(<<"probe_ctx">>, ProbeCtx, B1),
     
     Worker1Buffer ! Baggage,
@@ -48,8 +47,7 @@ worker_buffer(worker_1, Worker1, K, QueueLength) ->
             worker_buffer(worker_1, NewWorker, K, QueueLength);
         
         #{<<"probe_ctx">> := _} = CtxBaggage when QueueLength < K ->
-            WorkerPid = otel_wrapper:start_span(<<"worker_1">>),
-            WorkerCtx = ?start_span(worker_1),
+            {WorkerCtx, WorkerPid} = otel_wrapper:start_span(<<"worker_1">>),
             
             B = maps:put(<<"worker_id">>, WorkerPid, CtxBaggage),
             Baggage = maps:put(<<"worker_ctx">>, WorkerCtx, B),
@@ -61,7 +59,7 @@ worker_buffer(worker_1, Worker1, K, QueueLength) ->
             worker_buffer(worker_1, Worker1, K, QueueLength - 1);
         
         #{<<"probe_ctx">> := _} = CtxBaggage when QueueLength >= K ->
-            WorkerPid = otel_wrapper:start_span(<<"worker_1">>),
+            {WorkerCtx, WorkerPid} = otel_wrapper:start_span(<<"worker_1">>),
             Pid = maps:get(<<"probe_id">>, CtxBaggage, undefined), 
             
             otel_wrapper:fail_span(WorkerPid),
@@ -78,8 +76,7 @@ worker_buffer(worker_2, Worker2, K, QueueLength) ->
             worker_buffer(worker_2, NewWorker, K, QueueLength);
         
         #{<<"probe_ctx">> := _} = CtxBaggage when QueueLength < K ->
-            WorkerPid = otel_wrapper:start_span(<<"worker_2">>),
-            WorkerCtx = ?start_span(worker_2),
+            {WorkerCtx, WorkerPid} = otel_wrapper:start_span(<<"worker_2">>),
             
             B = maps:put(<<"worker_id">>, WorkerPid, CtxBaggage),
             Baggage = maps:put(<<"worker_ctx">>, WorkerCtx, B),
@@ -91,7 +88,7 @@ worker_buffer(worker_2, Worker2, K, QueueLength) ->
             worker_buffer(worker_2, Worker2, K, QueueLength - 1);
 
         #{<<"probe_ctx">> := _} = ProbeCtx when QueueLength >= K ->
-            WorkerPid = otel_wrapper:start_span(<<"worker_1">>),
+            {WorkerCtx, WorkerPid} = otel_wrapper:start_span(<<"worker_1">>),
             Pid = maps:get(<<"probe_id">>, ProbeCtx, undefined),
             otel_wrapper:fail_span(WorkerPid),
             otel_wrapper:fail_span(Pid),
@@ -110,8 +107,7 @@ worker_loop(worker_1, Y, Worker1Buffer, Worker2Buffer) ->
                                 Loops = rand:uniform(Y),
                                 loop(Loops),
                                 Worker2Buffer ! CtxBaggage,
-                        otel_wrapper:end_span(WorkerPid),
-                        ?end_span(WorkerCtx),
+                        otel_wrapper:end_span(WorkerCtx, WorkerPid),
                         ?set_current_span(ProbeCtx)
                     end),
                                    
@@ -132,18 +128,15 @@ worker_loop(worker_2, Y, Worker1Buffer, Worker2Buffer) ->
                         Loops = rand:uniform(Y),
                         loop(Loops),
 
-                    %    timer:sleep(1000), 
-                   %    Prob = rand:uniform(),
-                   %     if Prob > 0.5 -> 
-                   %         timer:sleep(10);
-                   %     true ->
-                   %         ok
-                   %     end,
-                        otel_wrapper:end_span(WorkerPid),
-                        ?end_span(WorkerCtx),
+                       Prob = rand:uniform(),
+                         if Prob > 0.5 -> 
+                            timer:sleep(10);
+                        true ->
+                            ok
+                        end,
+                        otel_wrapper:end_span(WorkerCtx, WorkerPid),
                         ?set_current_span(ProbeCtx),
-                        otel_wrapper:end_span(ProbePid),
-                        ?end_span(ProbeCtx)
+                        otel_wrapper:end_span(ProbeCtx, ProbePid)
                     end),
            
                 Worker2Buffer ! done,   

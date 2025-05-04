@@ -15,7 +15,7 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
     // Initialize axes
     axisX = new QValueAxis();
     axisY = new QValueAxis();
-    axisY->setRange(0, 1.0);
+    axisY->setRange(-0.1, 1.0);
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
     axisX->setRange(0, 0.05);
@@ -58,10 +58,13 @@ void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
 
 void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data)
 {
-    series->clear();
-    series->append(0, 0);
+
+    QVector<QPointF> points;
+    points.prepend(QPointF(0, 0));
+    points.reserve(data.size());
     for (const auto &[x, y] : data)
-        series->append(x, y);
+        points.append(QPointF(x, y));
+    series->replace(points);
 }
 
 void DeltaQPlot::updateXRange(double xRange)

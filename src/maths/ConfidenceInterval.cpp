@@ -15,9 +15,9 @@ ConfidenceInterval::ConfidenceInterval(int numBins)
 }
 void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 {
-    const auto& cdf = deltaQ.getCdfValues();
+    const auto &cdf = deltaQ.getCdfValues();
 
-    if (cdf.size() != cdfSum.size()) {
+    if (cdf.size() != numBins) {
         throw std::invalid_argument("CDF size mismatch in addDeltaQ");
     }
 
@@ -26,12 +26,11 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 
         cdfSum[i] += cdfValue;
         cdfSumSquares[i] += cdfValue * cdfValue;
-        cdfSampleCounts[i] += 1; // One more sample for this bin
+        cdfSampleCounts[i] += 1;
     }
 
     updateConfidenceInterval();
 }
-
 
 void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
 {
@@ -39,10 +38,10 @@ void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
         return;
     }
 
-    const auto& cdf = deltaQ.getCdfValues();
+    const auto &cdf = deltaQ.getCdfValues();
 
-    if (cdf.size() != cdfSum.size()) {
-        throw std::invalid_argument("CDF size mismatch in removeDeltaQ");
+    if (cdf.size() != numBins) {
+        return; // Returning a previous DeltaQ which had different bins
     }
 
     for (size_t i = 0; i < cdf.size(); ++i) {
@@ -52,7 +51,7 @@ void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
         cdfSumSquares[i] -= cdfValue * cdfValue;
 
         if (cdfSampleCounts[i] == 0) {
-            throw std::runtime_error("Cannot remove from empty bin");
+            return; // Removing more than needed
         }
 
         cdfSampleCounts[i] -= 1;
@@ -61,40 +60,43 @@ void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
     updateConfidenceInterval();
 }
 
-
 void ConfidenceInterval::updateConfidenceInterval()
 {
     for (size_t i = 0; i < bounds.size(); ++i) {
+        unsigned int n = cdfSampleCounts[i];
         if (cdfSampleCounts[i] == 0) {
             bounds[i].lowerBound = 0.0;
             bounds[i].upperBound = 0.0;
             continue;
         }
 
-        double mean = cdfSum[i] / cdfSampleCounts[i];
-        double meanSquare = cdfSumSquares[i] / cdfSampleCounts[i];
+        double mean = cdfSum[i] / n;
+        double meanSquare = cdfSumSquares[i] / n;
         double variance = meanSquare - (mean * mean);
         double stddev = std::sqrt(std::max(variance, 0.0));
-
-        bounds[i].lowerBound = std::max(0.0, mean - stddev);
-        bounds[i].upperBound = std::min(1.0, mean + stddev);
+        double marginOfError = z * stddev / std::sqrt(n);
+        bounds[i].lowerBound = std::max(0.0, mean - marginOfError);
+        bounds[i].upperBound = std::min(1.0, mean + marginOfError);
         bounds[i].mean = mean;
     }
 }
 
-
 void ConfidenceInterval::reset()
 {
-    bounds = std::vector<Bound>(numBins);
-    cdfSum = std::vector<double>(numBins);
-    cdfSumSquares = std::vector<double>(numBins);
-    cdfSampleCounts = std::vector<unsigned int>(numBins);
+    bounds = std::vector<Bound>();
+    bounds.resize(numBins);
+    cdfSum = std::vector<double>();
+    cdfSum.resize(numBins);
+    cdfSumSquares = std::vector<double>();
+    cdfSumSquares.resize(numBins);
+    cdfSampleCounts = std::vector<unsigned int>();
+    cdfSampleCounts.resize(numBins);
 }
 
 void ConfidenceInterval::setNumBins(int newNumBins)
 {
     numBins = newNumBins;
-    reset(  );
+    reset();
 }
 
 std::vector<Bound> ConfidenceInterval::getBounds() const

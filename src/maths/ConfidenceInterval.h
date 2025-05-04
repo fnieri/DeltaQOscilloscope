@@ -17,7 +17,7 @@ private:
     std::vector<double> cdfSum;
     std::vector<double> cdfSumSquares;
     std::vector<unsigned int> cdfSampleCounts;
-
+    double z {1.96};
     void updateConfidenceInterval();
 
 public:

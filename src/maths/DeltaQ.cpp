@@ -7,6 +7,9 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+
+#include <chrono>
+#include <iostream>
 DeltaQ::DeltaQ(const double binWidth)
     : binWidth(binWidth)
     , bins(0)
@@ -30,7 +33,6 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const b
 DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
     : binWidth(binWidth)
     , bins {50} // FIXME magic number
-    , samples(samples)
     , qta()
 {
     calculateDeltaQ(samples);
@@ -39,21 +41,22 @@ DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
 DeltaQ::DeltaQ(double binWidth, std::vector<Sample> &samples, int bins)
     : binWidth(binWidth)
     , bins(bins)
-    , samples(samples)
     , qta()
 {
     calculateDeltaQ(samples);
 }
+
 void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
 {
+
     if (outcomeSamples.empty() || binWidth <= 0) {
         bins = 0;
         return;
     }
-    auto histogram = std::vector<int>(bins, 0);
+    std::vector<double> histogram(bins, 0.0);
     totalSamples = outcomeSamples.size();
     long long successfulSamples = 0;
-    std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.elapsedTime < b.elapsedTime ; });
+    std::sort(outcomeSamples.begin(), outcomeSamples.end(), [](const Sample &a, const Sample &b) { return a.elapsedTime < b.elapsedTime; });
 
     for (const auto &sample : outcomeSamples) {
         if (sample.status != Status::SUCCESS) {
@@ -67,8 +70,8 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             std::cerr << "Warning: Invalid sample value: " << elapsed << std::endl;
             continue;
         }
-
-        int bin = std::floor(elapsed / binWidth);
+        double invBinWidth = 1.0 / binWidth;
+        int bin = static_cast<int>(elapsed * invBinWidth);
         if (bin < 0) {
             std::cerr << "Warning: Negative bin value: " << bin << std::endl;
             continue;
@@ -77,27 +80,27 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             bin = bins - 1;
         }
 
-        histogram[bin]++;
+        histogram[bin] += 1.0;
     }
     // Calculate PDF
-    pdfValues.reserve(bins);
-    for (const double &binValue : histogram) {
-        pdfValues.push_back(binValue / totalSamples);
+
+    for (double &val : histogram) {
+        val /= totalSamples;
     }
+    pdfValues = std::move(histogram);
+
     calculateCDF();
-    calculateQuartiles();
+    calculateQuartiles(outcomeSamples);
 }
 
-void DeltaQ::calculateQuartiles()
+void DeltaQ::calculateQuartiles(std::vector<Sample> &outcomeSamples)
 {
-    if (samples.empty()) {
+    if (outcomeSamples.empty()) {
         return;
     }
-    const size_t n = samples.size();
+    const size_t n = outcomeSamples.size();
 
-    auto getElapsedAt = [&](size_t index) -> double {
-        return samples[index].elapsedTime;
-    };
+    auto getElapsedAt = [&](size_t index) -> double { return outcomeSamples[index].elapsedTime; };
 
     auto getPercentile = [&](double p) -> double {
         double pos = p * (n - 1);
@@ -108,15 +111,10 @@ void DeltaQ::calculateQuartiles()
             // Linear interpolation between samples[idx] and samples[idx + 1]
             return getElapsedAt(idx) * (1.0 - frac) + getElapsedAt(idx + 1) * frac;
         }
-        // If exactly at the last element
         return getElapsedAt(idx);
     };
-    qta = QTA::create(getPercentile(0.25),
-        getPercentile(0.50),
-        getPercentile(0.75),
-        ((cdfAt(bins - 1)) > 1) ? 1 : cdfAt(bins - 1)) ;
+    qta = QTA::create(getPercentile(0.25), getPercentile(0.50), getPercentile(0.75), ((cdfAt(bins - 1)) > 1) ? 1 : cdfAt(bins - 1));
 }
-
 
 void DeltaQ::calculateCDF()
 {
@@ -140,7 +138,8 @@ void DeltaQ::calculatePDF()
     }
 }
 
-QTA DeltaQ::getQTA() const {
+QTA DeltaQ::getQTA() const
+{
     return qta;
 }
 

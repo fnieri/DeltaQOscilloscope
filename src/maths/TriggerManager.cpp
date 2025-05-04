@@ -49,3 +49,10 @@ void TriggerManager::setTriggersEnabled(TriggerType type, bool enabled) {
         }
     }
 }
+std::vector<TriggerManager::Trigger> TriggerManager::getAllTriggers() const {
+    std::vector<Trigger> result;
+    for (const auto& trigger : triggers_) {
+        result.push_back(trigger);
+    }
+    return result;
+}

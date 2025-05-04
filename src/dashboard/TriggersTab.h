@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QMap>
+#include <QSpinBox>
 
 #include "../Application.h"
 #include "src/maths/TriggerManager.h"
@@ -27,17 +28,21 @@ private Q_SLOTS:
 private:
     void populateObservables();
     void updateCheckboxStates();
-
     QVBoxLayout *mainLayout;
     QFormLayout *formLayout;
     QComboBox* observableComboBox;
+
+    QWidget* sampleLimitWidget;
+    QHBoxLayout* sampleLimitLayout;
     QCheckBox* sampleLimitCheckBox;
+    QSpinBox* sampleLimitSpinBox;
+
     QCheckBox* qtaBoundsCheckBox;
     QCheckBox* failureRateCheckBox;
 
     QListWidget* triggeredList;
 
-    TriggerManager triggerManagerForCurrentObservable();
+    std::shared_ptr<Observable> getCurrentObservable();
 
     static constexpr int sampleLimitThreshold = 500;
     static constexpr double failureRateThreshold = 0.95;

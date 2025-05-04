@@ -13,8 +13,6 @@ struct QTA {
     double cdfMax {1};
 
     static QTA create(double p25, double p50, double p75, double cdf) {
-        std::cout << p25 << " " << p50 << " " << p75 << " " << cdf << std::endl;
-
         if (!(p25 <= p50 && p50 <= p75)) {
             throw std::invalid_argument("Percentiles must be ordered: perc_25 < perc_50 < perc_75.");
         }

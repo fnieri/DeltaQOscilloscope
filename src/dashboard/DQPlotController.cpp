@@ -2,6 +2,9 @@
 #include "DQPlotController.h"
 #include "../Application.h"
 #include "../maths/DeltaQOperations.h"
+#include <QMetaObject>
+#include <QVector>
+#include <QtConcurrent>
 #include <algorithm>
 #include <qlineseries.h>
 DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
@@ -78,14 +81,12 @@ void DQPlotController::addComponent(std::string name, bool isProbe)
         auto qtaSeries = new QLineSeries();
         std::string qtaSeriesName = name + " qta";
 
-        ProbeAllSeries series
-            = {.probeS = probeSeries,
+        ProbeAllSeries series = {.probeS = probeSeries,
             .calculatedProbeS = calculatedProbeSeries,
             .lowerBoundS = lowerBoundSeries,
             .upperBoundS = upperBoundSeries,
             .meanS = meanSeries,
-            .qtaS = qtaSeries
-            };
+            .qtaS = qtaSeries};
 
         probes[name] = {series, system->getProbe(name)};
 
@@ -167,82 +168,114 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
     }
 }
 
-double DQPlotController::updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome>& outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
+double DQPlotController::updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    std::vector<std::pair<double, double>> data;
+    auto ret = QtConcurrent::run([=]() {
+        DeltaQ deltaQ = outcome->getObservableDeltaQ(timeLowerBound, timeUpperBound);
+        int size = deltaQ.getBins();
+        double binWidth = deltaQ.getBinWidth();
 
-    DeltaQ deltaQ = outcome->getObservableDeltaQ(timeLowerBound, timeUpperBound);
-    int size = deltaQ.getBins();
-    double binWidth = deltaQ.getBinWidth();
+        std::vector<std::pair<double, double>> data;
+        data.reserve(size);
 
-    for (int i = 0; i < size; i++) {
-        data.emplace_back(binWidth * (i + 1), deltaQ.cdfAt(i));
-    }
+        for (int i = 0; i < size; ++i) {
+            data.emplace_back(binWidth * (i + 1), deltaQ.cdfAt(i));
+        }
 
-    plot->updateSeries(series, data);
+        QMetaObject::invokeMethod(plot, [=]() { plot->updateSeries(series, data); }, Qt::QueuedConnection);
+    });
+
+    // Return the max delay
     return outcome->getMaxDelay();
 }
-
 void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    // Plot observed DeltaQ
+    using namespace std::chrono;
 
-    DeltaQ observedDeltaQ = probe->getObservableDeltaQ(timeLowerBound, timeUpperBound);
-    int observedBins = observedDeltaQ.getBins();
-    double observedBinWidth = observedDeltaQ.getBinWidth();
-    std::vector<std::pair<double, double>> probeData;
+    auto ret = QtConcurrent::run([=]() {
+        auto computeStart = high_resolution_clock::now();
 
-    for (int i = 0; i < observedBins; i++) {
-        probeData.emplace_back(observedBinWidth * (i + 1), observedDeltaQ.cdfAt(i));
-    }
-    plot->updateSeries(probeAllSeries.probeS, probeData);
+        DeltaQ observedDeltaQ = probe->getObservableDeltaQ(timeLowerBound, timeUpperBound);
+        DeltaQ probeCalculatedDeltaQ = probe->getProbeDeltaQ(timeLowerBound, timeUpperBound);
+        std::vector<Bound> bounds = probe->getBounds();
+        auto qta = probe->getQTA();
+        double maxDelay = probe->getMaxDelay();
+        /*
+        // --- Prepare data ---
+        std::vector<std::pair<double, double>> probeData;
+        std::vector<std::pair<double, double>> calculatedProbeData;
+        std::vector<std::pair<double, double>> lowerBoundData;
+        std::vector<std::pair<double, double>> upperBoundData;
+        std::vector<std::pair<double, double>> meanData;
+        std::vector<std::pair<double, double>> qtaData;
 
-    //Update calculated deltaQ
+        // Prepare observedDeltaQ data
+        int observedBins = observedDeltaQ.getBins();
+        double observedBinWidth = observedDeltaQ.getBinWidth();
+        probeData.reserve(observedBins);
+        for (int i = 0; i < observedBins; ++i) {
+            probeData.emplace_back(observedBinWidth * (i + 1), observedDeltaQ.cdfAt(i));
+        }
 
-    DeltaQ probeCalculatedDeltaQ = probe->getProbeDeltaQ(timeLowerBound, timeUpperBound);
+        // Prepare calculatedDeltaQ data
+        int calculatedBins = probeCalculatedDeltaQ.getBins();
+        double calculatedBinWidth = probeCalculatedDeltaQ.getBinWidth();
+        calculatedProbeData.reserve(calculatedBins);
+        for (int i = 0; i < calculatedBins; ++i) {
+            calculatedProbeData.emplace_back(calculatedBinWidth * (i + 1), probeCalculatedDeltaQ.cdfAt(i));
+        }
 
-    int calculatedBins = probeCalculatedDeltaQ.getBins();
-    auto calculatedBinWidth = probeCalculatedDeltaQ.getBinWidth();
-    std::vector<std::pair<double, double>> calculatedProbeData;
+        // Prepare bounds
+        int boundsSize = static_cast<int>(bounds.size());
+        lowerBoundData.reserve(boundsSize);
+        upperBoundData.reserve(boundsSize);
+        meanData.reserve(boundsSize);
+        for (int i = 0; i < boundsSize; ++i) {
+            double x = observedBinWidth * (i + 1);
+            lowerBoundData.emplace_back(x, bounds[i].lowerBound);
+            upperBoundData.emplace_back(x, bounds[i].upperBound);
+            meanData.emplace_back(x, bounds[i].mean);
+        }
 
-    for (int i = 0; i < calculatedBins; i++) {
-        calculatedProbeData.emplace_back(calculatedBinWidth * (i + 1), probeCalculatedDeltaQ.cdfAt(i));
-    }
+        // QTA line plot
+        qtaData.reserve(8);
+        qtaData.emplace_back(qta.perc_25, 0);
+        qtaData.emplace_back(qta.perc_25, 0.25);
+        qtaData.emplace_back(qta.perc_50, 0.25);
+        qtaData.emplace_back(qta.perc_50, 0.5);
+        qtaData.emplace_back(qta.perc_75, 0.5);
+        qtaData.emplace_back(qta.perc_75, 0.75);
+        qtaData.emplace_back(maxDelay, 0.75);
+        qtaData.emplace_back(maxDelay, qta.cdfMax);
 
-    plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData);
+        auto computeEnd = high_resolution_clock::now();
+        qDebug() << "Computation took" << duration_cast<microseconds>(computeEnd - computeStart).count() << "µs";
 
+        */
+        // --- Push results back to GUI thread ---
+        /*
+        QMetaObject::invokeMethod(
+            plot,
+            [=]() {
+                auto guiStart = high_resolution_clock::now();
 
-    // Update confidence bounds
+                plot->setUpdatesEnabled(false);
 
-    std::vector<Bound> bounds = probe->getBounds();
+                // Efficiently replace series data
+                plot->updateSeries(probeAllSeries.probeS, probeData);
+                plot->updateSeries(probeAllSeries.calculatedProbeS, calculatedProbeData);
+                plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData);
+                plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData);
+                plot->updateSeries(probeAllSeries.meanS, meanData);
+                plot->updateSeries(probeAllSeries.qtaS, qtaData);
 
-    std::vector<std::pair<double, double>> lowerBoundData;
-    std::vector<std::pair<double, double>> upperBoundData;
-    std::vector<std::pair<double, double>> meanData;
+                plot->setUpdatesEnabled(true);
 
-    for (int i = 0; i < bounds.size(); i++) {
-        double x = observedBinWidth * (i + 1);
-        lowerBoundData.emplace_back(x, bounds[i].lowerBound);
-        upperBoundData.emplace_back(x, bounds[i].upperBound);
-        meanData.emplace_back(x, bounds[i].mean);
-    }
+                auto guiEnd = high_resolution_clock::now();
+                qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "µs";
 
-    plot->updateSeries(probeAllSeries.lowerBoundS, lowerBoundData);
-    plot->updateSeries(probeAllSeries.upperBoundS, upperBoundData);
-    plot->updateSeries(probeAllSeries.meanS, meanData);
-
-    // Plot QTA
-
-    auto qta = probe->getQTA();
-    std::vector<std::pair<double, double>> qtaData;
-    qtaData.emplace_back(qta.perc_25, 0);
-    qtaData.emplace_back(qta.perc_25, 0.25);
-    qtaData.emplace_back(qta.perc_50, 0.25);
-    qtaData.emplace_back(qta.perc_50, 0.5);
-    qtaData.emplace_back(qta.perc_75, 0.5);
-    qtaData.emplace_back(qta.perc_75, 0.75);
-    qtaData.emplace_back(probe->getMaxDelay(), 0.75);
-    qtaData.emplace_back(probe->getMaxDelay(), qta.cdfMax);
-
-    plot->updateSeries(probeAllSeries.qtaS, qtaData);
+    },
+    Qt::QueuedConnection);
+*/
+    });
 }

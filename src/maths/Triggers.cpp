@@ -27,7 +27,7 @@ namespace TriggerDefs {
     namespace Actions {
         Action LogToConsole(const std::string& message) {
             return [message](const DeltaQ&, const QTA&) {
-                std::cout << "TRIGGER: " << message << std::endl;
+                std::cout << "TRIGGER: " << message << "\n";
             };
         }
 

@@ -1,10 +1,33 @@
+
 -module(otel_wrapper).
 -behaviour(application).
 
--export([start/0, start_span/1, end_span/1, fail_span/1, span_process/2]).
+-export([start/0, start_span/1,  end_span/2, fail_span/1, with_span/2, span_process/3]).
 -export([start/2, stop/1]).
 -export([start_tcp_server/0, connection_manager/1]).
 -export([init_ets/0, start_connection_manager/0]).
+-export([set_stub_running/1]).
+
+
+-include_lib("opentelemetry_api/include/otel_tracer.hrl").
+
+
+%% @moduledoc
+%% `otel_wrapper` is an Erlang module built on top of OpenTelemetry
+%% to pair with the DeltaQ osciloscope. It tracks spans start, end, uses a custom timeout defined by the user in the oscilloscope,
+%% and allows runtime configuration through TCP.
+%%
+%% Features:
+%% - Span lifecycle management (start/end/fail/timeout)
+%% - Dynamic timeouts for spans
+%% - Supports toggling stub behavior at runtime
+%%
+%% Usage:
+%%   otel_wrapper:start().
+%%   {Ctx, Pid} = otel_wrapper:start_span(<<"my_span">>).
+%%   otel_wrapper:end_span(Ctx, Pid).
+%%   otel_wrapper:fail_span(Pid)
+
 
 %%%=======================
 %%% Application Callbacks
@@ -20,6 +43,8 @@ stop(_State) ->
 init_ets() ->
     ets:new(timeout_registry, [named_table, public, set]),
     ets:new(otel_connections, [named_table, public, set]),
+    ets:new(otel_state, [named_table, public, set]),
+    ets:insert(otel_state, {stub_running, false}),
     {ok, self()}.
 
 start_connection_manager() ->
@@ -29,36 +54,120 @@ start_connection_manager() ->
 
 
 %%%=======================
+%%% For testing purposes
+%%% ======================
+
+set_stub_running(Bool) when is_boolean(Bool) ->
+    ets:insert(otel_state, {stub_running, Bool}),
+    io:format("Stub running set to: ~p~n", [Bool]),
+    ok.
+
+%%%=======================
 %%% Public API
 %%%=======================
-
+%% @doc Starts the otel_wrapper application and all dependencies.
+-spec start() -> {ok, [atom()]} | {error, term()}.
 start() ->
     application:ensure_all_started(otel_wrapper).
 
+%% @doc Starts a span with the given name, if the stub is running.
+%% Returns a tuple of SpanContext and the internal span process PID or `ignore`.
+-spec start_span(binary()) -> {opentelemetry:span_ctx(), pid() | ignore}.
 start_span(Name) ->
-    StartTime = erlang:system_time(nanosecond),
-    Pid = spawn(?MODULE, span_process, [Name, StartTime]),
-    Pid.
+    SpanCtx = ?start_span(Name),
+    case ets:lookup(otel_state, stub_running) of
+        [{_, true}] ->
+            case ets:lookup(timeout_registry, Name) of
+                [{_, T}] -> 
+                    StartTime = erlang:system_time(nanosecond),
+                    Pid = spawn(?MODULE, span_process, [Name, StartTime, T]),
+                    {SpanCtx, Pid};
+                [] ->
+                    {SpanCtx, ignore}
+            end;
+        _ -> 
+            {SpanCtx, ignore}
+    end.
 
-end_span(Pid) ->
-    Pid ! {end_span, erlang:system_time(nanosecond)}.
+start_span(SpanCtx, Name) ->
+    case ets:lookup(otel_state, stub_running) of
+        [{_, true}] ->
+            case ets:lookup(timeout_registry, Name) of
+                [{_, T}] -> 
+                    StartTime = erlang:system_time(nanosecond),
+                    Pid = spawn(?MODULE, span_process, [Name, StartTime, T]),
+                    {SpanCtx, Pid};
+                [] ->
+                    {SpanCtx, ignore}
+            end;
+        _ -> 
+            {SpanCtx, ignore}
+    end.
 
+
+%% @doc Ends the span and reports it, unless stub is disabled or Pid is `ignore`.
+-spec end_span(opentelemetry:span_ctx(), pid() | ignore) -> ok | term().
+end_span(Ctx, Pid) ->
+    ?end_span(Ctx),
+        case Pid of
+            ignore -> ok;
+        _ when is_pid(Pid) ->
+            Pid ! {end_span, erlang:system_time(nanosecond)}
+    end.
+
+
+%% @doc Fail the span and reports it to the oscilloscope, unless stub is disabled or Pid is `ignore`.
+-spec fail_span( pid() | ignore) -> ok | term().
 fail_span(Pid) ->
-    Pid ! {fail_span, a, b}.
+    case Pid of
+        ignore -> ok;
+    _ when is_pid(Pid) ->
+        Pid ! fail_span
+    end.
+
+
+-spec with_span(binary(), fun(() -> any())) -> any().
+with_span(Name, Fun) ->
+    ?with_span(Name, #{}, 
+        fun(SpanCtx) ->
+            Pid = start_with_span(Name),
+                Result = Fun(),
+                end_with_span(Pid),
+                Result
+        end).
+
+start_with_span(Name) ->
+    case ets:lookup(otel_state, stub_running) of
+        [{_, true}] ->
+            case ets:lookup(timeout_registry, Name) of
+                [{_, T}] -> 
+                    StartTime = erlang:system_time(nanosecond),
+                    Pid = spawn(?MODULE, span_process, [Name, StartTime, T]),
+                    Pid;
+                [] ->
+                    ignore
+            end;
+        _ -> 
+            ignore
+    end.
+
+end_with_span(Pid) ->
+        case Pid of
+            ignore -> ok;
+        _ when is_pid(Pid) ->
+            Pid ! {end_span, erlang:system_time(nanosecond)}
+    end.
+
+
 
 %%%=======================
 %%% Span Worker
 %%%=======================
 
-span_process(NameBin, StartTime) ->
-    Timeout = case ets:lookup(timeout_registry, NameBin) of
-        [{_, T}] -> T;
-        [] -> 50
-    end,
+span_process(NameBin, StartTime, Timeout) ->
     Timer = erlang:send_after(Timeout, self(), timeout),
-
     receive
-        {fail_span, a, b} ->
+        fail_span ->
             erlang:cancel_timer(Timer),
             send_span(NameBin, StartTime, 0, <<"fa">>);
         {end_span, EndTime} ->
@@ -84,7 +193,6 @@ accept(ListenSocket) ->
 handle_connection(Socket) ->
     case gen_tcp:recv(Socket, 0) of
         {ok, Line} ->
-            io:format("~p~n", [Line]),
             Trimmed = binary:replace(Line, <<"\n">>, <<>>, [global]),
             io:format("~p~n", [Trimmed]),
             handle_c_message(Trimmed),
@@ -107,6 +215,9 @@ handle_c_message(Bin) when is_binary(Bin) ->
                 _ ->
                     io:format("Invalid timeout: ~p~n", [TimeoutBin])
             end;
+         [<<"start_stub">>] ->
+            ets:insert(otel_state, {stub_running, true}),
+            io:format("Stub enabled~n");
         _ ->
             io:format("Unknown command: ~p~n", [Bin])
     end.
@@ -161,6 +272,7 @@ get_connection() ->
     receive
         {connection, Socket} -> Socket
     after 1000 ->
+        ets:insert(otel_state, {stub_running, false}),
         undefined
     end.
 

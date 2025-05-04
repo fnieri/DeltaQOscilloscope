@@ -2,16 +2,15 @@
 
 #include "DiagramComponent.h"
 #include "Sample.h"
+#include "src/maths/TriggerManager.h"
 #include <deque>
 #include <math.h>
-
-#include "src/maths/TriggerManager.h"
+#include <mutex>
 #define DELTA_T_BASE 0.001
 
 class Observable : virtual public DiagramComponent
 {
 protected:
-
     std::deque<Sample> samples;
     mutable bool sorted;
 
@@ -21,6 +20,8 @@ protected:
 
     TriggerManager triggerManager;
     QTA qta;
+
+    std::mutex observedMutex;
 
 public:
     explicit Observable(const std::string &name);
@@ -48,23 +49,24 @@ public:
         return maxDelay;
     }
 
-    QTA getQTA() const {
+    QTA getQTA() const
+    {
         return qta;
     }
 
-    int getDeltaTExp() const {
+    int getDeltaTExp() const
+    {
         return deltaTExp;
     }
 
-    const TriggerManager& getTriggerManager() const {
+    const TriggerManager &getTriggerManager() const
+    {
         return triggerManager;
     }
 
+    void setQTA(const QTA &newQTA);
 
-    void setQTA(const QTA& newQTA);
-
-    void addTrigger(TriggerType type, TriggerDefs::Condition condition,
-                              TriggerDefs::Action action, bool enabled);
+    void addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled, std::optional<int> sampleLimit);
 
     void removeTrigger(TriggerType type);
 };
