@@ -28,6 +28,7 @@ void System::setOperators(std::unordered_map<std::string, std::shared_ptr<Operat
 {
     operators = operatorsMap;
 }
+
 std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
 {
     return outcomes[name];
@@ -47,21 +48,15 @@ void System::setObservableParameters(std::string &componentName, int exponent, i
 
 void System::addSample(std::string &componentName, Sample &sample)
 {
-    if (auto it = outcomes.find(componentName); it != outcomes.end()) {
-        it->second->addSample(sample);
-    }
-    if (auto it = probes.find(componentName); it != probes.end()) {
+    if (auto it = components.find(componentName); it != components.end()) {
         it->second->addSample(sample);
     }
 }
 
 DeltaQ System::calculateDeltaQ()
 {
-
-    //   return firstComponent->calculateDeltaQ(binWidth, "system", 0, 0);
     return DeltaQ();
 }
-
 
 [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &System::getOutcomes()
 {
@@ -78,7 +73,12 @@ DeltaQ System::calculateDeltaQ()
     return probes;
 }
 
-bool System::hasOutcome(std::string &name)
+[[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Observable>> &System::getObservables()
+{
+    return components;
+}
+
+bool System::hasOutcome(const std::string &name)
 {
     return outcomes.find(name) != outcomes.end();
 }
@@ -117,6 +117,7 @@ std::string System::getSystemDefinitionText()
     return systemDefinitionText;
 }
 
-std::shared_ptr<Observable> System::getObservable(const std::string& name) {
+std::shared_ptr<Observable> System::getObservable(const std::string &name)
+{
     return components[name];
 }

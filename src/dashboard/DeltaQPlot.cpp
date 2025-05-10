@@ -33,7 +33,16 @@ DeltaQPlot::~DeltaQPlot()
     chart = NULL;
 }
 
-void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
+bool DeltaQPlot::isEmptyAfterReset()
+{
+    if (!controller->isEmptyAfterReset()) {
+        plotList->updateLists();
+        return false;
+    }
+    return true;
+}
+
+void DeltaQPlot::addSeries(QLineSeries *series, const std::string &name)
 {
     chart->addSeries(series);
     series->setName(QString::fromStdString(name));

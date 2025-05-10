@@ -9,12 +9,13 @@ Observable::Observable(const std::string &name)
 }
 void Observable::addSample(const Sample &sample)
 {
-    samples.push_back(sample);
+    samples.emplace_back(sample);
     sorted = false;
 }
 
 std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::uint64_t upperTime)
 {
+    std::lock_guard<std::mutex> lock(samplesMutex);
     if (!sorted) {
         std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.startTime < b.startTime; });
         sorted = true;
@@ -28,6 +29,8 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
         selectedSamples.emplace_back(*it);
     }
     samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
+
+    std::cout << selectedSamples.size() << "\n";
     return selectedSamples;
 }
 

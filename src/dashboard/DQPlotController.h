@@ -59,7 +59,7 @@ public:
     /**
      * @brief Adds a new component (probe or outcome) to the plot.
      */
-    void addComponent(std::string name, bool isProbe);
+    void addComponent(const std::string &name, bool isProbe);
 
     /**
      * @brief Returns a list of names of all currently plotted components.
@@ -81,12 +81,15 @@ public:
      */
     void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
+    bool isEmptyAfterReset();
+
 private:
-    double updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome>& outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
-    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;
-
+    std::mutex updateMutex;
+    std::mutex resetMutex;
     std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
     std::map<std::string, std::pair<ProbeAllSeries, std::shared_ptr<Probe>>> probes;
 };

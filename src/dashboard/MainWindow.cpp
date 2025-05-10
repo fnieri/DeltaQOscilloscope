@@ -52,29 +52,36 @@ MainWindow::MainWindow(QWidget *parent)
     timerThread->start();
     Application::getInstance().addObserver([this] { this->reset(); });
     auto now = std::chrono::system_clock::now();
-    auto adjustedTime = now - std::chrono::milliseconds(1000);
+    auto adjustedTime = now - std::chrono::milliseconds(3000);
     timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
 }
 
 void MainWindow::reset()
 {
-    sidebar->hideCurrentPlot();
 
-    for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
+    std::lock_guard<std::mutex> lock(plotDelMutex);
+    auto it = plotContainers.begin();
+    while (it != plotContainers.end()) {
         DeltaQPlot *plot = it.key();
         QWidget *plotWidget = it.value();
-        if (plot) {
+
+        if (plot->isEmptyAfterReset()) {
+            it = plotContainers.erase(it); // returns next valid iterator
+
             delete plot;
             plot = nullptr;
-        }
-        if (plotWidget) {
-            delete plotWidget;
-            plotWidget = nullptr;
+
+            if (plotWidget) {
+                delete plotWidget;
+                plotWidget = nullptr;
+            }
+
+            sidebar->hideCurrentPlot();
+        } else {
+            ++it;
         }
     }
-    plotContainers.clear();
 }
-
 
 void MainWindow::updatePlots()
 {
@@ -82,6 +89,7 @@ void MainWindow::updatePlots()
     uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     auto system = Application::getInstance().getSystem();
 
+    std::lock_guard<std::mutex> lock(plotDelMutex);
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
         plot->update(timeLowerBound, timeUpperBound);
     }

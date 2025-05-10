@@ -33,6 +33,10 @@ DQPlotList::DQPlotList(DQPlotController *controller, QWidget *parent)
 
     updateLists();
 }
+bool DQPlotList::isEmptyAfterReset()
+{
+    return controller->isEmptyAfterReset();
+}
 
 void DQPlotList::addCategory(const QString &category)
 {

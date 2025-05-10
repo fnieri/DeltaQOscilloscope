@@ -26,6 +26,32 @@ DQPlotController::~DQPlotController()
     probes.clear();
 }
 
+bool DQPlotController::isEmptyAfterReset()
+{
+    auto system = Application::getInstance().getSystem();
+
+    std::lock_guard<std::mutex> lock(resetMutex);
+
+    for (auto it = outcomes.begin(); it != outcomes.end();) {
+        if (!system->hasOutcome(it->first)) {
+            removeComponent(it->first);
+            it = outcomes.begin();
+        } else {
+            ++it;
+        }
+    }
+
+    for (auto it = probes.begin(); it != probes.end();) {
+        if (!system->hasProbe(it->first)) {
+            removeComponent(it->first);
+            it = probes.begin();
+        } else {
+            ++it;
+        }
+    }
+    return (outcomes.empty() && probes.empty());
+}
+
 bool DQPlotController::containsComponent(std::string name)
 {
     return ((outcomes.find(name) != outcomes.end()) || (probes.find(name) != probes.end()));
@@ -53,7 +79,7 @@ void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
     }
 }
 
-void DQPlotController::addComponent(std::string name, bool isProbe)
+void DQPlotController::addComponent(const std::string &name, bool isProbe)
 {
     auto system = Application::getInstance().getSystem();
     if (!isProbe) {
@@ -155,6 +181,7 @@ void DQPlotController::removeComponent(std::string &&name)
 
 void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
+    std::lock_guard<std::mutex> lock(updateMutex);
     double outcomeMax = 0;
     for (auto &[name, seriesOutcome] : outcomes) {
         double outcomeRange = updateOutcome(seriesOutcome.first, seriesOutcome.second, timeLowerBound, timeUpperBound);
@@ -188,19 +215,19 @@ double DQPlotController::updateOutcome(QLineSeries *series, const std::shared_pt
     // Return the max delay
     return outcome->getMaxDelay();
 }
-void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     using namespace std::chrono;
 
     auto ret = QtConcurrent::run([=]() {
-        auto computeStart = high_resolution_clock::now();
+        //      auto computeStart = high_resolution_clock::now();
 
         DeltaQ observedDeltaQ = probe->getObservableDeltaQ(timeLowerBound, timeUpperBound);
         DeltaQ probeCalculatedDeltaQ = probe->getProbeDeltaQ(timeLowerBound, timeUpperBound);
         std::vector<Bound> bounds = probe->getBounds();
         auto qta = probe->getQTA();
         double maxDelay = probe->getMaxDelay();
-        /*
+
         // --- Prepare data ---
         std::vector<std::pair<double, double>> probeData;
         std::vector<std::pair<double, double>> calculatedProbeData;
@@ -248,16 +275,15 @@ void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_pt
         qtaData.emplace_back(maxDelay, 0.75);
         qtaData.emplace_back(maxDelay, qta.cdfMax);
 
-        auto computeEnd = high_resolution_clock::now();
-        qDebug() << "Computation took" << duration_cast<microseconds>(computeEnd - computeStart).count() << "µs";
+        //    auto computeEnd = high_resolution_clock::now();
+        //  qDebug() << "Computation took" << duration_cast<microseconds>(computeEnd - computeStart).count() << "µs";
 
-        */
         // --- Push results back to GUI thread ---
-        /*
+
         QMetaObject::invokeMethod(
             plot,
             [=]() {
-                auto guiStart = high_resolution_clock::now();
+                //        auto guiStart = high_resolution_clock::now();
 
                 plot->setUpdatesEnabled(false);
 
@@ -271,11 +297,9 @@ void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_pt
 
                 plot->setUpdatesEnabled(true);
 
-                auto guiEnd = high_resolution_clock::now();
-                qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "µs";
-
-    },
-    Qt::QueuedConnection);
-*/
+                //    auto guiEnd = high_resolution_clock::now();
+                //      qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "µs";
+            },
+            Qt::QueuedConnection);
     });
 }

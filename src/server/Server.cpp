@@ -1,4 +1,3 @@
-
 #include "Server.h"
 #include "../Application.h"
 #include <arpa/inet.h>
@@ -114,16 +113,17 @@ void Server::run()
     cleanupThreads();
 }
 
+
 void Server::handleClient(int clientSocket)
 {
-    char buffer[1024] = {0};
+    std::string buffer;
+    char tempBuf[1024];
 
     while (running) {
-        int valread = read(clientSocket, buffer, sizeof(buffer));
+        int valread = read(clientSocket, tempBuf, sizeof(tempBuf));
         if (valread <= 0) {
-            if (valread == 0 || errno == ECONNRESET) {
-                break; // Client disconnected
-            }
+            if (valread == 0 || errno == ECONNRESET)
+                break;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
@@ -132,7 +132,14 @@ void Server::handleClient(int clientSocket)
             break;
         }
 
-        parseErlangMessage(buffer, valread);
+        buffer.append(tempBuf, valread);
+
+        size_t pos;
+        while ((pos = buffer.find('\n')) != std::string::npos) {
+            std::string message = buffer.substr(0, pos);
+            buffer.erase(0, pos + 1);
+            parseErlangMessage(message.c_str(), message.size());
+        }
     }
 
     close(clientSocket);
@@ -165,40 +172,44 @@ void Server::stop()
         workerThread.join();
 }
 
+
 void Server::parseErlangMessage(const char *buffer, int len)
 {
     if (buffer == nullptr || len <= 0 || len >= 1024) {
+        std::cerr << "error" << std::endl;
         return;
     }
+
     std::string message(buffer, len);
 
-    std::regex pattern(R"(n:(\w+);b:(\d+);e:(\d+);s:(\w+))");
-    std::smatch match;
+    size_t nPos = message.find("n:");
+    size_t bPos = message.find(";b:");
+    size_t ePos = message.find(";e:");
+    size_t sPos = message.find(";s:");
 
-    if (!std::regex_search(message, match, pattern) || match.size() != 5) {
-        // std::cerr << "Failed to parse message: " << message << std::endl;
+    if (nPos != 0 || bPos == std::string::npos || ePos == std::string::npos || sPos == std::string::npos) {
+        std::cerr << "Failed to parse message: " << message << std::endl;
         return;
     }
 
-    std::string name = match[1].str();
-    uint64_t startTime = std::stoull(match[2].str());
-    uint64_t endTime;
-    std::string statusStr = match[4].str();
+    std::string name = message.substr(2, bPos - 2);
+    std::string bStr = message.substr(bPos + 3, ePos - (bPos + 3));
+    std::string eStr = message.substr(ePos + 3, sPos - (ePos + 3));
+    std::string statusStr = message.substr(sPos + 3);
+
+    uint64_t startTime = std::stoull(bStr);
+    uint64_t endTime = 0;
     Sample sample;
     Status status = Status::SUCCESS;
+
     if (statusStr == TIMEOUT || statusStr == FAIL) {
-        status = Status::FAILED;
-        if (statusStr == TIMEOUT)
-            status = Status::TIMEDOUT;
-
+        status = (statusStr == TIMEOUT) ? Status::TIMEDOUT : Status::FAILED;
         sample = {startTime, 0, 0, status};
-
     } else if (statusStr == EXEC_OK) {
-        endTime = std::stoull(match[3].str());
+        endTime = std::stoull(eStr);
         double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
-        Sample sample {startTime, endTime, elapsed, status};
-
-    } else if (statusStr != EXEC_OK) {
+        sample = {startTime, endTime, elapsed, status};
+    } else {
         std::cerr << "Unknown status: " << statusStr << std::endl;
         return;
     }
@@ -209,3 +220,4 @@ void Server::parseErlangMessage(const char *buffer, int len)
     }
     queueCond.notify_one();
 }
+

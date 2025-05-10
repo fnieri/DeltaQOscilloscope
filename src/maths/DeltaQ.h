@@ -43,7 +43,7 @@ public:
     DeltaQ() = default;
     DeltaQ(double binWidth);
     DeltaQ(double binWidth, const std::vector<double> &values, bool isPdf);
-    DeltaQ(double binWidth, std::vector<Sample>);
+    DeltaQ(double binWidth, std::vector<Sample> &);
     DeltaQ(double binWidth, std::vector<Sample> &, int);
     /**
      * Getters

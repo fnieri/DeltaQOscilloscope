@@ -57,22 +57,19 @@ Sidebar::Sidebar(QWidget *parent)
     layout->addWidget(newPlotList);
     layout->addWidget(addNewPlotButton);
 
-
     qtaInputWidget = new QTAInputWidget(this);
     layout->addWidget(qtaInputWidget);
 
-
     delaySettingsWidget = new DelaySettingsWidget(this);
     layout->addWidget(delaySettingsWidget);
-    connect(delaySettingsWidget, &DelaySettingsWidget::delayParametersChanged,
-            qtaInputWidget, &QTAInputWidget::loadObservableSettings);
-
+    connect(delaySettingsWidget, &DelaySettingsWidget::delayParametersChanged, qtaInputWidget, &QTAInputWidget::loadObservableSettings);
 
     currentPlotLabel = new QLabel("Modify current plot:", this);
     currentPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     currentPlotLabel->hide(); // Initially hidden
     layout->addWidget(currentPlotLabel);
 }
+
 void Sidebar::setCurrentPlotList(DQPlotList *plotList)
 {
     if (currentPlotList == plotList) {
@@ -82,7 +79,6 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
     if (currentPlotList) {
         layout->removeWidget(currentPlotList);
         currentPlotList->hide();
-        currentPlotList = nullptr;
     }
 
     if (plotList) {
@@ -92,13 +88,10 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
         currentPlotLabel->show();
     }
 }
-
-
 void Sidebar::hideCurrentPlot()
 {
     if (currentPlotList) {
         layout->removeWidget(currentPlotList);
-        currentPlotList->deleteLater();
         currentPlotList = nullptr;
     }
     currentPlotLabel->hide();

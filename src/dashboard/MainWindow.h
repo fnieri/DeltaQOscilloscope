@@ -28,15 +28,16 @@ class MainWindow : public QMainWindow
     QThread *timerThread;
     QTimer *updateTimer;
 
-    QTabWidget* sideTabWidget;  // NEW
-    TriggersTab* triggersTab;   // NEW
-
-
+    QTabWidget *sideTabWidget; // NEW
+    TriggersTab *triggersTab; // NEW
 
     Sidebar *sidebar;
     QPushButton *addPlotButton;
     QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
     uint64_t timeLowerBound;
+
+    std::mutex plotDelMutex;
+    std::mutex updateMutex;
 
 public:
     MainWindow(QWidget *parent = nullptr);

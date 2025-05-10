@@ -17,9 +17,20 @@ public:
 
     void setProbabilities(const std::vector<double> &);
 
+    std::vector<double> getProbabilities() {
+        return probabilities;
+    }
     std::vector<std::shared_ptr<DiagramComponent>> getChildren();
 
     void setCausalLinks(std::vector<std::vector<std::shared_ptr<DiagramComponent>>> links) {
         causalLinks = links;
+    }
+
+    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> getCausalLinks() {
+        return causalLinks;
+    }
+    
+    OperatorType getType() {
+        return type;
     }
 };

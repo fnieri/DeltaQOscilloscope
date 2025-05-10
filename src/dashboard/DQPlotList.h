@@ -18,7 +18,10 @@ public:
     explicit DQPlotList(DQPlotController *controller, QWidget *parent = nullptr);
 
     void reset();
+    bool isEmptyAfterReset();
 
+    void updateLists();
+    ~DQPlotList() = default;
 private Q_SLOTS:
     void onConfirmSelection();
     void onRemoveSelection();
@@ -26,7 +29,6 @@ private Q_SLOTS:
 private:
     void addCategory(const QString &category);
     void addItemToList(const std::string &name, bool isSelected, const QString &category);
-    void updateLists();
 
     DQPlotController *controller;
 

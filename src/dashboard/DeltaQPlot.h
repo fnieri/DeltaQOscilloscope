@@ -42,7 +42,7 @@ public:
      * @param series Pointer to the line series.
      * @param name Name of the series.
      */
-    void addSeries(QLineSeries *series, std::string &name);
+    void addSeries(QLineSeries *series, const std::string &name);
 
     /**
      * @brief Updates the plot data using provided time range and bin width.
@@ -64,6 +64,8 @@ public:
      * @brief Gets list of currently plotted component names.
      */
     std::vector<std::string> getComponents();
+
+    bool isEmptyAfterReset();
 
     /**
      * @brief Updates an existing series with new data points.

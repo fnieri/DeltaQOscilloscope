@@ -17,10 +17,10 @@
 
 class System
 {
-    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;
-    std::unordered_map<std::string, std::shared_ptr<Operator>> operators;
-    std::unordered_map<std::string, std::shared_ptr<Probe>> probes;
-    std::unordered_map<std::string, std::shared_ptr<Observable>> components;
+    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes {};
+    std::unordered_map<std::string, std::shared_ptr<Operator>> operators {};
+    std::unordered_map<std::string, std::shared_ptr<Probe>> probes {};
+    std::unordered_map<std::string, std::shared_ptr<Observable>> components {};
 
     std::string systemDefinitionText;
 
@@ -35,6 +35,7 @@ public:
 
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Operator>> &getOperators();
 
+    [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Observable>> &getObservables();
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
@@ -46,13 +47,14 @@ public:
     std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
 
     std::shared_ptr<Observable> getObservable(const std::string &observableName);
+
     std::vector<std::string> getAllComponentsName();
     /**
      * Calculate the resulting DeltaQ for the whole system
      */
     DeltaQ calculateDeltaQ();
 
-    bool hasOutcome(std::string &name);
+    bool hasOutcome(const std::string &name);
 
     bool hasProbe(const std::string &name);
 

@@ -1,0 +1,159 @@
+
+#include "Server.h"
+#include "../Application.h"
+#include <algorithm>
+#include <arpa/inet.h>
+#include <cstdint>
+#include <cstring>
+#include <fcntl.h>
+#include <iostream>
+#include <unistd.h>
+#define TIMEOUT "to"
+#define EXEC_OK "ok"
+#define FAIL "fa"
+
+Server::Server(int port)
+    : port(port)
+    , server_fd(0)
+{
+    Application::getInstance().addObserver([this]() { this->updateSystem(); });
+}
+
+Server::~Server()
+{
+    running = false;
+    close(server_fd);
+
+    {
+        std::lock_guard lock(queueMutex);
+        shutdownWorker = true;
+    }
+
+    queueCond.notify_all();
+
+    if (workerThread.joinable())
+        workerThread.join();
+
+    if (serverThread.joinable())
+        serverThread.join();
+}
+
+void Server::start()
+{
+    serverThread = std::thread(&Server::run, this);
+
+    workerThread = std::thread([this]() {
+        while (!shutdownWorker) {
+            std::unique_lock lock(queueMutex);
+            queueCond.wait(lock, [this] { return !sampleQueue.empty() || shutdownWorker; });
+
+            while (!sampleQueue.empty()) {
+                auto [name, sample] = sampleQueue.front();
+                sampleQueue.pop();
+                lock.unlock();
+
+                if (system) {
+                    system->addSample(name, sample);
+                }
+
+                lock.lock();
+            }
+        }
+    });
+}
+
+void Server::updateSystem()
+{
+    system = Application::getInstance().getSystem();
+}
+
+void Server::run()
+{
+    server_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (server_fd < 0) {
+        perror("Socket creation failed");
+        return;
+    }
+
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    int rcvbuf = 1024 * 1024; // 1 MB buffer
+    setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+
+    memset(&address, 0, sizeof(address));
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        perror("Bind failed");
+        return;
+    }
+
+    std::cout << "UDP server listening on port " << port << std::endl;
+    running = true;
+
+    char buffer[1024];
+    struct sockaddr_in clientAddr;
+    socklen_t len = sizeof(clientAddr);
+
+    while (running) {
+        ssize_t n = recvfrom(server_fd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &len);
+        if (n > 0) {
+            parseErlangMessage(buffer, n);
+        } else {
+            std::cerr << "Couldn't read \n";
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
+void Server::parseErlangMessage(const char *buffer, int len)
+{
+    if (buffer == nullptr || len <= 0 || len >= 1024) {
+        std::cerr << "Invalid message" << std::endl;
+        return;
+    }
+    std::string message(buffer, len);
+    size_t nPos = message.find("n:");
+    size_t bPos = message.find(";b:");
+    size_t ePos = message.find(";e:");
+    size_t sPos = message.find(";s:");
+    if (nPos != 0 || bPos == std::string::npos || ePos == std::string::npos || sPos == std::string::npos) {
+        std::cerr << "Failed to parse message: " << message << std::endl;
+        return;
+    }
+    std::string name = message.substr(2, bPos - 2);
+    std::string bStr = message.substr(bPos + 3, ePos - (bPos + 3));
+    std::string eStr = message.substr(ePos + 3, sPos - (ePos + 3));
+    std::string statusStr = message.substr(sPos + 3);
+
+    // Trim whitespace and newlines from statusStr
+    statusStr.erase(std::remove_if(statusStr.begin(), statusStr.end(), [](unsigned char c) { return std::isspace(c); }), statusStr.end());
+
+    uint64_t startTime = std::stoull(bStr);
+    uint64_t endTime = 0;
+    Sample sample;
+    Status status = Status::SUCCESS;
+
+    if (statusStr == TIMEOUT) {
+        status = Status::TIMEDOUT;
+        sample = {startTime, 0, 0, status};
+    } else if (statusStr == FAIL) {
+        status = Status::FAILED;
+        sample = {startTime, 0, 0, status};
+    } else if (statusStr == EXEC_OK) {
+        endTime = std::stoull(eStr);
+        double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
+        sample = {startTime, endTime, elapsed, status};
+    } else {
+        std::cerr << "Unknown status: '" << statusStr << "'" << std::endl;
+        return;
+    }
+
+    {
+        std::lock_guard lock(queueMutex);
+        sampleQueue.emplace(name, sample);
+    }
+    queueCond.notify_one();
+}

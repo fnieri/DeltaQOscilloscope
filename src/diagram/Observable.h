@@ -22,6 +22,7 @@ protected:
     QTA qta;
 
     std::mutex observedMutex;
+    std::mutex samplesMutex;
 
 public:
     explicit Observable(const std::string &name);

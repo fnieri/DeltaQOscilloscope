@@ -53,7 +53,6 @@ public:
 
     void setCurrentPlotList(DQPlotList *currentPlotList);
     void hideCurrentPlot();
-
     NewPlotList *getPlotList() const
     {
         return newPlotList;

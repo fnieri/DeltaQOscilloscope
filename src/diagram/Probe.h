@@ -28,4 +28,14 @@ public:
     std::vector<Bound> getBounds() const;
 
     double setNewParameters(int, int) override;
+
+    void setCausalLinks(std::vector<std::shared_ptr<DiagramComponent>> newCausalLinks)
+    {
+        causalLinks = newCausalLinks;
+    }
+
+    std::vector<std::shared_ptr<DiagramComponent>> getCausalLinks()
+    {
+        return causalLinks;
+    }
 };

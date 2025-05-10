@@ -30,9 +30,9 @@ DeltaQ::DeltaQ(const double binWidth, const std::vector<double> &values, const b
         calculatePDF();
     }
 }
-DeltaQ::DeltaQ(double binWidth, std::vector<Sample> samples)
+DeltaQ::DeltaQ(double binWidth, std::vector<Sample> &samples)
     : binWidth(binWidth)
-    , bins {50} // FIXME magic number
+    , bins {50}
     , qta()
 {
     calculateDeltaQ(samples);
@@ -56,6 +56,7 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
     std::vector<double> histogram(bins, 0.0);
     totalSamples = outcomeSamples.size();
     long long successfulSamples = 0;
+
     std::sort(outcomeSamples.begin(), outcomeSamples.end(), [](const Sample &a, const Sample &b) { return a.elapsedTime < b.elapsedTime; });
 
     for (const auto &sample : outcomeSamples) {
@@ -63,7 +64,6 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             continue; // Exclude failed samples from histogram but count them
         }
 
-        successfulSamples++;
         double elapsed = sample.elapsedTime;
 
         if (elapsed < 0 || std::isnan(elapsed) || std::isinf(elapsed)) {
@@ -77,13 +77,16 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             continue;
         }
         if (bin >= bins) {
+            if (elapsed > binWidth * bins); {
+                continue;
+            }
             bin = bins - 1;
         }
 
+        successfulSamples++;
         histogram[bin] += 1.0;
     }
     // Calculate PDF
-
     for (double &val : histogram) {
         val /= totalSamples;
     }
