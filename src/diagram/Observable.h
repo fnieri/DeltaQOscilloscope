@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../maths/Snapshot.h"
 #include "DiagramComponent.h"
 #include "Sample.h"
 #include "src/maths/TriggerManager.h"
 #include <deque>
 #include <math.h>
 #include <mutex>
+
 #define DELTA_T_BASE 0.001
 
 class Observable : virtual public DiagramComponent
@@ -19,13 +21,19 @@ protected:
     int nBins {50}; // Number of bins
 
     TriggerManager triggerManager;
+
+    ConfidenceInterval observedInterval;
     QTA qta;
+
+    Snapshot observableSnapshot;
 
     std::mutex observedMutex;
     std::mutex samplesMutex;
 
+    bool recording = false;
+
 public:
-    explicit Observable(const std::string &name);
+    Observable(const std::string &name);
 
     void addSample(const Sample &sample);
 
@@ -65,6 +73,7 @@ public:
         return triggerManager;
     }
 
+    void setRecording(bool);
     void setQTA(const QTA &newQTA);
 
     void addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled, std::optional<int> sampleLimit);

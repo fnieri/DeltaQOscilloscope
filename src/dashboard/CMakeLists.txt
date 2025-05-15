@@ -13,10 +13,12 @@ add_library(${PREFIX}_dashboard
     NewPlotList.cpp
     Sidebar.h
     Sidebar.cpp
-        QTAInputWidget.cpp
-        QTAInputWidget.h
-        TriggersTab.cpp
-        TriggersTab.h
+    SnapshotViewerWindow.h
+    SnapshotViewerWindow.cpp
+    QTAInputWidget.cpp
+    QTAInputWidget.h
+    TriggersTab.cpp
+    TriggersTab.h
 )
 
 

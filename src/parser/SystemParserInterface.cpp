@@ -1,9 +1,11 @@
 
 #include "SystemParserInterface.h"
 #include "SystemErrorListener.h"
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 std::optional<System> SystemParserInterface::parseFile(const std::string &filename)
 {
     std::ifstream file(filename);
@@ -17,13 +19,21 @@ std::optional<System> SystemParserInterface::parseFile(const std::string &filena
     std::string content = buffer.str();
 
     antlr4::ANTLRInputStream input(content);
-    return parseInternal(input);
+    try {
+        return parseInternal(input);
+    } catch (std::exception &e) {
+        throw std::invalid_argument(e.what());
+    }
 }
 
 std::optional<System> SystemParserInterface::parseString(const std::string &inputStr)
 {
     antlr4::ANTLRInputStream input(inputStr);
-    return parseInternal(input);
+    try {
+        return parseInternal(input);
+    } catch (std::exception &e) {
+        throw std::invalid_argument(e.what());
+    }
 }
 
 std::optional<System> SystemParserInterface::parseInternal(antlr4::ANTLRInputStream &input)
@@ -43,8 +53,7 @@ std::optional<System> SystemParserInterface::parseInternal(antlr4::ANTLRInputStr
         SystemBuilderVisitor visitor;
         visitor.visitStart(tree);
         return visitor.getSystem();
-    } catch (const std::exception &e) {
-        std::cerr << "Parsing error: " << e.what() << std::endl;
-        return std::nullopt;
+    } catch (std::exception &e) {
+        throw std::invalid_argument(e.what());
     }
 }

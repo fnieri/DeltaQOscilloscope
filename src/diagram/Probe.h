@@ -11,12 +11,17 @@
 #include <mutex>
 class Probe : public Observable
 {
-    std::map<uint64_t, DeltaQ> calculatedDeltaQs;
-    ConfidenceInterval interval;
     std::vector<std::shared_ptr<DiagramComponent>> causalLinks;
-    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
+
     std::mutex paramMutex;
     std::mutex calcMutex;
+
+    std::map<uint64_t, DeltaQ> calculatedDeltaQs;
+    ConfidenceInterval calculatedInterval;
+
+    Snapshot calculatedSnapshot;
+
+    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
 
 public:
     Probe(const std::string &name);
@@ -26,6 +31,10 @@ public:
     DeltaQ getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     std::vector<Bound> getBounds() const;
+
+    std::vector<Bound> getObservedBounds() const;
+
+    std::vector<Bound> getCalculatedBounds() const;
 
     double setNewParameters(int, int) override;
 

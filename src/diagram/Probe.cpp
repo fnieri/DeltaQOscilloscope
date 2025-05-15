@@ -10,14 +10,12 @@
 Probe::Probe(const std::string &name)
     : DiagramComponent(name)
     , Observable(name)
-    , interval(50)
 {
 }
 
 Probe::Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>> causalLinks)
     : DiagramComponent(name)
     , Observable(name)
-    , interval(50)
     , causalLinks(causalLinks)
 {
 }
@@ -31,13 +29,28 @@ DeltaQ Probe::getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     }
 
     std::lock_guard<std::mutex> lock(calcMutex);
-    if (deltaQs.size() > MAX_DQ) {
+
+    if (calculatedDeltaQs.size() > MAX_DQ) {
         const auto earliest = calculatedDeltaQs.begin();
-        interval.removeDeltaQ(earliest->second);
         calculatedDeltaQs.erase(earliest);
     }
 
-    return convolveN(deltaQs);
+    DeltaQ result = convolveN(deltaQs);
+    int calculatedBins = result.getBins();
+
+    if (calculatedBins == calculatedInterval.getBins()) {
+        calculatedInterval.setNumBins(calculatedBins);
+    }
+
+    calculatedInterval.addDeltaQ(result);
+
+    calculatedSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
+
+    if ((calculatedSnapshot.getCalculatedSize() > MAX_DQ && !recording)) {
+        calculatedSnapshot.removeOldestCalculatedDeltaQ();
+    }
+
+    return result;
 }
 
 DeltaQ Probe::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
@@ -47,16 +60,19 @@ DeltaQ Probe::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
 
     if (!samplesInRange.empty()) {
         deltaQ = {getBinWidth(), samplesInRange, nBins};
-        interval.addDeltaQ(deltaQ);
+        observedInterval.addDeltaQ(deltaQ);
     }
-    std::vector<Bound> bounds = interval.getBounds();
+    std::vector<Bound> bounds = observedInterval.getBounds();
+
     std::lock_guard<std::mutex> lock(observedMutex);
     observedDeltaQs[timeLowerBound] = deltaQ;
+
     if (observedDeltaQs.size() > MAX_DQ) {
         auto earliest = observedDeltaQs.begin();
-        interval.removeDeltaQ(earliest->second);
+        observedInterval.removeDeltaQ(earliest->second);
         observedDeltaQs.erase(earliest);
     }
+
     triggerManager.evaluate(deltaQ, qta);
 
     return deltaQ;
@@ -64,7 +80,17 @@ DeltaQ Probe::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
 
 std::vector<Bound> Probe::getBounds() const
 {
-    return interval.getBounds();
+    return observedInterval.getBounds();
+}
+
+std::vector<Bound> Probe::getObservedBounds() const
+{
+    return observedInterval.getBounds();
+}
+
+std::vector<Bound> Probe::getCalculatedBounds() const
+{
+    return observedInterval.getBounds();
 }
 
 double Probe::setNewParameters(int newExp, int newNBins)
@@ -75,6 +101,8 @@ double Probe::setNewParameters(int newExp, int newNBins)
     if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
         qta = QTA::create(0, 0, 0, qta.cdfMax);
     }
-    interval = ConfidenceInterval(nBins);
+    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
+
+    observedInterval = ConfidenceInterval(nBins);
     return maxDelay;
 }

@@ -1,12 +1,13 @@
 
 #include "DQPlotController.h"
 #include "../Application.h"
-#include "../maths/DeltaQOperations.h"
 #include <QMetaObject>
 #include <QVector>
 #include <QtConcurrent>
 #include <algorithm>
 #include <qlineseries.h>
+
+using namespace std::chrono;
 DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
     : plot(plot)
 {
@@ -217,7 +218,6 @@ double DQPlotController::updateOutcome(QLineSeries *series, const std::shared_pt
 }
 void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    using namespace std::chrono;
 
     auto ret = QtConcurrent::run([=]() {
         //      auto computeStart = high_resolution_clock::now();
@@ -236,12 +236,22 @@ void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_pt
         std::vector<std::pair<double, double>> meanData;
         std::vector<std::pair<double, double>> qtaData;
 
-        // Prepare observedDeltaQ data
+        // Prepare observedDeltaQ data and its bounds
         int observedBins = observedDeltaQ.getBins();
         double observedBinWidth = observedDeltaQ.getBinWidth();
         probeData.reserve(observedBins);
+
+        int boundsSize = static_cast<int>(bounds.size());
+        lowerBoundData.reserve(boundsSize);
+        upperBoundData.reserve(boundsSize);
+        meanData.reserve(boundsSize);
+
         for (int i = 0; i < observedBins; ++i) {
+            double x = observedBinWidth * (i + 1);
             probeData.emplace_back(observedBinWidth * (i + 1), observedDeltaQ.cdfAt(i));
+            lowerBoundData.emplace_back(x, bounds[i].lowerBound);
+            upperBoundData.emplace_back(x, bounds[i].upperBound);
+            meanData.emplace_back(x, bounds[i].mean);
         }
 
         // Prepare calculatedDeltaQ data
@@ -251,19 +261,6 @@ void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_pt
         for (int i = 0; i < calculatedBins; ++i) {
             calculatedProbeData.emplace_back(calculatedBinWidth * (i + 1), probeCalculatedDeltaQ.cdfAt(i));
         }
-
-        // Prepare bounds
-        int boundsSize = static_cast<int>(bounds.size());
-        lowerBoundData.reserve(boundsSize);
-        upperBoundData.reserve(boundsSize);
-        meanData.reserve(boundsSize);
-        for (int i = 0; i < boundsSize; ++i) {
-            double x = observedBinWidth * (i + 1);
-            lowerBoundData.emplace_back(x, bounds[i].lowerBound);
-            upperBoundData.emplace_back(x, bounds[i].upperBound);
-            meanData.emplace_back(x, bounds[i].mean);
-        }
-
         // QTA line plot
         qtaData.reserve(8);
         qtaData.emplace_back(qta.perc_25, 0);

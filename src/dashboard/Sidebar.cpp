@@ -17,6 +17,9 @@
 #include <qpushbutton.h>
 #include <qtextedit.h>
 
+#include <fstream>
+#include <string>
+
 Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
 {
@@ -104,10 +107,16 @@ void Sidebar::clearOnAdd()
 void Sidebar::onUpdateSystem()
 {
     std::string text = getSystemText();
-    auto system = SystemParserInterface::parseString(text);
 
-    if (system.has_value())
-        Application::getInstance().setSystem(system.value());
+    try {
+        auto system = SystemParserInterface::parseString(text);
+        if (system.has_value()) {
+            Application::getInstance().setSystem(system.value());
+            system->setSystemDefinitionText(text);
+        }
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Parsing error", e.what());
+    }
 }
 
 void Sidebar::onAddPlotClicked()
@@ -126,7 +135,7 @@ void Sidebar::saveSystemTo()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
-    QString filename = dialog.getSaveFileName(this, "Save file", "", "JSON Files (*.json)");
+    QString filename = dialog.getSaveFileName(this, "Save file", "", "All files (* *.dq)");
 
     if (!filename.isEmpty()) {
         std::string systemText = getSystemText();
@@ -149,14 +158,23 @@ void Sidebar::saveSystemTo()
 
 void Sidebar::loadSystem()
 {
+    // https://stackoverflow.com/questions/13035674/how-to-read-a-file-line-by-line-or-a-whole-text-file-at-once
     QFileDialog dialog(this);
-    std::string filename = dialog.getOpenFileName(this, "Select file", " ", ".json").toStdString();
+    std::string filename = dialog.getOpenFileName(this, "Select file", " ", "All files (* *.dq)").toStdString();
 
-    std::string text = getSystemText();
     auto system = SystemParserInterface::parseFile(filename);
-
-    if (system.has_value())
+    if (system.has_value()) {
         Application::getInstance().setSystem(system.value());
+        std::ifstream file(filename);
+        std::string str;
+        std::string file_contents;
+        while (std::getline(file, str)) {
+            file_contents += str;
+            file_contents.push_back('\n');
+        }
+
+        system->setSystemDefinitionText(file_contents);
+    }
     std::string systemText = Application::getInstance().getSystem()->getSystemDefinitionText();
     systemTextEdit->setText(QString::fromStdString(systemText));
 }

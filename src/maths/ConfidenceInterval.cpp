@@ -4,6 +4,11 @@
 #include <stdexcept>
 #include <vector>
 
+ConfidenceInterval::ConfidenceInterval()
+    : numBins(0)
+{
+}
+
 ConfidenceInterval::ConfidenceInterval(int numBins)
 
     : numBins(numBins)
@@ -18,7 +23,8 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
     const auto &cdf = deltaQ.getCdfValues();
 
     if (cdf.size() != numBins) {
-        throw std::invalid_argument("CDF size mismatch in addDeltaQ");
+        std::cerr << "CDF size mismatch in addDeltaQ \n";
+        return;
     }
 
     for (size_t i = 0; i < cdf.size(); ++i) {
@@ -95,11 +101,18 @@ void ConfidenceInterval::reset()
 
 void ConfidenceInterval::setNumBins(int newNumBins)
 {
-    numBins = newNumBins;
-    reset();
+    if (numBins != newNumBins) {
+        numBins = newNumBins;
+        reset();
+    }
 }
 
 std::vector<Bound> ConfidenceInterval::getBounds() const
 {
     return bounds;
+}
+
+unsigned int ConfidenceInterval::getBins()
+{
+    return numBins;
 }

@@ -21,6 +21,7 @@ private:
     void updateConfidenceInterval();
 
 public:
+    ConfidenceInterval();
     ConfidenceInterval(int numBins);
 
     void setNumBins(int newNumBins);
@@ -29,6 +30,6 @@ public:
     void removeDeltaQ(const DeltaQ &);
 
     std::vector<Bound> getBounds() const;
-
+    unsigned int getBins();
     void reset();
 };

@@ -30,7 +30,6 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
     }
     samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
 
-    std::cout << selectedSamples.size() << "\n";
     return selectedSamples;
 }
 
@@ -60,4 +59,9 @@ void Observable::addTrigger(TriggerType type, TriggerDefs::Condition condition, 
 void Observable::removeTrigger(TriggerType type)
 {
     triggerManager.removeTriggersByType(type);
+}
+
+void Observable::setRecording(bool isRecording)
+{
+    recording = isRecording;
 }

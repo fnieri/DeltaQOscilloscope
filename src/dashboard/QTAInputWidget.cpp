@@ -9,13 +9,11 @@ QTAInputWidget::QTAInputWidget(QWidget *parent)
 {
     auto layout = new QFormLayout(this);
 
-
     qtaLabel = new QLabel(this);
     qtaLabel->setText("Set QTA for an observable");
     layout->addRow(qtaLabel);
     observableComboBox = new QComboBox(this);
     layout->addRow("Observable:", observableComboBox);
-
 
     perc25Edit = new QLineEdit(this);
     perc25Edit->setPlaceholderText("Seconds (s)");
@@ -42,7 +40,6 @@ QTAInputWidget::QTAInputWidget(QWidget *parent)
     connect(saveButton, &QPushButton::clicked, this, &QTAInputWidget::onSaveButtonClicked);
 
     setLayout(layout);
-
 
     Application::getInstance().addObserver([this]() { this->populateComboBox(); });
 }
@@ -71,7 +68,7 @@ void QTAInputWidget::loadObservableSettings()
     auto observable = system->getObservable(observableName);
     if (observable) {
         auto qta = observable->getQTA();
-        perc25Edit->setText(QString::number(qta.perc_25, 'f', 6));  // 6 decimal places
+        perc25Edit->setText(QString::number(qta.perc_25, 'f', 6)); // 6 decimal places
         perc50Edit->setText(QString::number(qta.perc_50, 'f', 6));
         perc75Edit->setText(QString::number(qta.perc_75, 'f', 6));
         cdfMaxEdit->setText(QString::number(qta.cdfMax, 'f', 6));
@@ -92,16 +89,29 @@ void QTAInputWidget::onSaveButtonClicked()
     try {
         QTA newQTA = QTA::create(getPerc25(), getPerc50(), getPerc75(), getCdfMax());
         observable->setQTA(newQTA);
-    }
-    catch (std::exception &e) {
+    } catch (std::exception &e) {
         QMessageBox::warning(this, "Error", e.what());
     }
 }
 
+double QTAInputWidget::getPerc25() const
+{
+    return perc25Edit->text().toDouble();
+}
+double QTAInputWidget::getPerc50() const
+{
+    return perc50Edit->text().toDouble();
+}
+double QTAInputWidget::getPerc75() const
+{
+    return perc75Edit->text().toDouble();
+}
+double QTAInputWidget::getCdfMax() const
+{
+    return cdfMaxEdit->text().toDouble();
+}
 
-double QTAInputWidget::getPerc25() const { return perc25Edit->text().toDouble(); }
-double QTAInputWidget::getPerc50() const { return perc50Edit->text().toDouble(); }
-double QTAInputWidget::getPerc75() const { return perc75Edit->text().toDouble(); }
-double QTAInputWidget::getCdfMax() const { return cdfMaxEdit->text().toDouble(); }
-
-QString QTAInputWidget::getSelectedObservable() const { return observableComboBox->currentText(); }
+QString QTAInputWidget::getSelectedObservable() const
+{
+    return observableComboBox->currentText();
+}

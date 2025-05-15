@@ -9,20 +9,19 @@ System SystemBuilderVisitor::getSystem() const
     return system;
 }
 
-void SystemBuilderVisitor::checkForCycles() const {
+void SystemBuilderVisitor::checkForCycles() const
+{
     std::set<std::string> visited;
     std::set<std::string> recursionStack;
 
-    for (const auto& [node, _] : dependencies) {
+    for (const auto &[node, _] : dependencies) {
         if (hasCycle(node, visited, recursionStack)) {
             throw std::invalid_argument("Cycle detected in system definition involving: " + node);
         }
     }
 }
 
-bool SystemBuilderVisitor::hasCycle(const std::string& node,
-                                    std::set<std::string>& visited,
-                                    std::set<std::string>& recursionStack) const
+bool SystemBuilderVisitor::hasCycle(const std::string &node, std::set<std::string> &visited, std::set<std::string> &recursionStack) const
 {
     if (recursionStack.find(node) != recursionStack.end()) {
         return true;
@@ -35,7 +34,7 @@ bool SystemBuilderVisitor::hasCycle(const std::string& node,
     recursionStack.insert(node);
 
     if (dependencies.find(node) != dependencies.end()) {
-        for (const auto& neighbor : dependencies.at(node)) {
+        for (const auto &neighbor : dependencies.at(node)) {
             if (hasCycle(neighbor, visited, recursionStack)) {
                 return true;
             }
@@ -45,8 +44,6 @@ bool SystemBuilderVisitor::hasCycle(const std::string& node,
     recursionStack.erase(node);
     return false;
 }
-
-
 
 std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext *context)
 {
@@ -61,7 +58,7 @@ std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext 
     system.setOutcomes(outcomes);
     system.setOperators(operators);
     system.setProbes(probes);
-
+    /*
     for (const auto& [name, link] : definitionLinks) {
         std::cout << name << " [ ";
         for (auto &name2 : link) {
@@ -81,7 +78,7 @@ std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext 
         }
         std::cout << "]\n";
     }
-
+    */
     checkForCycles();
     return nullptr;
 }
@@ -114,7 +111,6 @@ std::any SystemBuilderVisitor::visitDefinition(parser::DQGrammarParser::Definiti
     currentlyBuildingProbe = "";
     return nullptr;
 }
-
 
 std::any SystemBuilderVisitor::visitSystem(parser::DQGrammarParser::SystemContext *context)
 {
@@ -169,14 +165,11 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
     if (type == OperatorType::PRB && context->probability_list()) {
         const auto probabilities = std::any_cast<std::vector<double>>(visitProbability_list(context->probability_list()));
         op->setProbabilities(probabilities);
-    }
-    else if (type == OperatorType::PRB && !context->probability_list()) {
+    } else if (type == OperatorType::PRB && !context->probability_list()) {
         throw std::invalid_argument("A probabilistic operator must have probabilities");
-    }
-    else if (type != OperatorType::PRB && context->probability_list()) {
+    } else if (type != OperatorType::PRB && context->probability_list()) {
         throw std::invalid_argument("A non probabilistic operator cannot have probabilities");
     }
-
 
     std::vector<std::vector<std::shared_ptr<DiagramComponent>>> operatorPtrLinks;
 
@@ -233,7 +226,6 @@ std::any SystemBuilderVisitor::visitProbeComponent(parser::DQGrammarParser::Prob
     probes[name] = probe;
     return std::dynamic_pointer_cast<DiagramComponent>(probe);
 }
-
 
 std::any SystemBuilderVisitor::visitProbability_list(parser::DQGrammarParser::Probability_listContext *context)
 {

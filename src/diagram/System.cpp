@@ -12,7 +12,7 @@ void System::setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome
 {
     outcomes = outcomesMap;
     for (auto &[name, outcome] : outcomes) {
-        components[name] = outcome;
+        observables[name] = outcome;
     }
 }
 
@@ -20,7 +20,7 @@ void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> p
 {
     probes = probesMap;
     for (auto &[name, probe] : probes) {
-        components[name] = probe;
+        observables[name] = probe;
     }
 }
 
@@ -48,7 +48,7 @@ void System::setObservableParameters(std::string &componentName, int exponent, i
 
 void System::addSample(std::string &componentName, Sample &sample)
 {
-    if (auto it = components.find(componentName); it != components.end()) {
+    if (auto it = observables.find(componentName); it != observables.end()) {
         it->second->addSample(sample);
     }
 }
@@ -75,7 +75,7 @@ DeltaQ System::calculateDeltaQ()
 
 [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Observable>> &System::getObservables()
 {
-    return components;
+    return observables;
 }
 
 bool System::hasOutcome(const std::string &name)
@@ -119,5 +119,10 @@ std::string System::getSystemDefinitionText()
 
 std::shared_ptr<Observable> System::getObservable(const std::string &name)
 {
-    return components[name];
+    return observables[name];
+}
+
+void System::setRecording(bool isRecording)
+{
+    for (auto &obs : observables) { }
 }

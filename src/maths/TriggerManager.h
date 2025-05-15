@@ -6,27 +6,37 @@
 #include <optional>
 #include <vector>
 
-class TriggerManager {
+class TriggerManager
+{
 public:
     struct Trigger {
         TriggerType type;
+
         TriggerDefs::Condition condition;
+
         TriggerDefs::Action action;
+
         bool enabled;
+
         std::optional<int> sampleLimitValue;
-        Trigger(TriggerType t, TriggerDefs::Condition c,
-                TriggerDefs::Action a, bool e = true);
+
+        Trigger(TriggerType t, TriggerDefs::Condition c, TriggerDefs::Action a, bool e = true);
     };
 
-    void addTrigger(TriggerType type, TriggerDefs::Condition condition,
-                   TriggerDefs::Action action, bool enabled = true);
+    void addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled = true);
 
     std::vector<Trigger> getTriggersByType(TriggerType type);
-    void evaluate(const DeltaQ& dq, const QTA& qta) const;
+
+    void evaluate(const DeltaQ &dq, const QTA &qta) const;
+
     void removeTriggersByType(TriggerType type);
+
     void clearAllTriggers();
+
     void setTriggersEnabled(TriggerType type, bool enabled);
+
     std::vector<Trigger> getAllTriggers() const;
+
 private:
     std::vector<Trigger> triggers_;
 };

@@ -12,4 +12,5 @@ class Outcome : public Observable
 
 public:
     Outcome(const std::string &name);
+    double setNewParameters(int newExp, int newNBins) override;
 };
