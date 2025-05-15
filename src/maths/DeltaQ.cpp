@@ -77,7 +77,7 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             continue;
         }
         if (bin >= bins) {
-            if (elapsed > binWidth * bins); {
+            if (elapsed > binWidth * bins) {
                 continue;
             }
             bin = bins - 1;

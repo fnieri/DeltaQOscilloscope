@@ -67,13 +67,16 @@ void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
 
 void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data)
 {
-
     QVector<QPointF> points;
     points.prepend(QPointF(0, 0));
     points.reserve(data.size());
     for (const auto &[x, y] : data)
         points.append(QPointF(x, y));
     series->replace(points);
+}
+void DeltaQPlot::updateSeries(QLineSeries *series, const QVector<QPointF> &data)
+{
+    series->replace(data);
 }
 
 void DeltaQPlot::updateXRange(double xRange)

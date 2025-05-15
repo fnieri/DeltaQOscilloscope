@@ -91,6 +91,7 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
         currentPlotLabel->show();
     }
 }
+
 void Sidebar::hideCurrentPlot()
 {
     if (currentPlotList) {
@@ -99,6 +100,7 @@ void Sidebar::hideCurrentPlot()
     }
     currentPlotLabel->hide();
 }
+
 void Sidebar::clearOnAdd()
 {
     newPlotList->clearSelection();

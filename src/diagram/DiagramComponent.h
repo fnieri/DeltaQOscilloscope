@@ -19,9 +19,7 @@ protected:
 
     DiagramComponent(const std::string &name);
 
-    std::map<uint64_t, DeltaQ> observedDeltaQs;
-
-    virtual DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) = 0;
+    virtual DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) = 0;
 
 public:
     DiagramComponent() = default;
@@ -30,5 +28,5 @@ public:
 
     [[nodiscard]] std::string getName() const &;
 
-    DeltaQ getObservableDeltaQ(uint64_t, uint64_t);
+    virtual DeltaQ getObservedDeltaQ(uint64_t, uint64_t) = 0;
 };

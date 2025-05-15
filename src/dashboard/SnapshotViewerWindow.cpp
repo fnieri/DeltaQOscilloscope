@@ -10,7 +10,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 
-SnapshotViewerWindow::SnapshotViewerWindow(QWidget *parent)
+SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, QWidget *parent)
     : QWidget(parent)
     , observableSelector(new QComboBox(this))
     , timeSlider(new QSlider(Qt::Horizontal, this))
@@ -38,6 +38,8 @@ SnapshotViewerWindow::SnapshotViewerWindow(QWidget *parent)
 
     connect(observableSelector, &QComboBox::currentTextChanged, this, &SnapshotViewerWindow::onObservableChanged);
     connect(timeSlider, &QSlider::valueChanged, this, &SnapshotViewerWindow::onTimeSliderChanged);
+
+    setSnapshots(snapshotList);
 }
 
 void SnapshotViewerWindow::setSnapshots(std::vector<Snapshot> &snapshotList)

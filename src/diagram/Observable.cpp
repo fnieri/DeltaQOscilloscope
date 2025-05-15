@@ -20,7 +20,9 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
         std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.startTime < b.startTime; });
         sorted = true;
     }
+
     std::vector<Sample> selectedSamples;
+
     auto lower = std::lower_bound(samples.begin(), samples.end(), lowerTime, [](const Sample &s, long long time) { return s.startTime < time; });
 
     auto upper = std::upper_bound(samples.begin(), samples.end(), upperTime, [](long long time, const Sample &s) { return time < s.startTime; });
@@ -31,14 +33,6 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
     samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
 
     return selectedSamples;
-}
-
-double Observable::setNewParameters(int newExp, int newNBins)
-{
-    deltaTExp = newExp;
-    nBins = newNBins;
-    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
-    return maxDelay;
 }
 
 void Observable::setQTA(const QTA &newQTA)
@@ -64,4 +58,7 @@ void Observable::removeTrigger(TriggerType type)
 void Observable::setRecording(bool isRecording)
 {
     recording = isRecording;
+    if (!isRecording) {
+        observableSnapshot.resizeTo(30); // FIXME magic numbah
+    }
 }

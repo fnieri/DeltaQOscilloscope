@@ -113,7 +113,6 @@ void Server::run()
     cleanupThreads();
 }
 
-
 void Server::handleClient(int clientSocket)
 {
     std::string buffer;
@@ -172,7 +171,6 @@ void Server::stop()
         workerThread.join();
 }
 
-
 void Server::parseErlangMessage(const char *buffer, int len)
 {
     if (buffer == nullptr || len <= 0 || len >= 1024) {
@@ -220,4 +218,3 @@ void Server::parseErlangMessage(const char *buffer, int len)
     }
     queueCond.notify_one();
 }
-

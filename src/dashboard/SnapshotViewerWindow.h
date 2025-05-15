@@ -13,8 +13,8 @@ class SnapshotViewerWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit SnapshotViewerWindow(QWidget *parent = nullptr);
-    void setSnapshots(std::vector<Snapshot> &snapshotList);
+    explicit SnapshotViewerWindow(std::vector<Snapshot> &, QWidget *parent = nullptr);
+    void setSnapshots(std::vector<Snapshot> &);
 
 private Q_SLOTS:
     void onObservableChanged(const QString &name);

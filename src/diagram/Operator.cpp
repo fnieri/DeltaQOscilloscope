@@ -29,7 +29,7 @@ void Operator::setProbabilities(const std::vector<double> &probs)
     probabilities = probs;
 }
 
-DeltaQ Operator::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Operator::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<DeltaQ> deltaQs;
 
@@ -39,7 +39,7 @@ DeltaQ Operator::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t tim
 
         // For each children in causal link, get their DeltaQ
         for (auto &component : childrenLinks) {
-            childrenDeltaQs.push_back(component->getObservableDeltaQ(timeLowerBound, timeUpperBound));
+            childrenDeltaQs.push_back(component->getObservedDeltaQ(timeLowerBound, timeUpperBound));
         }
         // Get the convolution of the components in a children
         deltaQs.push_back(convolveN(childrenDeltaQs));
@@ -63,4 +63,12 @@ DeltaQ Operator::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t tim
     }
 
     return observableDeltaQ;
+}
+
+DeltaQ Operator::getObservedDeltaQ(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound)
+{
+    if (observedDeltaQs.count(timeLowerBound)) {
+        return observedDeltaQs[timeLowerBound];
+    }
+    return calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
 }

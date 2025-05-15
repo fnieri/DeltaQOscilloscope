@@ -18,10 +18,3 @@ std::string DiagramComponent::getName() const &
 {
     return name;
 }
-
-DeltaQ DiagramComponent::getObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    if (observedDeltaQs.count(timeLowerBound))
-        return observedDeltaQs[timeLowerBound];
-    return calculateObservableDeltaQ(timeLowerBound, timeUpperBound);
-}

@@ -10,8 +10,7 @@ TriggersTab::TriggersTab(QWidget *parent)
     formLayout = new QFormLayout();
 
     observableComboBox = new QComboBox(this);
-    connect(observableComboBox, &QComboBox::currentTextChanged,
-            this, &TriggersTab::onObservableChanged);
+    connect(observableComboBox, &QComboBox::currentTextChanged, this, &TriggersTab::onObservableChanged);
     formLayout->addRow("Observable:", observableComboBox);
 
     sampleLimitCheckBox = new QCheckBox("Sample Limit >", this);
@@ -27,7 +26,6 @@ TriggersTab::TriggersTab(QWidget *parent)
     sampleLimitWidget->setLayout(sampleLimitLayout);
 
     formLayout->addRow(sampleLimitWidget);
-
 
     qtaBoundsCheckBox = new QCheckBox("QTA Bound Violation", this);
     failureRateCheckBox = new QCheckBox("Failure Rate < 0.95", this);
@@ -47,8 +45,7 @@ TriggersTab::TriggersTab(QWidget *parent)
     triggeredList = new QListWidget(this);
     triggeredList->setSelectionMode(QAbstractItemView::SingleSelection);
     triggeredList->setMinimumHeight(150);
-    connect(triggeredList, &QListWidget::itemClicked,
-            this, &TriggersTab::onTriggeredItemClicked);
+    connect(triggeredList, &QListWidget::itemClicked, this, &TriggersTab::onTriggeredItemClicked);
 
     mainLayout->addWidget(new QLabel("Triggered Events:"));
     mainLayout->addWidget(triggeredList);
@@ -58,43 +55,40 @@ TriggersTab::TriggersTab(QWidget *parent)
     populateObservables();
 }
 
-TriggersTab::~TriggersTab() {
-
+TriggersTab::~TriggersTab()
+{
     delete mainLayout;
 }
 
-void TriggersTab::populateObservables() {
+void TriggersTab::populateObservables()
+{
     try {
         auto system = Application::getInstance().getSystem();
         observableComboBox->clear();
-        for (const auto& [name, _] : system->getProbes())
+        for (const auto &[name, _] : system->getProbes())
             observableComboBox->addItem(QString::fromStdString(name));
-        for (const auto& [name, _] : system->getOutcomes())
+        for (const auto &[name, _] : system->getOutcomes())
             observableComboBox->addItem(QString::fromStdString(name));
-    }
-    catch (std::exception& e) {
+    } catch (std::exception &e) {
         return;
     }
 }
 
-void TriggersTab::onObservableChanged(const QString&) {
+void TriggersTab::onObservableChanged(const QString &)
+{
     updateCheckboxStates();
 }
-void TriggersTab::onTriggerChanged() {
+
+void TriggersTab::onTriggerChanged()
+{
     try {
         auto observable = getCurrentObservable();
 
         // Sample Limit Trigger
         if (sampleLimitCheckBox->isChecked()) {
             observable->addTrigger(
-                TriggerType::SampleLimit,
-                TriggerDefs::Conditions::SampleLimit(sampleLimitSpinBox->value()),
-                [this](const DeltaQ&, const QTA&) {
-                    addTriggeredMessage("Sample limit exceeded");
-                },
-                true,
-                sampleLimitSpinBox->value()
-            );
+                TriggerType::SampleLimit, TriggerDefs::Conditions::SampleLimit(sampleLimitSpinBox->value()),
+                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("Sample limit exceeded"); }, true, sampleLimitSpinBox->value());
         } else {
             observable->removeTrigger(TriggerType::SampleLimit);
         }
@@ -102,14 +96,8 @@ void TriggersTab::onTriggerChanged() {
         // QTA Bounds Trigger
         if (qtaBoundsCheckBox->isChecked()) {
             observable->addTrigger(
-                TriggerType::QTAViolation,
-                TriggerDefs::Conditions::QTABounds(),
-                [this](const DeltaQ&, const QTA&) {
-                    addTriggeredMessage("QTA bounds violated");
-                },
-                true,
-                std::nullopt
-            );
+                TriggerType::QTAViolation, TriggerDefs::Conditions::QTABounds(),
+                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("QTA bounds violated"); }, true, std::nullopt);
         } else {
             observable->removeTrigger(TriggerType::QTAViolation);
         }
@@ -117,31 +105,25 @@ void TriggersTab::onTriggerChanged() {
         // Failure Rate Trigger
         if (failureRateCheckBox->isChecked()) {
             observable->addTrigger(
-                TriggerType::Failure,
-                TriggerDefs::Conditions::FailureRate(observable->getQTA().cdfMax),
-                [this](const DeltaQ&, const QTA&) {
-                    addTriggeredMessage("Failure rate below threshold");
-                },
-                true,
-                std::nullopt
-            );
+                TriggerType::Failure, TriggerDefs::Conditions::FailureRate(observable->getQTA().cdfMax),
+                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("Failure rate below threshold"); }, true, std::nullopt);
         } else {
             observable->removeTrigger(TriggerType::Failure);
         }
-    }
-    catch (std::exception& e) {
+    } catch (std::exception &e) {
         return;
     }
 }
 
-void TriggersTab::updateCheckboxStates() {
+void TriggersTab::updateCheckboxStates()
+{
     try {
         auto observable = getCurrentObservable();
-        auto& manager = observable->getTriggerManager();
+        auto &manager = observable->getTriggerManager();
 
         auto all = manager.getAllTriggers();
         std::unordered_set<TriggerType> activeTypes;
-        for (const auto& trigger : all) {
+        for (const auto &trigger : all) {
             if (trigger.enabled)
                 activeTypes.insert(trigger.type);
         }
@@ -150,7 +132,7 @@ void TriggersTab::updateCheckboxStates() {
         qtaBoundsCheckBox->setChecked(activeTypes.count(TriggerType::QTAViolation));
         failureRateCheckBox->setChecked(activeTypes.count(TriggerType::Failure));
 
-        for (const auto& t : all) {
+        for (const auto &t : all) {
             if (t.type == TriggerType::SampleLimit) {
                 if (auto limit = t.sampleLimitValue) {
                     sampleLimitSpinBox->setValue(*limit);
@@ -164,25 +146,37 @@ void TriggersTab::updateCheckboxStates() {
     }
 }
 
-
-
-std::shared_ptr<Observable> TriggersTab::getCurrentObservable() {
+std::shared_ptr<Observable> TriggersTab::getCurrentObservable()
+{
     auto system = Application::getInstance().getSystem();
 
-    if (!system) throw std::runtime_error("System does not exist");
+    if (!system)
+        throw std::runtime_error("System does not exist");
 
     std::string name = observableComboBox->currentText().toStdString();
     auto observable = system->getObservable(name);
-    if (!observable) throw std::runtime_error("Observable does not exist");
+    if (!observable)
+        throw std::runtime_error("Observable does not exist");
 
     return observable;
 }
 
-void TriggersTab::addTriggeredMessage(const QString& msg) {
+void TriggersTab::addTriggeredMessage(const QString &msg)
+{
     triggeredList->addItem(msg);
 }
 
-void TriggersTab::onTriggeredItemClicked(QListWidgetItem* item) {
+void TriggersTab::recordSnapshot()
+{
+    auto system = Application::getInstance().getSystem();
+    if (system->isRecording()) {
+        return; // TODO
+    }
+    system->setRecording(true);
+}
+
+void TriggersTab::onTriggeredItemClicked(QListWidgetItem *item)
+{
     // Future: emit a signal or open a plot window
     QString msg = item->text();
     qDebug() << "Item clicked:" << msg;

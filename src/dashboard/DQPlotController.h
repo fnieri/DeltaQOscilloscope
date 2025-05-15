@@ -2,6 +2,7 @@
 #ifndef DQPLOTCONTROLLER_H
 #define DQPLOTCONTROLLER_H
 
+#include <qlineseries.h>
 #pragma once
 
 // Project includes
@@ -18,12 +19,23 @@
 #include <string>
 #include <vector>
 
-struct ProbeAllSeries {
-    QLineSeries *probeS;
-    QLineSeries *calculatedProbeS;
+struct OutcomeSeries {
+    QLineSeries *outcomeS;
     QLineSeries *lowerBoundS;
     QLineSeries *upperBoundS;
     QLineSeries *meanS;
+    QLineSeries *qtaS;
+};
+;
+struct ProbeAllSeries {
+    QLineSeries *obsS;
+    QLineSeries *obsLowerBoundS;
+    QLineSeries *obsUpperBoundS;
+    QLineSeries *obsMeanS;
+    QLineSeries *calcS;
+    QLineSeries *calcLowerBoundS;
+    QLineSeries *calcUpperBoundS;
+    QLineSeries *calcMeanS;
     QLineSeries *qtaS;
 };
 
@@ -61,16 +73,19 @@ public:
      */
     void addComponent(const std::string &name, bool isProbe);
 
+    QLineSeries *createAndAddLineSeries(const std::string &legendName);
+
+    void addOutcomeSeries(const std::string &name);
+
+    void removeOutcomeSeries(const std::string &name);
+
+    void addProbeSeries(const std::string &name);
+
+    void removeProbeSeries(const std::string &name);
     /**
      * @brief Returns a list of names of all currently plotted components.
      */
     std::vector<std::string> getComponents();
-
-    /**
-     * @brief Removes a plotted component by name (rvalue version).
-     */
-    void removeComponent(std::string &&name);
-
     /**
      * @brief Removes a plotted component by name (const reference).
      */
@@ -84,13 +99,15 @@ public:
     bool isEmptyAfterReset();
 
 private:
-    double updateOutcome(QLineSeries *series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(OutcomeSeries series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
     void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;
+
     std::mutex updateMutex;
     std::mutex resetMutex;
-    std::map<std::string, std::pair<QLineSeries *, std::shared_ptr<Outcome>>> outcomes;
+
+    std::map<std::string, std::pair<OutcomeSeries, std::shared_ptr<Outcome>>> outcomes;
     std::map<std::string, std::pair<ProbeAllSeries, std::shared_ptr<Probe>>> probes;
 };
 

@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+
 class Probe : public Observable
 {
     std::vector<std::shared_ptr<DiagramComponent>> causalLinks;
@@ -16,19 +17,24 @@ class Probe : public Observable
     std::mutex paramMutex;
     std::mutex calcMutex;
 
-    std::map<uint64_t, DeltaQ> calculatedDeltaQs;
     ConfidenceInterval calculatedInterval;
 
     Snapshot calculatedSnapshot;
 
-    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override;
+    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override;
 
 public:
     Probe(const std::string &name);
 
     Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>>);
 
-    DeltaQ getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
+    DeltaQ calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
+
+    DeltaQ getObservedDeltaQ(uint64_t, uint64_t) override;
+
+    DeltaQRepr getObservedDeltaQRepr(uint64_t, uint64_t);
+
+    DeltaQRepr getCalculatedDeltaQRepr(uint64_t, uint64_t);
 
     std::vector<Bound> getBounds() const;
 

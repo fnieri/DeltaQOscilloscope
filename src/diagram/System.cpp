@@ -124,5 +124,12 @@ std::shared_ptr<Observable> System::getObservable(const std::string &name)
 
 void System::setRecording(bool isRecording)
 {
-    for (auto &obs : observables) { }
+    for (auto &obs : observables) {
+        obs.second->setRecording(isRecording);
+    }
+}
+
+bool System::isRecording() const
+{
+    return recordingTrigger;
 }

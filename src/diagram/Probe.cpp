@@ -20,20 +20,18 @@ Probe::Probe(const std::string &name, std::vector<std::shared_ptr<DiagramCompone
 {
 }
 
-DeltaQ Probe::getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Probe::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
+    if (observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).has_value()) {
+        return observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).value().deltaQ;
+    }
 
     std::vector<DeltaQ> deltaQs;
     for (const auto &component : causalLinks) {
-        deltaQs.push_back(component->getObservableDeltaQ(timeLowerBound, timeUpperBound));
+        deltaQs.push_back(component->getObservedDeltaQ(timeLowerBound, timeUpperBound));
     }
 
     std::lock_guard<std::mutex> lock(calcMutex);
-
-    if (calculatedDeltaQs.size() > MAX_DQ) {
-        const auto earliest = calculatedDeltaQs.begin();
-        calculatedDeltaQs.erase(earliest);
-    }
 
     DeltaQ result = convolveN(deltaQs);
     int calculatedBins = result.getBins();
@@ -43,39 +41,51 @@ DeltaQ Probe::getProbeDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
     }
 
     calculatedInterval.addDeltaQ(result);
-
     calculatedSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
 
-    if ((calculatedSnapshot.getCalculatedSize() > MAX_DQ && !recording)) {
-        calculatedSnapshot.removeOldestCalculatedDeltaQ();
+    if (observableSnapshot.getCalculatedSize() > MAX_DQ) {
+        observableSnapshot.removeOldestCalculatedDeltaQ();
+        if (!recording) {
+            calculatedInterval.removeDeltaQ(observableSnapshot.getOldestCalculatedDeltaQ());
+        }
     }
 
     return result;
 }
 
-DeltaQ Probe::calculateObservableDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Probe::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
-    DeltaQ deltaQ;
-
-    if (!samplesInRange.empty()) {
-        deltaQ = {getBinWidth(), samplesInRange, nBins};
-        observedInterval.addDeltaQ(deltaQ);
+    if (samplesInRange.empty()) {
+        return DeltaQ();
     }
-    std::vector<Bound> bounds = observedInterval.getBounds();
+
+    DeltaQ deltaQ = {getBinWidth(), samplesInRange, nBins};
+
+    observedInterval.addDeltaQ(deltaQ);
 
     std::lock_guard<std::mutex> lock(observedMutex);
-    observedDeltaQs[timeLowerBound] = deltaQ;
 
-    if (observedDeltaQs.size() > MAX_DQ) {
-        auto earliest = observedDeltaQs.begin();
-        observedInterval.removeDeltaQ(earliest->second);
-        observedDeltaQs.erase(earliest);
+    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+
+    if (observableSnapshot.getObservedSize() > MAX_DQ) {
+        if (!recording) {
+            observedInterval.removeDeltaQ(observableSnapshot.getOldestObservedDeltaQ());
+        }
+        observableSnapshot.removeOldestObservedDeltaQ();
     }
 
     triggerManager.evaluate(deltaQ, qta);
-
+    std::cout << deltaQ.toString() << "\n";
     return deltaQ;
+}
+
+DeltaQ Probe::getObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    if (observableSnapshot.getObservedDeltaQAtTime(timeLowerBound).has_value()) {
+        return observableSnapshot.getObservedDeltaQAtTime(timeLowerBound).value().deltaQ;
+    }
+    return calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
 }
 
 std::vector<Bound> Probe::getBounds() const
@@ -90,7 +100,7 @@ std::vector<Bound> Probe::getObservedBounds() const
 
 std::vector<Bound> Probe::getCalculatedBounds() const
 {
-    return observedInterval.getBounds();
+    return calculatedInterval.getBounds();
 }
 
 double Probe::setNewParameters(int newExp, int newNBins)
@@ -105,4 +115,25 @@ double Probe::setNewParameters(int newExp, int newNBins)
 
     observedInterval = ConfidenceInterval(nBins);
     return maxDelay;
+}
+
+DeltaQRepr Probe::getObservedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    auto deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    }
+    std::cout << deltaQRepr->deltaQ.toString() << "\n";
+    return deltaQRepr.value();
+}
+
+DeltaQRepr Probe::getCalculatedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    auto deltaQRepr = observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateCalculatedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound);
+    }
+    return deltaQRepr.value();
 }

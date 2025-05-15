@@ -1,46 +1,47 @@
 #pragma once
 
-#include <QWidget>
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFormLayout>
-#include <QVBoxLayout>
 #include <QListWidget>
 #include <QMap>
 #include <QSpinBox>
+#include <QVBoxLayout>
+#include <QWidget>
 
 #include "../Application.h"
 #include "src/maths/TriggerManager.h"
 
-class TriggersTab : public QWidget {
+class TriggersTab : public QWidget
+{
     Q_OBJECT
 
 public:
     explicit TriggersTab(QWidget *parent = nullptr);
     ~TriggersTab();
-    void addTriggeredMessage(const QString& msg); // To display in list
-
+    void addTriggeredMessage(const QString &msg); // To display in list
+    void recordSnapshot();
 private Q_SLOTS:
-    void onObservableChanged(const QString& name);
+    void onObservableChanged(const QString &name);
     void onTriggerChanged();
-    void onTriggeredItemClicked(QListWidgetItem* item);
+    void onTriggeredItemClicked(QListWidgetItem *item);
 
 private:
     void populateObservables();
     void updateCheckboxStates();
     QVBoxLayout *mainLayout;
     QFormLayout *formLayout;
-    QComboBox* observableComboBox;
+    QComboBox *observableComboBox;
 
-    QWidget* sampleLimitWidget;
-    QHBoxLayout* sampleLimitLayout;
-    QCheckBox* sampleLimitCheckBox;
-    QSpinBox* sampleLimitSpinBox;
+    QWidget *sampleLimitWidget;
+    QHBoxLayout *sampleLimitLayout;
+    QCheckBox *sampleLimitCheckBox;
+    QSpinBox *sampleLimitSpinBox;
 
-    QCheckBox* qtaBoundsCheckBox;
-    QCheckBox* failureRateCheckBox;
+    QCheckBox *qtaBoundsCheckBox;
+    QCheckBox *failureRateCheckBox;
 
-    QListWidget* triggeredList;
+    QListWidget *triggeredList;
 
     std::shared_ptr<Observable> getCurrentObservable();
 

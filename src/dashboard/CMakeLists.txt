@@ -11,6 +11,7 @@ add_library(${PREFIX}_dashboard
     MainWindow.cpp
     NewPlotList.h
     NewPlotList.cpp
+    Point.h
     Sidebar.h
     Sidebar.cpp
     SnapshotViewerWindow.h

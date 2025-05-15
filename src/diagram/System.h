@@ -63,6 +63,9 @@ public:
     void addSample(std::string &componentName, Sample &sample);
 
     void setRecording(bool);
+
+    bool isRecording() const;
+
     std::vector<std::string> getAllComponentsName();
 
     /**

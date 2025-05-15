@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Point.h"
+
 // Qt includes
 #include <QChartView>
 #include <QLineSeries>
@@ -72,6 +74,7 @@ public:
      */
     void updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data);
 
+    void updateSeries(QLineSeries *series, const QVector<QPointF> &data);
     void updateXRange(double xRange);
     /**
      * @brief Returns the associated plot list.

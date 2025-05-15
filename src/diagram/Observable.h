@@ -39,9 +39,9 @@ public:
 
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
 
-    DeltaQ calculateObservableDeltaQ(uint64_t, uint64_t) override = 0;
+    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override = 0;
 
-    virtual double setNewParameters(int newExp, int newNBins);
+    virtual double setNewParameters(int newExp, int newNBins) = 0;
 
     double getBinWidth() const
     {
