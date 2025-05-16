@@ -19,8 +19,6 @@ class Probe : public Observable
 
     ConfidenceInterval calculatedInterval;
 
-    Snapshot calculatedSnapshot;
-
     DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override;
 
 public:

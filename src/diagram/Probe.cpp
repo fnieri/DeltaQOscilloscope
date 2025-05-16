@@ -25,9 +25,9 @@ DeltaQ Probe::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
     if (observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).has_value()) {
         return observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).value().deltaQ;
     }
-
     std::vector<DeltaQ> deltaQs;
     for (const auto &component : causalLinks) {
+
         deltaQs.push_back(component->getObservedDeltaQ(timeLowerBound, timeUpperBound));
     }
 
@@ -41,13 +41,12 @@ DeltaQ Probe::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
     }
 
     calculatedInterval.addDeltaQ(result);
-    calculatedSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
-
+    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
     if (observableSnapshot.getCalculatedSize() > MAX_DQ) {
-        observableSnapshot.removeOldestCalculatedDeltaQ();
         if (!recording) {
             calculatedInterval.removeDeltaQ(observableSnapshot.getOldestCalculatedDeltaQ());
         }
+        observableSnapshot.removeOldestCalculatedDeltaQ();
     }
 
     return result;
@@ -57,6 +56,7 @@ DeltaQ Probe::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUppe
 {
     std::vector<Sample> samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
     if (samplesInRange.empty()) {
+        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
         return DeltaQ();
     }
 
@@ -76,7 +76,6 @@ DeltaQ Probe::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUppe
     }
 
     triggerManager.evaluate(deltaQ, qta);
-    std::cout << deltaQ.toString() << "\n";
     return deltaQ;
 }
 
@@ -124,7 +123,6 @@ DeltaQRepr Probe::getObservedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUp
         calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
         deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
     }
-    std::cout << deltaQRepr->deltaQ.toString() << "\n";
     return deltaQRepr.value();
 }
 

@@ -39,8 +39,11 @@ DeltaQ Outcome::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
     }
 
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
+    if (samplesInRange.empty()) {
+        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
+        return DeltaQ();
+    }
 
-    sorted = true;
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
 
     std::lock_guard<std::mutex> lock(observedMutex);

@@ -5,6 +5,7 @@
 #include <iostream>
 Observable::Observable(const std::string &name)
     : DiagramComponent(name)
+    , observedInterval(50)
 {
 }
 void Observable::addSample(const Sample &sample)

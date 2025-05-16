@@ -12,6 +12,7 @@ class Snapshot
     std::map<std::uint64_t, DeltaQRepr> calculatedDeltaQs;
 
 public:
+    Snapshot() = default;
     void addObservedDeltaQ(std::uint64_t, const DeltaQ &, const std::vector<Bound> &);
     DeltaQ getOldestObservedDeltaQ() const;
     void removeOldestObservedDeltaQ();

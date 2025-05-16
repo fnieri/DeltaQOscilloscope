@@ -273,15 +273,12 @@ double DQPlotController::updateOutcome(OutcomeSeries series, const std::shared_p
 }
 void DQPlotController::updateProbe(ProbeAllSeries probeAllSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    std::cout << "enter \n";
     auto ret = QtConcurrent::run([=]() {
-        std::cout << "enter 2 \n";
         //      auto computeStart = high_resolution_clock::now();
         DeltaQRepr obsRepr = probe->getObservedDeltaQRepr(timeLowerBound, timeUpperBound);
         DeltaQRepr calcRepr = probe->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound);
         DeltaQ obsDeltaQ = obsRepr.deltaQ;
         std::vector<Bound> obsBounds = obsRepr.bounds;
-        std::cout << "received " << obsDeltaQ.toString() << "\n";
         DeltaQ calcDeltaQ = calcRepr.deltaQ;
         std::vector<Bound> calcBounds = calcRepr.bounds;
 
