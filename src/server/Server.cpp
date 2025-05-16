@@ -1,9 +1,9 @@
-
 #include "Server.h"
 #include "../Application.h"
 #include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <regex>
 #include <unistd.h>
@@ -31,12 +31,30 @@ Server::~Server()
 void Server::start()
 {
     serverThread = std::thread(&Server::run, this);
+
+    workerThread = std::thread([this]() {
+        while (!shutdownWorker) {
+            std::unique_lock lock(queueMutex);
+            queueCond.wait(lock, [this] { return !sampleQueue.empty() || shutdownWorker; });
+
+            while (!sampleQueue.empty()) {
+                auto [name, sample] = sampleQueue.front();
+                sampleQueue.pop();
+                lock.unlock(); // Unlock during processing (non-blocking)
+
+                if (system) {
+                    system->addSample(name, sample); // Now OK to block if needed
+                }
+
+                lock.lock();
+            }
+        }
+    });
 }
 
 void Server::updateSystem()
 {
     system = Application::getInstance().getSystem();
-    std::cout << "updated \n";
 }
 
 void Server::run()
@@ -47,12 +65,9 @@ void Server::run()
         return;
     }
 
-    // Allow reuse of the address (fix bind issues)
     int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        perror("setsockopt failed");
-        return;
-    }
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -62,68 +77,144 @@ void Server::run()
         perror("Bind failed");
         return;
     }
-    if (listen(server_fd, 3) < 0) {
+
+    // Set socket to non-blocking
+    fcntl(server_fd, F_SETFL, O_NONBLOCK);
+
+    if (listen(server_fd, SOMAXCONN) < 0) {
         perror("Listen failed");
         return;
     }
 
     std::cout << "Server running on port " << port << std::endl;
+    running = true;
 
-    int addrlen = sizeof(address);
-    new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
-    if (new_socket < 0) {
-        perror("Accept failed");
-        return;
+    while (running) {
+        int addrlen = sizeof(address);
+        int client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
+
+        if (client_socket < 0) {
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                // No pending connections, sleep a bit
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                cleanupThreads();
+                continue;
+            }
+            perror("Accept failed");
+            continue;
+        }
+
+        std::lock_guard<std::mutex> lock(clientsMutex);
+        clientThreads.emplace_back(&Server::handleClient, this, client_socket);
     }
 
-    char buffer[1024] = {0};
+    // Cleanup
+    close(server_fd);
+    cleanupThreads();
+}
 
-    while (true) {
-        int valread = read(new_socket, buffer, sizeof(buffer));
+void Server::handleClient(int clientSocket)
+{
+    std::string buffer;
+    char tempBuf[1024];
+
+    while (running) {
+        int valread = read(clientSocket, tempBuf, sizeof(tempBuf));
         if (valread <= 0) {
+            if (valread == 0 || errno == ECONNRESET)
+                break;
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                continue;
+            }
+            perror("Read failed");
             break;
         }
 
-        parseErlangMessage(buffer, valread);
+        buffer.append(tempBuf, valread);
+
+        size_t pos;
+        while ((pos = buffer.find('\n')) != std::string::npos) {
+            std::string message = buffer.substr(0, pos);
+            buffer.erase(0, pos + 1);
+            parseErlangMessage(message.c_str(), message.size());
+        }
+    }
+
+    close(clientSocket);
+}
+
+void Server::cleanupThreads()
+{
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    auto it = clientThreads.begin();
+    while (it != clientThreads.end()) {
+        if (it->joinable()) {
+            it->join();
+            it = clientThreads.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
+
+void Server::stop()
+{
+    running = false;
+
+    {
+        std::lock_guard lock(queueMutex);
+        shutdownWorker = true;
+    }
+    queueCond.notify_all();
+    if (workerThread.joinable())
+        workerThread.join();
+}
+
 void Server::parseErlangMessage(const char *buffer, int len)
 {
+    if (buffer == nullptr || len <= 0 || len >= 1024) {
+        std::cerr << "error" << std::endl;
+        return;
+    }
+
     std::string message(buffer, len);
 
-    std::regex pattern(R"(n:(\w+);b:(\d+);e:(\d+);s:(\w+))");
-    std::smatch match;
+    size_t nPos = message.find("n:");
+    size_t bPos = message.find(";b:");
+    size_t ePos = message.find(";e:");
+    size_t sPos = message.find(";s:");
 
-    if (!std::regex_search(message, match, pattern) || match.size() != 5) {
+    if (nPos != 0 || bPos == std::string::npos || ePos == std::string::npos || sPos == std::string::npos) {
         std::cerr << "Failed to parse message: " << message << std::endl;
         return;
     }
 
-    std::string name = match[1].str();
-    uint64_t startTime = std::stoull(match[2].str());
-    uint64_t endTime;
-    std::string statusStr = match[4].str();
+    std::string name = message.substr(2, bPos - 2);
+    std::string bStr = message.substr(bPos + 3, ePos - (bPos + 3));
+    std::string eStr = message.substr(ePos + 3, sPos - (ePos + 3));
+    std::string statusStr = message.substr(sPos + 3);
+
+    uint64_t startTime = std::stoull(bStr);
+    uint64_t endTime = 0;
     Sample sample;
     Status status = Status::SUCCESS;
+
     if (statusStr == TIMEOUT || statusStr == FAIL) {
-        status = Status::FAILED;
-        if (statusStr == TIMEOUT)
-            status = Status::TIMEDOUT;
-
-        sample = {startTime, NULL, NULL, status};
-        std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", Status=" << status << std::endl;
-
+        status = (statusStr == TIMEOUT) ? Status::TIMEDOUT : Status::FAILED;
+        sample = {startTime, 0, 0, status};
     } else if (statusStr == EXEC_OK) {
-        endTime = std::stoull(match[3].str());
+        endTime = std::stoull(eStr);
         double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
-        Sample sample {startTime, endTime, elapsed, status};
-        // std::cout << "Received Sample: Name=" << name << ", Start=" << sample.startTime << ", End=" << sample.endTime << ", Elapsed=" << elapsed
-        // << ", Status=" << (status == Status::SUCCESS ? "SUCCESS" : "TIMEDOUT") << std::endl;
-
-    } else if (statusStr != EXEC_OK) {
+        sample = {startTime, endTime, elapsed, status};
+    } else {
         std::cerr << "Unknown status: " << statusStr << std::endl;
         return;
     }
 
-    system->addSample(name, sample);
+    {
+        std::lock_guard lock(queueMutex);
+        sampleQueue.emplace(name, sample);
+    }
+    queueCond.notify_one();
 }

@@ -1,0 +1,44 @@
+#ifndef SERVER_H
+#define SERVER_H
+
+#include "../diagram/System.h"
+#include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <netinet/in.h>
+#include <queue>
+#include <sys/socket.h>
+#include <thread>
+#include <vector>
+
+class Server
+{
+public:
+    Server(int port);
+    ~Server();
+    void start();
+
+private:
+    void run();
+
+    int server_fd;
+    struct sockaddr_in address;
+    int port;
+
+    std::thread serverThread;
+    void updateSystem();
+    void parseErlangMessage(const char *buffer, int len);
+    std::shared_ptr<System> system;
+
+    std::atomic<bool> running {false};
+
+    // For adding samples in a non blocking way
+    std::queue<std::pair<std::string, Sample>> sampleQueue;
+    std::mutex queueMutex;
+    std::condition_variable queueCond;
+    std::thread workerThread;
+    bool shutdownWorker = false;
+};
+
+#endif

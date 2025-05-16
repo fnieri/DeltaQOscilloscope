@@ -6,7 +6,9 @@
  */
 
 #include "DiagramComponent.h"
+
 #include <iostream>
+
 DiagramComponent::DiagramComponent(const std::string &name)
     : name {name}
 {
@@ -15,9 +17,4 @@ DiagramComponent::DiagramComponent(const std::string &name)
 std::string DiagramComponent::getName() const &
 {
     return name;
-}
-
-void DiagramComponent::setNext(const std::string &probeName, std::shared_ptr<DiagramComponent> next)
-{
-    probeNextComponent[probeName] = next;
 }

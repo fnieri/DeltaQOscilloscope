@@ -6,23 +6,30 @@
 struct Bound {
     double lowerBound {0};
     double upperBound {1};
+    double mean {0};
 };
 
 class ConfidenceInterval
 {
 private:
-    std::vector<int> summedCumulativeHistogram;
     std::vector<Bound> bounds;
-    double alpha;
-    unsigned int totalSamples;
-
-    void addCumulativeHistogram(const std::vector<int> &cumulativeHistogram, unsigned int numSamples);
-    std::vector<double> calculateECDF() const;
-    double getDKWEpsilon() const;
+    unsigned int numBins;
+    std::vector<double> cdfSum;
+    std::vector<double> cdfSumSquares;
+    std::vector<unsigned int> cdfSampleCounts;
+    double z {1.96};
     void updateConfidenceInterval();
 
 public:
-    ConfidenceInterval(int numBins, double alpha);
-    [[nodiscard]] std::vector<Bound> addDeltaQ(const DeltaQ &);
-    const std::vector<Bound> getBounds() const;
+    ConfidenceInterval();
+    ConfidenceInterval(int numBins);
+
+    void setNumBins(int newNumBins);
+
+    void addDeltaQ(const DeltaQ &);
+    void removeDeltaQ(const DeltaQ &);
+
+    std::vector<Bound> getBounds() const;
+    unsigned int getBins();
+    void reset();
 };

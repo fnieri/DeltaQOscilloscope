@@ -10,6 +10,9 @@
 #include <QThread>
 #include <QVBoxLayout>
 
+#define MAX_P_ROW 2
+#define MAX_P_COL 2
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -31,8 +34,14 @@ MainWindow::MainWindow(QWidget *parent)
     mainLayout->addWidget(scrollArea, 1);
 
     sidebar = new Sidebar(this);
-    mainLayout->addWidget(sidebar, 0);
+    triggersTab = new TriggersTab(this);
 
+    // Tab widget to hold sidebar and triggers tab
+    sideTabWidget = new QTabWidget(this);
+    sideTabWidget->addTab(sidebar, "Sidebar");
+    sideTabWidget->addTab(triggersTab, "Triggers");
+    sideTabWidget->setTabPosition(QTabWidget::West); // Tabs on the left
+    mainLayout->addWidget(sideTabWidget, 0);
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
 
     timerThread = new QThread(this);
@@ -43,25 +52,35 @@ MainWindow::MainWindow(QWidget *parent)
     timerThread->start();
     Application::getInstance().addObserver([this] { this->reset(); });
     auto now = std::chrono::system_clock::now();
-    auto adjustedTime = now - std::chrono::milliseconds(1000);
+    auto adjustedTime = now - std::chrono::milliseconds(3000);
     timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
 }
 
 void MainWindow::reset()
 {
-    for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
+
+    std::lock_guard<std::mutex> lock(plotDelMutex);
+    auto it = plotContainers.begin();
+    while (it != plotContainers.end()) {
         DeltaQPlot *plot = it.key();
         QWidget *plotWidget = it.value();
-        if (plot) {
+
+        if (plot->isEmptyAfterReset()) {
+            it = plotContainers.erase(it); // returns next valid iterator
+
             delete plot;
-            plot = NULL;
-        }
-        if (plotWidget) {
-            delete plotWidget;
-            plotWidget = NULL;
+            plot = nullptr;
+
+            if (plotWidget) {
+                delete plotWidget;
+                plotWidget = nullptr;
+            }
+
+            sidebar->hideCurrentPlot();
+        } else {
+            ++it;
         }
     }
-    plotContainers.clear();
 }
 
 void MainWindow::updatePlots()
@@ -69,10 +88,10 @@ void MainWindow::updatePlots()
     timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
     auto system = Application::getInstance().getSystem();
-    system->calculateBinWidth();
-    double binWidth = system->getBinWidth();
+
+    std::lock_guard<std::mutex> lock(plotDelMutex);
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
-        plot->update(binWidth, timeLowerBound, timeUpperBound);
+        plot->update(timeLowerBound, timeUpperBound);
     }
 }
 
@@ -101,17 +120,15 @@ void MainWindow::onAddPlotClicked()
     plotContainers[deltaQPlot] = plotWidget;
 
     plotWidgetLayout->addWidget(deltaQPlot);
-    plotWidget->setMaximumWidth(scrollArea->width() / 4);
-    plotWidget->setMaximumHeight(400);
+
+    plotWidget->setMaximumWidth(scrollArea->width() / MAX_P_ROW);
+    plotWidget->setMaximumHeight(scrollArea->height() / 2);
 
     int plotCount = plotContainers.size();
-    int maxPlotsPerRow = 3;
-    int row = (plotCount - 1) / maxPlotsPerRow;
-    int col = (plotCount - 1) % maxPlotsPerRow;
+    int row = (plotCount - 1) / MAX_P_ROW;
+    int col = (plotCount - 1) % MAX_P_COL;
 
     plotLayout->addWidget(plotWidget, row, col);
-    plotLayout->setColumnStretch(col, 1);
-    plotLayout->setRowStretch(row, 1);
 
     onPlotSelected(deltaQPlot);
     sidebar->clearOnAdd();
@@ -121,7 +138,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
     for (auto [plot, widget] : plotContainers.asKeyValueRange()) {
-        widget->setMaximumWidth(scrollArea->width() / 4);
+        widget->setMaximumWidth(scrollArea->width() / MAX_P_COL);
+        widget->setMaximumHeight(scrollArea->height() / 2);
     }
 }
 void MainWindow::onUpdateSystem()
@@ -177,8 +195,8 @@ void MainWindow::onRemovePlot(DeltaQPlot *plot)
     plotContainers.remove(plot);
     int plotCount = 0;
     for (auto it = plotContainers.begin(); it != plotContainers.end(); ++it) {
-        int row = plotCount / 3;
-        int col = plotCount % 3;
+        int row = plotCount / MAX_P_ROW;
+        int col = plotCount % MAX_P_COL;
         plotLayout->addWidget(it.value(), row, col);
         plotLayout->setRowStretch(row, 1);
         plotLayout->setColumnStretch(col, 1);

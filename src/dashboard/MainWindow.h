@@ -12,6 +12,8 @@
 #include <QVBoxLayout>
 #include <qboxlayout.h>
 
+#include "TriggersTab.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,17 +28,23 @@ class MainWindow : public QMainWindow
     QThread *timerThread;
     QTimer *updateTimer;
 
+    QTabWidget *sideTabWidget; // NEW
+    TriggersTab *triggersTab; // NEW
+
     Sidebar *sidebar;
     QPushButton *addPlotButton;
     QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
     uint64_t timeLowerBound;
+
+    std::mutex plotDelMutex;
+    std::mutex updateMutex;
 
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void reset();
 
-private slots:
+private Q_SLOTS:
     void updatePlots();
     void onUpdateSystem();
     void onAddPlotClicked();

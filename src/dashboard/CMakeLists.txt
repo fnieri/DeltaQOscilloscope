@@ -1,4 +1,6 @@
 add_library(${PREFIX}_dashboard
+    DelaySettingsWidget.h
+    DelaySettingsWidget.cpp
     DQPlotController.h
     DQPlotController.cpp
     DQPlotList.h
@@ -9,8 +11,15 @@ add_library(${PREFIX}_dashboard
     MainWindow.cpp
     NewPlotList.h
     NewPlotList.cpp
+    Point.h
     Sidebar.h
     Sidebar.cpp
+    SnapshotViewerWindow.h
+    SnapshotViewerWindow.cpp
+    QTAInputWidget.cpp
+    QTAInputWidget.h
+    TriggersTab.cpp
+    TriggersTab.h
 )
 
 
@@ -20,25 +29,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Charts Widgets Graphs)
 target_link_libraries(${PREFIX}_dashboard
         PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::Graphs
         ${PREFIX}_maths
-        nlohmann_json
         ${PREFIX}_server
         ${PREFIX}_parser
     )
 
 target_include_directories(${PREFIX}_dashboard
         PUBLIC
-        ${CMAKE_SOURCE_DIR}
-         
-    )
-
-
-add_executable(dashboard
-        main.cpp
+        ${CMAKE_SOURCE_DIR}         
+        ${PREFIX}_parser
 )
 
-target_link_libraries(dashboard
-        PRIVATE
-        ${PREFIX}_dashboard
-)
-
-target_compile_features(dashboard PRIVATE cxx_std_17)

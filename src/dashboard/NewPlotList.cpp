@@ -56,7 +56,6 @@ void NewPlotList::addOutcomes(Outcomes outcomes)
     addCategory(category);
 
     for (const auto &outcome : outcomes) {
-        std::cout << outcome.second->getName() << "\n";
         QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(outcome.first), this);
         item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     }

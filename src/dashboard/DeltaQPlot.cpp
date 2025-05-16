@@ -15,7 +15,7 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
     // Initialize axes
     axisX = new QValueAxis();
     axisY = new QValueAxis();
-    axisY->setRange(0, 1.0);
+    axisY->setRange(-0.1, 1.0);
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
     axisX->setRange(0, 0.05);
@@ -33,7 +33,16 @@ DeltaQPlot::~DeltaQPlot()
     chart = NULL;
 }
 
-void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
+bool DeltaQPlot::isEmptyAfterReset()
+{
+    if (!controller->isEmptyAfterReset()) {
+        plotList->updateLists();
+        return false;
+    }
+    return true;
+}
+
+void DeltaQPlot::addSeries(QLineSeries *series, const std::string &name)
 {
     chart->addSeries(series);
     series->setName(QString::fromStdString(name));
@@ -41,9 +50,9 @@ void DeltaQPlot::addSeries(QLineSeries *series, std::string &name)
     series->attachAxis(axisY);
 }
 
-void DeltaQPlot::update(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+void DeltaQPlot::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    controller->update(binWidth, timeLowerBound, timeUpperBound);
+    controller->update(timeLowerBound, timeUpperBound);
 }
 
 void DeltaQPlot::removeSeries(QAbstractSeries *series)
@@ -56,14 +65,25 @@ void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
     controller->editPlot(selectedItems);
 }
 
-void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data, double xRange)
+void DeltaQPlot::updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data)
 {
-
-    series->clear();
-    series->append(0, 0);
+    QVector<QPointF> points;
+    points.prepend(QPointF(0, 0));
+    points.reserve(data.size());
     for (const auto &[x, y] : data)
-        series->append(x, y);
+        points.append(QPointF(x, y));
+    series->replace(points);
 }
+void DeltaQPlot::updateSeries(QLineSeries *series, const QVector<QPointF> &data)
+{
+    series->replace(data);
+}
+
+void DeltaQPlot::updateXRange(double xRange)
+{
+    axisX->setRange(0, xRange);
+}
+
 std::vector<std::string> DeltaQPlot::getComponents()
 {
     return controller->getComponents();
@@ -76,5 +96,5 @@ DQPlotList *DeltaQPlot::getPlotList()
 
 void DeltaQPlot::mousePressEvent(QMouseEvent *event)
 {
-    emit plotSelected(this);
+    Q_EMIT plotSelected(this);
 }

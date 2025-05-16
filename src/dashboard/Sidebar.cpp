@@ -1,8 +1,9 @@
 
 #include "Sidebar.h"
+
+#include "../parser/SystemParserInterface.h"
+
 #include "../Application.h"
-#include "../diagram/SystemParser.h"
-#include "../parser/ParserWrapper.h"
 #include "NewPlotList.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -15,6 +16,10 @@
 #include <qlogging.h>
 #include <qpushbutton.h>
 #include <qtextedit.h>
+
+#include <fstream>
+#include <string>
+
 Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
 {
@@ -55,6 +60,13 @@ Sidebar::Sidebar(QWidget *parent)
     layout->addWidget(newPlotList);
     layout->addWidget(addNewPlotButton);
 
+    qtaInputWidget = new QTAInputWidget(this);
+    layout->addWidget(qtaInputWidget);
+
+    delaySettingsWidget = new DelaySettingsWidget(this);
+    layout->addWidget(delaySettingsWidget);
+    connect(delaySettingsWidget, &DelaySettingsWidget::delayParametersChanged, qtaInputWidget, &QTAInputWidget::loadObservableSettings);
+
     currentPlotLabel = new QLabel("Modify current plot:", this);
     currentPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     currentPlotLabel->hide(); // Initially hidden
@@ -68,29 +80,27 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
     }
 
     if (currentPlotList) {
-        if (!currentPlotList->parent()) {
-            qDebug() << "Sidebar: currentPlotList is already deleted!";
-        } else {
-            layout->removeWidget(currentPlotList);
-            currentPlotList->hide(); // <-- Avoids segfault if it's valid
-        }
+        layout->removeWidget(currentPlotList);
+        currentPlotList->hide();
     }
 
-    currentPlotList = plotList;
-    layout->addWidget(currentPlotList);
-    currentPlotList->show();
-    currentPlotLabel->show();
+    if (plotList) {
+        currentPlotList = plotList;
+        layout->addWidget(currentPlotList);
+        currentPlotList->show();
+        currentPlotLabel->show();
+    }
 }
 
 void Sidebar::hideCurrentPlot()
 {
     if (currentPlotList) {
         layout->removeWidget(currentPlotList);
-        currentPlotList->deleteLater();
         currentPlotList = nullptr;
     }
     currentPlotLabel->hide();
 }
+
 void Sidebar::clearOnAdd()
 {
     newPlotList->clearSelection();
@@ -99,8 +109,16 @@ void Sidebar::clearOnAdd()
 void Sidebar::onUpdateSystem()
 {
     std::string text = getSystemText();
-    std::string parsedJson = parseJson(text);
-    Application::getInstance().setSystem(parseJsonString(parsedJson));
+
+    try {
+        auto system = SystemParserInterface::parseString(text);
+        if (system.has_value()) {
+            Application::getInstance().setSystem(system.value());
+            system->setSystemDefinitionText(text);
+        }
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Parsing error", e.what());
+    }
 }
 
 void Sidebar::onAddPlotClicked()
@@ -112,24 +130,53 @@ void Sidebar::onAddPlotClicked()
         return;
     }
 
-    emit addPlotClicked();
+    Q_EMIT addPlotClicked();
 }
 
 void Sidebar::saveSystemTo()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
-    std::string filename = dialog.getSaveFileName(this, "Save file", " ", ".json").toStdString();
-    std::string systemText = getSystemText();
-    parseAndSaveJson(systemText, filename);
-    Application::getInstance().setSystem(parseSystemJson(filename));
+    QString filename = dialog.getSaveFileName(this, "Save file", "", "All files (* *.dq)");
+
+    if (!filename.isEmpty()) {
+        std::string systemText = getSystemText();
+        auto system = SystemParserInterface::parseString(systemText);
+
+        if (system.has_value()) {
+            std::ofstream outFile(filename.toStdString());
+            if (outFile.is_open()) {
+                outFile << systemText;
+                outFile.close();
+                QMessageBox::information(this, "Success", "File saved successfully.");
+            } else {
+                QMessageBox::critical(this, "Error", "Could not open file for writing.");
+            }
+        } else {
+            QMessageBox::warning(this, "Error", "System parsing failed. File not saved.");
+        }
+    }
 }
 
 void Sidebar::loadSystem()
 {
+    // https://stackoverflow.com/questions/13035674/how-to-read-a-file-line-by-line-or-a-whole-text-file-at-once
     QFileDialog dialog(this);
-    std::string filename = dialog.getOpenFileName(this, "Select file", " ", ".json").toStdString();
-    Application::getInstance().setSystem(parseSystemJson(filename));
+    std::string filename = dialog.getOpenFileName(this, "Select file", " ", "All files (* *.dq)").toStdString();
+
+    auto system = SystemParserInterface::parseFile(filename);
+    if (system.has_value()) {
+        Application::getInstance().setSystem(system.value());
+        std::ifstream file(filename);
+        std::string str;
+        std::string file_contents;
+        while (std::getline(file, str)) {
+            file_contents += str;
+            file_contents.push_back('\n');
+        }
+
+        system->setSystemDefinitionText(file_contents);
+    }
     std::string systemText = Application::getInstance().getSystem()->getSystemDefinitionText();
     systemTextEdit->setText(QString::fromStdString(systemText));
 }

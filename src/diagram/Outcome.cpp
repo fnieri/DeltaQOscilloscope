@@ -1,58 +1,68 @@
 #include "Outcome.h"
-#include "../maths/DeltaQOperations.h"
 #include "DiagramComponent.h"
-#include "System.h"
-#include <algorithm>
+#include "src/maths/ConfidenceInterval.h"
+#include "src/maths/DeltaQRepr.h"
 #include <iostream>
+
+#define MAX_DQ 30
+
 Outcome::Outcome(const std::string &name)
     : DiagramComponent(name)
     , Observable(name)
 {
 }
-/*
-DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe)
+
+DeltaQRepr Outcome::getObservedDeltaQRepr(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound)
 {
-    if (probeNextComponent.count(currentProbe)) {
-        return convolve(getDeltaQ(binWidth), probeNextComponent.at(currentProbe)->calculateDeltaQ(binWidth, currentProbe));
+    auto deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
     }
-    return getDeltaQ(binWidth);
-}
-*/
-// TODO implement
-DeltaQ Outcome::calculateDeltaQ(const double &binWidth, std::string currentProbe, uint64_t timeLowerBound, uint64_t timeUpperBound)
-{
-    if (probeNextComponent.count(currentProbe)) {
-        DeltaQ outcomeDeltaQ = DeltaQ();
-        if (deltaQs.count(timeLowerBound)) {
-            outcomeDeltaQ = deltaQs[timeLowerBound];
-        } else {
-            outcomeDeltaQ = getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
-        }
-        return convolve(outcomeDeltaQ, probeNextComponent.at(currentProbe)->calculateDeltaQ(binWidth, currentProbe, timeLowerBound, timeUpperBound));
-    }
-    return getDeltaQ(binWidth, timeLowerBound, timeUpperBound);
+    return deltaQRepr.value();
 }
 
-DeltaQ Outcome::getDeltaQ(double binWidth, uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Outcome::getObservedDeltaQ(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound)
 {
-    if (deltaQs.count(timeLowerBound)) {
-        return deltaQs[timeLowerBound];
+    auto deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
     }
+    return deltaQRepr.value().deltaQ;
+}
+
+DeltaQ Outcome::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    if (observableSnapshot.getObservedDeltaQAtTime(timeLowerBound).has_value()) {
+        return observableSnapshot.getObservedDeltaQAtTime(timeLowerBound).value().deltaQ;
+    }
+
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
+    if (samplesInRange.empty()) {
+        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
+        return DeltaQ();
+    }
 
-    // FIXME,a lot of samples not getting deleted
-    auto it = std::lower_bound(samples.begin(), samples.end(), timeUpperBound, [](const Sample &s, long long time) { return s.startTime < time; });
+    DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
 
-    samples.erase(samples.begin(), it);
-    sorted = true;
-    DeltaQ deltaQ {binWidth, samplesInRange};
-    deltaQs[timeLowerBound] = deltaQ;
+    std::lock_guard<std::mutex> lock(observedMutex);
+
+    triggerManager.evaluate(deltaQ, qta, timeLowerBound);
+
+    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+    if ((observableSnapshot.getObservedSize() > MAX_DQ && !recording)) {
+        observableSnapshot.removeOldestObservedDeltaQ();
+    }
+
     return deltaQ;
 }
-/*
-DeltaQ Outcome::getDeltaQ(double binWidth) const
+
+double Outcome::setNewParameters(int newExp, int newNBins)
 {
-    std::vector<long double> outcomeSamples = getTimeSeries();
-    return {binWidth, outcomeSamples};
+    deltaTExp = newExp;
+    nBins = newNBins;
+    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
+    observedInterval.setNumBins(newNBins);
+    return maxDelay;
 }
-*/

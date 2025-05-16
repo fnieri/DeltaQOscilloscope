@@ -11,5 +11,11 @@ setup:
 
 .PHONY: build
 build:
-	cmake --build  build 
+	cmake --build build 
 	echo -e "\e[32m== SUCCESSFUL BUILDING! ==\e[0m\n"
+
+
+.PHONY: test
+test:
+	ctest --test-dir build --output-on-failure
+	echo -e "\e[32m== SUCCESSFUL TESTING! ==\e[0m\n"

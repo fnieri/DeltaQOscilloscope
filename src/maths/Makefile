@@ -144,6 +144,30 @@ maths/fast:
 	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/maths/CMakeFiles/maths.dir/build.make src/maths/CMakeFiles/maths.dir/build
 .PHONY : maths/fast
 
+ConfidenceInterval.o: ConfidenceInterval.cpp.o
+.PHONY : ConfidenceInterval.o
+
+# target to build an object file
+ConfidenceInterval.cpp.o:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/maths/CMakeFiles/DQ_maths.dir/build.make src/maths/CMakeFiles/DQ_maths.dir/ConfidenceInterval.cpp.o
+.PHONY : ConfidenceInterval.cpp.o
+
+ConfidenceInterval.i: ConfidenceInterval.cpp.i
+.PHONY : ConfidenceInterval.i
+
+# target to preprocess a source file
+ConfidenceInterval.cpp.i:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/maths/CMakeFiles/DQ_maths.dir/build.make src/maths/CMakeFiles/DQ_maths.dir/ConfidenceInterval.cpp.i
+.PHONY : ConfidenceInterval.cpp.i
+
+ConfidenceInterval.s: ConfidenceInterval.cpp.s
+.PHONY : ConfidenceInterval.s
+
+# target to generate assembly for a file
+ConfidenceInterval.cpp.s:
+	cd /home/francy/Desktop/RealTimeDeltaQSD && $(MAKE) $(MAKESILENT) -f src/maths/CMakeFiles/DQ_maths.dir/build.make src/maths/CMakeFiles/DQ_maths.dir/ConfidenceInterval.cpp.s
+.PHONY : ConfidenceInterval.cpp.s
+
 DeltaQ.o: DeltaQ.cpp.o
 .PHONY : DeltaQ.o
 
@@ -226,6 +250,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... DQ_maths"
 	@echo "... maths"
+	@echo "... ConfidenceInterval.o"
+	@echo "... ConfidenceInterval.i"
+	@echo "... ConfidenceInterval.s"
 	@echo "... DeltaQ.o"
 	@echo "... DeltaQ.i"
 	@echo "... DeltaQ.s"
