@@ -20,15 +20,17 @@ public:
     explicit TriggersTab(QWidget *parent = nullptr);
     ~TriggersTab();
     void addTriggeredMessage(const QString &msg); // To display in list
-    void recordSnapshot();
 private Q_SLOTS:
     void onObservableChanged(const QString &name);
     void onTriggerChanged();
     void onTriggeredItemClicked(QListWidgetItem *item);
 
 private:
+    void captureSnapshots(std::uint64_t, const std::string &);
+
     void populateObservables();
     void updateCheckboxStates();
+
     QVBoxLayout *mainLayout;
     QFormLayout *formLayout;
     QComboBox *observableComboBox;

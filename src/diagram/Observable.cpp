@@ -7,6 +7,7 @@ Observable::Observable(const std::string &name)
     : DiagramComponent(name)
     , observedInterval(50)
 {
+    observableSnapshot.setName(name);
 }
 void Observable::addSample(const Sample &sample)
 {
@@ -58,8 +59,14 @@ void Observable::removeTrigger(TriggerType type)
 
 void Observable::setRecording(bool isRecording)
 {
-    recording = isRecording;
-    if (!isRecording) {
+    if (recording && !isRecording) {
+        recording = isRecording;
         observableSnapshot.resizeTo(30); // FIXME magic numbah
     }
+    recording = isRecording;
+}
+
+Snapshot Observable::getSnapshot()
+{
+    return observableSnapshot;
 }

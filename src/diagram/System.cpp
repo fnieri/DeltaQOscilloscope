@@ -124,12 +124,35 @@ std::shared_ptr<Observable> System::getObservable(const std::string &name)
 
 void System::setRecording(bool isRecording)
 {
+    if (recordingTrigger && isRecording) {
+        return;
+    }
+
+    recordingTrigger = isRecording;
     for (auto &obs : observables) {
-        obs.second->setRecording(isRecording);
+        if (obs.second) {
+            obs.second->setRecording(isRecording);
+        }
     }
 }
 
 bool System::isRecording() const
 {
     return recordingTrigger;
+}
+
+void System::getObservablesSnapshotAt(std::uint64_t time)
+{
+    std::vector<Snapshot> result;
+    for (auto &[name, observable] : observables) {
+        if (observable)
+            result.push_back(observable->getSnapshot());
+    }
+
+    snapshots[time] = std::move(result); // store the snapshots by timestamp
+}
+
+std::map<std::uint64_t, std::vector<Snapshot>> System::getAllSnapshots()
+{
+    return snapshots;
 }

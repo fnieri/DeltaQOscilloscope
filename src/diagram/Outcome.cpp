@@ -48,7 +48,7 @@ DeltaQ Outcome::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
 
     std::lock_guard<std::mutex> lock(observedMutex);
 
-    triggerManager.evaluate(deltaQ, qta);
+    triggerManager.evaluate(deltaQ, qta, timeLowerBound);
 
     observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
     if ((observableSnapshot.getObservedSize() > MAX_DQ && !recording)) {

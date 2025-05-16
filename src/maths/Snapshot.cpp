@@ -40,21 +40,23 @@ void Snapshot::removeOldestCalculatedDeltaQ()
 void Snapshot::resizeTo(size_t newSize)
 {
     int observedSize = getObservedSize();
-
-    if (observedSize < newSize) {
-        return;
-    }
-
     int calculatedSize = getCalculatedSize();
 
-    int toObserved = observedSize - newSize;
-    int toCalculated = calculatedSize - newSize;
+    // Don't shrink if not needed
+    if (observedSize <= newSize && calculatedSize <= newSize)
+        return;
 
-    auto endIt = std::next(observedDeltaQs.begin(), toObserved);
-    observedDeltaQs.erase(observedDeltaQs.begin(), endIt);
+    if (observedSize > newSize) {
+        int toObserved = observedSize - newSize;
+        auto endIt = std::next(observedDeltaQs.begin(), toObserved);
+        observedDeltaQs.erase(observedDeltaQs.begin(), endIt);
+    }
 
-    auto endItC = std::next(calculatedDeltaQs.begin(), toCalculated);
-    calculatedDeltaQs.erase(calculatedDeltaQs.begin(), endItC);
+    if (calculatedSize > newSize) {
+        int toCalculated = calculatedSize - newSize;
+        auto endItC = std::next(calculatedDeltaQs.begin(), toCalculated);
+        calculatedDeltaQs.erase(calculatedDeltaQs.begin(), endItC);
+    }
 }
 
 std::optional<DeltaQRepr> Snapshot::getObservedDeltaQAtTime(std::uint64_t time)

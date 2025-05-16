@@ -26,6 +26,8 @@ class System
 
     bool recordingTrigger = false;
 
+    std::map<uint64_t, std::vector<Snapshot>> snapshots;
+
 public:
     System() = default;
 
@@ -65,6 +67,10 @@ public:
     void setRecording(bool);
 
     bool isRecording() const;
+
+    void getObservablesSnapshotAt(std::uint64_t);
+
+    std::map<std::uint64_t, std::vector<Snapshot>> getAllSnapshots();
 
     std::vector<std::string> getAllComponentsName();
 

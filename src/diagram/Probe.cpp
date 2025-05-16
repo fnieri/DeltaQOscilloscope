@@ -75,7 +75,7 @@ DeltaQ Probe::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUppe
         observableSnapshot.removeOldestObservedDeltaQ();
     }
 
-    triggerManager.evaluate(deltaQ, qta);
+    triggerManager.evaluate(deltaQ, qta, timeLowerBound);
     return deltaQ;
 }
 

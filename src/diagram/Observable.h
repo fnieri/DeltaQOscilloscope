@@ -74,9 +74,12 @@ public:
     }
 
     void setRecording(bool);
+
     void setQTA(const QTA &newQTA);
 
     void addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled, std::optional<int> sampleLimit);
 
     void removeTrigger(TriggerType type);
+
+    Snapshot getSnapshot();
 };

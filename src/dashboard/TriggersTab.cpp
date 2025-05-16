@@ -1,8 +1,15 @@
+
 #include "TriggersTab.h"
 
+#include "SnapshotViewerWindow.h"
+#include <QDateTime>
 #include <QLabel>
+#include <QString>
+#include <QTimer>
+#include <cstdlib>
+#include <sstream>
+#include <string>
 #include <unordered_set>
-
 TriggersTab::TriggersTab(QWidget *parent)
     : QWidget(parent)
 {
@@ -15,8 +22,8 @@ TriggersTab::TriggersTab(QWidget *parent)
 
     sampleLimitCheckBox = new QCheckBox("Sample Limit >", this);
     sampleLimitSpinBox = new QSpinBox(this);
-    sampleLimitSpinBox->setRange(1, 100000); // or whatever range makes sense
-    sampleLimitSpinBox->setValue(sampleLimitThreshold); // initialize to default value
+    sampleLimitSpinBox->setRange(1, 100000);
+    sampleLimitSpinBox->setValue(sampleLimitThreshold);
 
     sampleLimitLayout = new QHBoxLayout();
     sampleLimitLayout->addWidget(sampleLimitCheckBox);
@@ -24,7 +31,6 @@ TriggersTab::TriggersTab(QWidget *parent)
 
     sampleLimitWidget = new QWidget(this);
     sampleLimitWidget->setLayout(sampleLimitLayout);
-
     formLayout->addRow(sampleLimitWidget);
 
     qtaBoundsCheckBox = new QCheckBox("QTA Bound Violation", this);
@@ -35,19 +41,17 @@ TriggersTab::TriggersTab(QWidget *parent)
 
     connect(sampleLimitCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
     connect(sampleLimitSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &TriggersTab::onTriggerChanged);
-
     connect(qtaBoundsCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
     connect(failureRateCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
 
     mainLayout->addLayout(formLayout);
 
-    // Triggered list view
     triggeredList = new QListWidget(this);
     triggeredList->setSelectionMode(QAbstractItemView::SingleSelection);
     triggeredList->setMinimumHeight(150);
     connect(triggeredList, &QListWidget::itemClicked, this, &TriggersTab::onTriggeredItemClicked);
 
-    mainLayout->addWidget(new QLabel("Triggered Events:"));
+    mainLayout->addWidget(new QLabel("Triggered Snapshots:"));
     mainLayout->addWidget(triggeredList);
 
     Application::getInstance().addObserver([this]() { this->populateObservables(); });
@@ -69,7 +73,7 @@ void TriggersTab::populateObservables()
             observableComboBox->addItem(QString::fromStdString(name));
         for (const auto &[name, _] : system->getOutcomes())
             observableComboBox->addItem(QString::fromStdString(name));
-    } catch (std::exception &e) {
+    } catch (std::exception &) {
         return;
     }
 }
@@ -83,35 +87,68 @@ void TriggersTab::onTriggerChanged()
 {
     try {
         auto observable = getCurrentObservable();
-
-        // Sample Limit Trigger
+        std::string name = observable->getName();
         if (sampleLimitCheckBox->isChecked()) {
             observable->addTrigger(
                 TriggerType::SampleLimit, TriggerDefs::Conditions::SampleLimit(sampleLimitSpinBox->value()),
-                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("Sample limit exceeded"); }, true, sampleLimitSpinBox->value());
+                [this, name](const DeltaQ &, const QTA &, std::uint64_t time) { this->captureSnapshots(time, name); }, true, sampleLimitSpinBox->value());
         } else {
             observable->removeTrigger(TriggerType::SampleLimit);
         }
 
-        // QTA Bounds Trigger
         if (qtaBoundsCheckBox->isChecked()) {
             observable->addTrigger(
                 TriggerType::QTAViolation, TriggerDefs::Conditions::QTABounds(),
-                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("QTA bounds violated"); }, true, std::nullopt);
+                [this, name](const DeltaQ &, const QTA &, std::uint64_t time) { this->captureSnapshots(time, name); }, true, std::nullopt);
         } else {
             observable->removeTrigger(TriggerType::QTAViolation);
         }
 
-        // Failure Rate Trigger
         if (failureRateCheckBox->isChecked()) {
             observable->addTrigger(
                 TriggerType::Failure, TriggerDefs::Conditions::FailureRate(observable->getQTA().cdfMax),
-                [this](const DeltaQ &, const QTA &) { addTriggeredMessage("Failure rate below threshold"); }, true, std::nullopt);
+                [this, name](const DeltaQ &, const QTA &, std::uint64_t time) { this->captureSnapshots(time, name); }, true, std::nullopt);
         } else {
             observable->removeTrigger(TriggerType::Failure);
         }
-    } catch (std::exception &e) {
+    } catch (std::exception &) {
         return;
+    }
+}
+
+void TriggersTab::captureSnapshots(std::uint64_t time, const std::string &name)
+{
+    auto system = Application::getInstance().getSystem();
+    if (!system->isRecording()) {
+        system->setRecording(true);
+        QMetaObject::invokeMethod(
+            this,
+            [this, name, system, time]() {
+                auto *timer = new QTimer(this);
+                timer->setSingleShot(true);
+
+                connect(timer, &QTimer::timeout, this, [=]() {
+                    system->getObservablesSnapshotAt(time);
+
+                    qint64 msTime = time / 1000000;
+                    QDateTime timestamp = QDateTime::fromMSecsSinceEpoch(msTime);
+
+                    QString timestampStr = timestamp.toString();
+                    std::ostringstream oss;
+                    oss << "Snapshot at: " << timestampStr.toStdString() << " from " << name;
+                    QString snapshotString = QString::fromStdString(oss.str());
+
+                    auto *item = new QListWidgetItem(snapshotString);
+                    item->setData(Qt::UserRole, static_cast<qulonglong>(time)); // Store raw timestamp
+                    triggeredList->addItem(item);
+                    timer->deleteLater();
+
+                    system->setRecording(false);
+                });
+
+                timer->start(5000);
+            },
+            Qt::QueuedConnection);
     }
 }
 
@@ -133,13 +170,11 @@ void TriggersTab::updateCheckboxStates()
         failureRateCheckBox->setChecked(activeTypes.count(TriggerType::Failure));
 
         for (const auto &t : all) {
-            if (t.type == TriggerType::SampleLimit) {
-                if (auto limit = t.sampleLimitValue) {
-                    sampleLimitSpinBox->setValue(*limit);
-                }
+            if (t.type == TriggerType::SampleLimit && t.sampleLimitValue) {
+                sampleLimitSpinBox->setValue(*t.sampleLimitValue);
             }
         }
-    } catch (std::exception &e) {
+    } catch (std::exception &) {
         sampleLimitCheckBox->setChecked(false);
         qtaBoundsCheckBox->setChecked(false);
         failureRateCheckBox->setChecked(false);
@@ -149,7 +184,6 @@ void TriggersTab::updateCheckboxStates()
 std::shared_ptr<Observable> TriggersTab::getCurrentObservable()
 {
     auto system = Application::getInstance().getSystem();
-
     if (!system)
         throw std::runtime_error("System does not exist");
 
@@ -160,24 +194,26 @@ std::shared_ptr<Observable> TriggersTab::getCurrentObservable()
 
     return observable;
 }
-
-void TriggersTab::addTriggeredMessage(const QString &msg)
-{
-    triggeredList->addItem(msg);
-}
-
-void TriggersTab::recordSnapshot()
-{
-    auto system = Application::getInstance().getSystem();
-    if (system->isRecording()) {
-        return; // TODO
-    }
-    system->setRecording(true);
-}
-
 void TriggersTab::onTriggeredItemClicked(QListWidgetItem *item)
 {
-    // Future: emit a signal or open a plot window
-    QString msg = item->text();
-    qDebug() << "Item clicked:" << msg;
+    if (!item)
+        return;
+
+    // Retrieve raw timestamp
+    qulonglong timestamp = item->data(Qt::UserRole).toULongLong();
+    if (timestamp == 0)
+        return;
+
+    auto system = Application::getInstance().getSystem();
+    const auto &snapshots = system->getAllSnapshots();
+    auto it = snapshots.find(timestamp);
+    if (it != snapshots.end()) {
+        const auto &snapshotList = it->second;
+        qDebug() << "Snapshot at" << timestamp << "contains" << snapshotList.size() << "entries";
+
+        auto *viewer = new SnapshotViewerWindow(const_cast<std::vector<Snapshot> &>(snapshotList));
+        viewer->setAttribute(Qt::WA_DeleteOnClose);
+        viewer->resize(800, 600);
+        viewer->show();
+    }
 }

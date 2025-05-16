@@ -27,7 +27,7 @@ public:
 
     std::vector<Trigger> getTriggersByType(TriggerType type);
 
-    void evaluate(const DeltaQ &dq, const QTA &qta) const;
+    void evaluate(const DeltaQ &dq, const QTA &qta, std::uint64_t) const;
 
     void removeTriggersByType(TriggerType type);
 

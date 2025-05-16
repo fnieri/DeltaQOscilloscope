@@ -9,6 +9,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
+#include <QtConcurrent>
 
 SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, QWidget *parent)
     : QWidget(parent)
@@ -72,53 +73,105 @@ void SnapshotViewerWindow::onObservableChanged(const QString &name)
 
 void SnapshotViewerWindow::onTimeSliderChanged(int value)
 {
+    if (snapshots.empty() || !snapshots.count(currentObservable))
+        return;
+
     const auto &snapshot = snapshots.at(currentObservable);
     timeLabel->setText(QString("Time Index: %1").arg(value));
 
-    if (snapshot.getObservedSize() == 0)
-        return;
-    if (value >= static_cast<int>(snapshot.getObservedSize()))
+    if (snapshot.getObservedSize() == 0 || value >= static_cast<int>(snapshot.getObservedSize()))
         return;
 
-    const auto &obs = snapshot.getObservedDeltaQs()[value];
+    const auto obs = snapshot.getObservedDeltaQs()[value];
+    const auto calc = snapshot.getCalculatedSize() > value ? std::optional<DeltaQRepr>(snapshot.getCalculatedDeltaQs()[value]) : std::nullopt;
 
-    QChart *chart = new QChart();
-    chart->setTitle(QString::fromStdString(currentObservable + " - Time Index: " + std::to_string(value)));
+    QtConcurrent::run([=]() {
+        int bins = obs.deltaQ.getBins();
+        double binWidth = obs.deltaQ.getBinWidth();
 
-    auto *obsSeries = new QLineSeries();
-    obsSeries->setName("Observed");
-    const auto &obsVals = obs.deltaQ.getPdfValues();
-    for (int i = 0; i < static_cast<int>(obsVals.size()); ++i) {
-        obsSeries->append(i * obs.deltaQ.getBinWidth(), obsVals[i]);
-    }
-    chart->addSeries(obsSeries);
+        QVector<QPointF> obsCdf;
+        obsCdf.reserve(bins);
+        QVector<QPointF> obsMean, obsLower, obsUpper;
+        obsMean.reserve(bins);
+        obsLower.reserve(bins);
+        obsUpper.reserve(bins);
+        obsCdf.emplace_back(QPointF(0, 0));
+        obsMean.emplace_back(QPointF(0, 0));
+        obsLower.emplace_back(QPointF(0, 0));
+        obsUpper.emplace_back(QPointF(0, 0));
 
-    // Calculated series
-    if (snapshot.getCalculatedSize() > value) {
-        const auto &calc = snapshot.getCalculatedDeltaQs()[value];
-        auto *calcSeries = new QLineSeries();
-        calcSeries->setName("Calculated");
-        const auto &calcVals = calc.deltaQ.getPdfValues();
-        for (int i = 0; i < static_cast<int>(calcVals.size()); ++i) {
-            calcSeries->append(i * calc.deltaQ.getBinWidth(), calcVals[i]);
+        for (int i = 0; i < bins; ++i) {
+            double x = binWidth * (i + 1);
+            obsCdf.append(QPointF(x, obs.deltaQ.cdfAt(i)));
+            obsLower.append(QPointF(x, obs.bounds[i].lowerBound));
+            obsUpper.append(QPointF(x, obs.bounds[i].upperBound));
+            obsMean.append(QPointF(x, obs.bounds[i].mean));
         }
-        chart->addSeries(calcSeries);
-    }
 
-    auto *axisX = new QValueAxis();
-    axisX->setTitleText("x");
-    chart->addAxis(axisX, Qt::AlignBottom);
-    obsSeries->attachAxis(axisX);
+        QVector<QPointF> calcCdf, calcMean, calcLower, calcUpper;
+        if (calc) {
+            int cbins = calc->deltaQ.getBins();
+            double cbinWidth = calc->deltaQ.getBinWidth();
+            calcCdf.reserve(cbins);
+            calcMean.reserve(cbins);
+            calcLower.reserve(cbins);
+            calcUpper.reserve(cbins);
 
-    auto *axisY = new QValueAxis();
-    axisY->setTitleText("PDF");
-    chart->addAxis(axisY, Qt::AlignLeft);
-    obsSeries->attachAxis(axisY);
+            calcCdf.emplace_back(QPointF(0, 0));
 
-    if (snapshot.getCalculatedSize() > value) {
-        chart->series().last()->attachAxis(axisX);
-        chart->series().last()->attachAxis(axisY);
-    }
+            calcMean.emplace_back(QPointF(0, 0));
+            calcLower.emplace_back(QPointF(0, 0));
+            calcUpper.emplace_back(QPointF(0, 0));
+            for (int i = 0; i < cbins; ++i) {
+                double x = cbinWidth * (i + 1);
+                calcCdf.append(QPointF(x, calc->deltaQ.cdfAt(i)));
+                calcLower.append(QPointF(x, calc->bounds[i].lowerBound));
+                calcUpper.append(QPointF(x, calc->bounds[i].upperBound));
+                calcMean.append(QPointF(x, calc->bounds[i].mean));
+            }
+        }
 
-    chartView->setChart(chart);
+        // GUI update
+        QMetaObject::invokeMethod(this, [=]() {
+            QChart *chart = new QChart();
+            chart->setTitle(QString::fromStdString(currentObservable) + QString(" - Time Index: %1").arg(value));
+
+            auto addSeries = [&](const QVector<QPointF> &data, const QString &name, const QColor &color) {
+                QLineSeries *series = new QLineSeries();
+                series->setName(name);
+                series->append(data);
+                series->setColor(color);
+                chart->addSeries(series);
+                return series;
+            };
+
+            auto *obsS = addSeries(obsCdf, "Observed", Qt::blue);
+            auto *obsMeanS = addSeries(obsMean, "Obs Mean", Qt::darkGreen);
+            auto *obsLowerS = addSeries(obsLower, "Obs Lower", Qt::darkCyan);
+            auto *obsUpperS = addSeries(obsUpper, "Obs Upper", Qt::darkMagenta);
+
+            QLineSeries *calcS = nullptr, *calcMeanS = nullptr, *calcLowerS = nullptr, *calcUpperS = nullptr;
+            if (!calcCdf.isEmpty()) {
+                calcS = addSeries(calcCdf, "Calculated", Qt::red);
+                calcMeanS = addSeries(calcMean, "Calc Mean", Qt::darkYellow);
+                calcLowerS = addSeries(calcLower, "Calc Lower", Qt::gray);
+                calcUpperS = addSeries(calcUpper, "Calc Upper", Qt::lightGray);
+            }
+
+            auto *axisX = new QValueAxis();
+            axisX->setTitleText("Delay (ms)");
+            chart->addAxis(axisX, Qt::AlignBottom);
+
+            auto *axisY = new QValueAxis();
+            axisY->setTitleText("CDF");
+            chart->addAxis(axisY, Qt::AlignLeft);
+
+            for (auto *series : chart->series()) {
+                series->attachAxis(axisX);
+                series->attachAxis(axisY);
+            }
+
+            chartView->setChart(chart);
+        });
+    });
 }
