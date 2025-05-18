@@ -29,8 +29,12 @@ protected:
 
     std::mutex observedMutex;
     std::mutex samplesMutex;
+    std::mutex paramMutex;
 
     bool recording = false;
+
+private:
+    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t);
 
 public:
     Observable(const std::string &name);
@@ -39,9 +43,11 @@ public:
 
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
 
-    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override = 0;
+    DeltaQ getObservedDeltaQ(uint64_t, uint64_t);
 
-    virtual double setNewParameters(int newExp, int newNBins) = 0;
+    DeltaQRepr getObservedDeltaQRepr(uint64_t, uint64_t);
+
+    double setNewParameters(int newExp, int newNBins);
 
     double getBinWidth() const
     {

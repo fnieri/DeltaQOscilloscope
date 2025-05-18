@@ -19,6 +19,7 @@ class Operator : virtual public DiagramComponent
 
 public:
     DeltaQ getObservedDeltaQ(uint64_t, uint64_t) override;
+
     Operator(const std::string name, OperatorType);
 
     void setProbabilities(const std::vector<double> &);

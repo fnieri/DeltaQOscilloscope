@@ -23,7 +23,7 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
     const auto &cdf = deltaQ.getCdfValues();
 
     if (cdf.size() != numBins) {
-        std::cerr << "CDF size mismatch in addDeltaQ \n";
+        std::cerr << "CDF size mismatch in addDeltaQ, have" << deltaQ.getBins() << " expected" << numBins << "\n";
         return;
     }
 

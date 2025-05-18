@@ -1,12 +1,16 @@
 
 #include "DelaySettingsWidget.h"
 #include "../Application.h"
+#include <qlabel.h>
 #include <qpushbutton.h>
 DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     : QWidget(parent)
 {
-    auto *mainLayout = new QVBoxLayout(this);
-    auto *settingsLayout = new QHBoxLayout();
+    mainLayout = new QVBoxLayout(this);
+    settingsLayout = new QHBoxLayout(this);
+
+    settingsLabel = new QLabel("Set the parameters for an observable");
+    mainLayout->addWidget(settingsLabel);
 
     observableComboBox = new QComboBox();
     settingsLayout->addWidget(observableComboBox);
@@ -70,7 +74,6 @@ void DelaySettingsWidget::loadObservableSettings()
     updateMaxDelay();
 }
 
-
 double DelaySettingsWidget::getMaxDelayMs() const
 {
     int exponent = delaySlider->value();
@@ -99,5 +102,4 @@ void DelaySettingsWidget::onSaveDelayClicked()
     std::string nameString = name.toStdString();
     system->setObservableParameters(nameString, exponent, bins);
     Q_EMIT delayParametersChanged();
-
 }

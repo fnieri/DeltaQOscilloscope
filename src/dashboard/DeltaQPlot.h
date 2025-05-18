@@ -2,15 +2,15 @@
 #ifndef DELTAQPLOT_H
 #define DELTAQPLOT_H
 
+#include "CustomLegendPanel.h"
+#include <qboxlayout.h>
 #pragma once
-
-#include "Point.h"
 
 // Qt includes
 #include <QChartView>
 #include <QLineSeries>
+#include <QToolButton>
 #include <QValueAxis>
-
 // C++ includes
 #include <string>
 #include <vector>
@@ -20,9 +20,9 @@ class DQPlotList;
 
 /**
  * @class DeltaQPlot
- * @brief A class representing a Delta-Q chart view that allows visualization of outcomes and probes over time.
+ * @brief A class representing a DeltaQ chart view that allows visualization of  probes over time.
  */
-class DeltaQPlot : public QChartView
+class DeltaQPlot : public QWidget
 {
     Q_OBJECT
 
@@ -72,14 +72,15 @@ public:
     /**
      * @brief Updates an existing series with new data points.
      */
-    void updateSeries(QLineSeries *series, const std::vector<std::pair<double, double>> &data);
-
     void updateSeries(QLineSeries *series, const QVector<QPointF> &data);
+
     void updateXRange(double xRange);
     /**
      * @brief Returns the associated plot list.
      */
     DQPlotList *getPlotList();
+
+    void setTitle(QString &&);
 
 protected:
     /**
@@ -89,17 +90,25 @@ protected:
 
 Q_SIGNALS:
     /**
-     * @brief Emitted when this plot is selected by the user.
+     * @brief Emitted whenout
+    QHBox this plot is selected by the user.
      */
     void plotSelected(DeltaQPlot *plot);
 
 private:
+    QHBoxLayout *layout;
+    QToolButton *toggleButton;
+    QChartView *chartView;
     QChart *chart;
+
     QValueAxis *axisX;
     QValueAxis *axisY;
+
     QLineSeries *operationSeries;
     DQPlotController *controller;
     DQPlotList *plotList;
+
+    CustomLegendPanel *legendPanel;
 };
 
 #endif // DELTAQPLOT_H

@@ -33,6 +33,7 @@ DQPlotList::DQPlotList(DQPlotController *controller, QWidget *parent)
 
     updateLists();
 }
+
 bool DQPlotList::isEmptyAfterReset()
 {
     return controller->isEmptyAfterReset();

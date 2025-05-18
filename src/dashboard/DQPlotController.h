@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+// All series pertaining to an outcome
 struct OutcomeSeries {
     QLineSeries *outcomeS;
     QLineSeries *lowerBoundS;
@@ -26,7 +27,8 @@ struct OutcomeSeries {
     QLineSeries *meanS;
     QLineSeries *qtaS;
 };
-;
+
+// All series pertaining to a probe
 struct ProbeAllSeries {
     QLineSeries *obsS;
     QLineSeries *obsLowerBoundS;
@@ -96,11 +98,13 @@ public:
      */
     void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
+    void setTitle();
     bool isEmptyAfterReset();
 
 private:
-    double updateOutcome(OutcomeSeries series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
-    void updateProbe(ProbeAllSeries probeSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(OutcomeSeries &series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+
+    double updateProbe(ProbeAllSeries &probeSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     DeltaQPlot *plot;
 

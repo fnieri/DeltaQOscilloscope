@@ -14,12 +14,9 @@ class Probe : public Observable
 {
     std::vector<std::shared_ptr<DiagramComponent>> causalLinks;
 
-    std::mutex paramMutex;
     std::mutex calcMutex;
 
     ConfidenceInterval calculatedInterval;
-
-    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override;
 
 public:
     Probe(const std::string &name);
@@ -28,10 +25,6 @@ public:
 
     DeltaQ calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
-    DeltaQ getObservedDeltaQ(uint64_t, uint64_t) override;
-
-    DeltaQRepr getObservedDeltaQRepr(uint64_t, uint64_t);
-
     DeltaQRepr getCalculatedDeltaQRepr(uint64_t, uint64_t);
 
     std::vector<Bound> getBounds() const;
@@ -39,8 +32,6 @@ public:
     std::vector<Bound> getObservedBounds() const;
 
     std::vector<Bound> getCalculatedBounds() const;
-
-    double setNewParameters(int, int) override;
 
     void setCausalLinks(std::vector<std::shared_ptr<DiagramComponent>> newCausalLinks)
     {

@@ -3,7 +3,10 @@
 #include "../diagram/System.h"
 #include "DeltaQPlot.h"
 #include "NewPlotList.h"
+#include "ObservableSettings.h"
 #include "Sidebar.h"
+#include "TriggersTab.h"
+
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QMainWindow>
@@ -11,8 +14,6 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <qboxlayout.h>
-
-#include "TriggersTab.h"
 
 class MainWindow : public QMainWindow
 {
@@ -23,17 +24,21 @@ class MainWindow : public QMainWindow
     QScrollArea *scrollArea;
     QGridLayout *plotLayout;
 
+    QWidget *plotContainer;
+
     QWidget *centralWidget;
 
     QThread *timerThread;
     QTimer *updateTimer;
 
-    QTabWidget *sideTabWidget; // NEW
-    TriggersTab *triggersTab; // NEW
-
+    QTabWidget *sideTabWidget;
+    TriggersTab *triggersTab;
     Sidebar *sidebar;
+    ObservableSettings *observableSettings;
+
     QPushButton *addPlotButton;
-    QMap<DeltaQPlot *, QWidget *> plotContainers; // Store plots dynamically
+
+    QMap<DeltaQPlot *, QWidget *> plotContainers;
     uint64_t timeLowerBound;
 
     std::mutex plotDelMutex;
@@ -46,10 +51,7 @@ public:
 
 private Q_SLOTS:
     void updatePlots();
-    void onUpdateSystem();
     void onAddPlotClicked();
-
-    void onEditPlot(DeltaQPlot *plot);
     void onRemovePlot(DeltaQPlot *plot);
     void onPlotSelected(DeltaQPlot *plot);
 

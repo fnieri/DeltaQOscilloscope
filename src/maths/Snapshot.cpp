@@ -61,16 +61,18 @@ void Snapshot::resizeTo(size_t newSize)
 
 std::optional<DeltaQRepr> Snapshot::getObservedDeltaQAtTime(std::uint64_t time)
 {
-    if (observedDeltaQs.count(time)) {
-        return observedDeltaQs[time];
+    auto it = observedDeltaQs.find(time);
+    if (it != observedDeltaQs.end()) {
+        return it->second;
     }
     return std::nullopt;
 }
 
 std::optional<DeltaQRepr> Snapshot::getCalculatedDeltaQAtTime(std::uint64_t time)
 {
-    if (calculatedDeltaQs.count(time)) {
-        return calculatedDeltaQs[time];
+    auto it = calculatedDeltaQs.find(time);
+    if (it != calculatedDeltaQs.end()) {
+        return it->second;
     }
     return std::nullopt;
 }

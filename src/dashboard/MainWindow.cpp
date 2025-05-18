@@ -4,12 +4,12 @@
 #include "DQPlotList.h"
 #include "DeltaQPlot.h"
 #include "NewPlotList.h"
+#include "ObservableSettings.h"
 #include "Sidebar.h"
 #include <QMenu>
 #include <QMessageBox>
 #include <QThread>
 #include <QVBoxLayout>
-
 #define MAX_P_ROW 2
 #define MAX_P_COL 2
 
@@ -27,7 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setBaseSize(800, 800);
-    QWidget *plotContainer = new QWidget();
+
+    plotContainer = new QWidget();
     plotLayout = new QGridLayout(plotContainer);
     scrollArea->setWidget(plotContainer);
 
@@ -35,12 +36,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     sidebar = new Sidebar(this);
     triggersTab = new TriggersTab(this);
+    observableSettings = new ObservableSettings(this);
 
     // Tab widget to hold sidebar and triggers tab
     sideTabWidget = new QTabWidget(this);
     sideTabWidget->addTab(sidebar, "Sidebar");
+    sideTabWidget->addTab(observableSettings, "Probes settings");
     sideTabWidget->addTab(triggersTab, "Triggers");
-    sideTabWidget->setTabPosition(QTabWidget::West); // Tabs on the left
+    sideTabWidget->setTabPosition(QTabWidget::West);
+
     mainLayout->addWidget(sideTabWidget, 0);
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
 
@@ -50,7 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(updateTimer, &QTimer::timeout, this, &MainWindow::updatePlots, Qt::QueuedConnection);
     connect(timerThread, &QThread::started, [this]() { updateTimer->start(200); });
     timerThread->start();
+
     Application::getInstance().addObserver([this] { this->reset(); });
+
     auto now = std::chrono::system_clock::now();
     auto adjustedTime = now - std::chrono::milliseconds(3000);
     timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
@@ -66,7 +72,7 @@ void MainWindow::reset()
         QWidget *plotWidget = it.value();
 
         if (plot->isEmptyAfterReset()) {
-            it = plotContainers.erase(it); // returns next valid iterator
+            it = plotContainers.erase(it);
 
             delete plot;
             plot = nullptr;
@@ -142,18 +148,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
         widget->setMaximumHeight(scrollArea->height() / 2);
     }
 }
-void MainWindow::onUpdateSystem()
-{
-    std::string text = sidebar->getSystemText();
-}
-
-void MainWindow::onEditPlot(DeltaQPlot *plot)
-{
-    auto selectedItems = sidebar->getPlotList()->getSelectedItems();
-    plot->editPlot(selectedItems);
-
-    onPlotSelected(plot);
-}
 
 void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 {
@@ -173,14 +167,11 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
         return;
 
     QMenu contextMenu(this);
-    QAction *editAction = contextMenu.addAction("Edit Plot");
     QAction *removeAction = contextMenu.addAction("Remove Plot");
 
     QAction *selectedAction = contextMenu.exec(event->globalPos());
 
-    if (selectedAction == editAction) {
-        onEditPlot(selectedPlot);
-    } else if (selectedAction == removeAction) {
+    if (selectedAction == removeAction) {
         onRemovePlot(selectedPlot);
     }
 }

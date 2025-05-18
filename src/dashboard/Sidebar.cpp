@@ -1,54 +1,35 @@
 
 #include "Sidebar.h"
 
-#include "../parser/SystemParserInterface.h"
-
-#include "../Application.h"
 #include "NewPlotList.h"
+#include "SystemCreationWidget.h"
 #include <QBoxLayout>
 #include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>
 #include <iostream>
-#include <memory>
 #include <qboxlayout.h>
 #include <qlabel.h>
 #include <qlogging.h>
+#include <qnamespace.h>
 #include <qpushbutton.h>
+#include <qsplitter.h>
 #include <qtextedit.h>
-
-#include <fstream>
-#include <string>
 
 Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
 {
     layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignTop);
-    layout->setSpacing(10);
-    layout->setContentsMargins(10, 10, 10, 10);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    systemLabel = new QLabel("Create or edit your system here");
-    systemTextEdit = new QTextEdit();
+    mainSplitter = new QSplitter(Qt::Vertical, this);
 
-    systemButtonsLayout = new QHBoxLayout();
+    systemCreationWidget = new SystemCreationWidget(this);
+    mainSplitter->addWidget(systemCreationWidget);
 
-    updateSystemButton = new QPushButton("Create or edit system");
-    saveSystemButton = new QPushButton("Save system to");
-    loadSystemButton = new QPushButton("Load system from");
-
-    systemButtonsLayout->addWidget(updateSystemButton);
-    connect(updateSystemButton, &QPushButton::clicked, this, &Sidebar::onUpdateSystem);
-
-    systemButtonsLayout->addWidget(saveSystemButton);
-    connect(saveSystemButton, &QPushButton::clicked, this, &Sidebar::saveSystemTo);
-
-    systemButtonsLayout->addWidget(loadSystemButton);
-    connect(loadSystemButton, &QPushButton::clicked, this, &Sidebar::loadSystem);
-    layout->addWidget(systemLabel);
-    layout->addWidget(systemTextEdit);
-
-    layout->addLayout(systemButtonsLayout);
+    newPlotListWidget = new QWidget(this);
+    newPlotListLayout = new QVBoxLayout(newPlotListWidget);
+    newPlotListLayout->setContentsMargins(5, 5, 5, 5);
 
     newPlotLabel = new QLabel("Add a new plot:", this);
     newPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -56,21 +37,22 @@ Sidebar::Sidebar(QWidget *parent)
     newPlotList = new NewPlotList(this);
     connect(addNewPlotButton, &QPushButton::clicked, this, &Sidebar::onAddPlotClicked);
 
-    layout->addWidget(newPlotLabel);
-    layout->addWidget(newPlotList);
-    layout->addWidget(addNewPlotButton);
+    newPlotListLayout->addWidget(newPlotLabel);
+    newPlotListLayout->addWidget(newPlotList);
+    newPlotListLayout->addWidget(addNewPlotButton);
 
-    qtaInputWidget = new QTAInputWidget(this);
-    layout->addWidget(qtaInputWidget);
+    mainSplitter->addWidget(newPlotListWidget);
 
-    delaySettingsWidget = new DelaySettingsWidget(this);
-    layout->addWidget(delaySettingsWidget);
-    connect(delaySettingsWidget, &DelaySettingsWidget::delayParametersChanged, qtaInputWidget, &QTAInputWidget::loadObservableSettings);
-
+    currentPlotWidget = new QWidget(this);
+    currentPlotLayout = new QVBoxLayout(currentPlotWidget);
     currentPlotLabel = new QLabel("Modify current plot:", this);
     currentPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    currentPlotLabel->hide(); // Initially hidden
-    layout->addWidget(currentPlotLabel);
+    currentPlotLabel->hide();
+
+    currentPlotLayout->addWidget(currentPlotLabel);
+    mainSplitter->addWidget(currentPlotWidget);
+
+    layout->addWidget(mainSplitter);
 }
 
 void Sidebar::setCurrentPlotList(DQPlotList *plotList)
@@ -106,21 +88,6 @@ void Sidebar::clearOnAdd()
     newPlotList->clearSelection();
 }
 
-void Sidebar::onUpdateSystem()
-{
-    std::string text = getSystemText();
-
-    try {
-        auto system = SystemParserInterface::parseString(text);
-        if (system.has_value()) {
-            Application::getInstance().setSystem(system.value());
-            system->setSystemDefinitionText(text);
-        }
-    } catch (const std::exception &e) {
-        QMessageBox::critical(this, "Parsing error", e.what());
-    }
-}
-
 void Sidebar::onAddPlotClicked()
 {
     auto selectedItems = newPlotList->getSelectedItems();
@@ -131,52 +98,4 @@ void Sidebar::onAddPlotClicked()
     }
 
     Q_EMIT addPlotClicked();
-}
-
-void Sidebar::saveSystemTo()
-{
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::AnyFile);
-    QString filename = dialog.getSaveFileName(this, "Save file", "", "All files (* *.dq)");
-
-    if (!filename.isEmpty()) {
-        std::string systemText = getSystemText();
-        auto system = SystemParserInterface::parseString(systemText);
-
-        if (system.has_value()) {
-            std::ofstream outFile(filename.toStdString());
-            if (outFile.is_open()) {
-                outFile << systemText;
-                outFile.close();
-                QMessageBox::information(this, "Success", "File saved successfully.");
-            } else {
-                QMessageBox::critical(this, "Error", "Could not open file for writing.");
-            }
-        } else {
-            QMessageBox::warning(this, "Error", "System parsing failed. File not saved.");
-        }
-    }
-}
-
-void Sidebar::loadSystem()
-{
-    // https://stackoverflow.com/questions/13035674/how-to-read-a-file-line-by-line-or-a-whole-text-file-at-once
-    QFileDialog dialog(this);
-    std::string filename = dialog.getOpenFileName(this, "Select file", " ", "All files (* *.dq)").toStdString();
-
-    auto system = SystemParserInterface::parseFile(filename);
-    if (system.has_value()) {
-        Application::getInstance().setSystem(system.value());
-        std::ifstream file(filename);
-        std::string str;
-        std::string file_contents;
-        while (std::getline(file, str)) {
-            file_contents += str;
-            file_contents.push_back('\n');
-        }
-
-        system->setSystemDefinitionText(file_contents);
-    }
-    std::string systemText = Application::getInstance().getSystem()->getSystemDefinitionText();
-    systemTextEdit->setText(QString::fromStdString(systemText));
 }

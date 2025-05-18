@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <cmath>
+#include <qboxlayout.h>
 class DelaySettingsWidget : public QWidget
 {
     Q_OBJECT
@@ -29,9 +30,15 @@ private Q_SLOTS:
     void loadObservableSettings();
 
 private:
+    QVBoxLayout *mainLayout;
+
+    QLabel *settingsLabel;
+    QLabel *maxDelayLabel;
+
+    QHBoxLayout *settingsLayout;
     QComboBox *observableComboBox;
     QSlider *delaySlider;
     QSpinBox *binSpinBox;
-    QLabel *maxDelayLabel;
+
     QPushButton *saveDelayButton;
 };
