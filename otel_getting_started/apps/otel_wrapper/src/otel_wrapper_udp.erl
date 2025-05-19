@@ -1,13 +1,13 @@
 
--module(otel_wrapper).
+-module(otel_wrapper_udp).
 -behaviour(application).
 -author("Francesco Nieri").
 
 -export([start/0, start_span/1, start_span/2,  end_span/2, fail_span/1, with_span/2, with_span/3, span_process/3]).
 -export([start/2, stop/1]).
--export([init_ets/0]). 
+-export([init_ets/0]).
 -export([set_stub_running/1]).
--export([handle_c_message/1]).
+-export([start_tcp_server/0]).
 
 -include_lib("opentelemetry_api/include/otel_tracer.hrl").
 
@@ -40,11 +40,16 @@ start(_Type, _Args) ->
 stop(_State) ->
     ok.
 
+
 init_ets() ->
     ets:new(timeout_registry, [named_table, public, set]),
+    ets:new(otel_connections, [named_table, public, set]),
     ets:new(otel_state, [named_table, public, set]),
     ets:insert(otel_state, {stub_running, false}),
+    %start_udp_sender(),
     {ok, self()}.
+
+
 %%%=======================
 %%% For testing purposes
 %%% ======================
@@ -142,6 +147,7 @@ with_span(Name, Fun, Attrs) when is_map(Attrs), is_function(Fun, 0) ->
             end_with_span(Pid),
             Result
         end).
+
 start_with_span(Name) ->
     case ets:lookup(otel_state, stub_running) of
         [{_, true}] ->
@@ -183,7 +189,29 @@ span_process(NameBin, StartTime, Timeout) ->
             send_span(NameBin, StartTime, 0, <<"to">>)
     end.
 
+%%%=======================
+%%% TCP Server to Receive Commands from C
+%%%=======================
 
+start_tcp_server() ->
+    {ok, ListenSocket} = gen_tcp:listen(8081, [binary, {packet, line}, {active, false}, {reuseaddr, true}]),
+    accept(ListenSocket).
+
+accept(ListenSocket) ->
+    {ok, Socket} = gen_tcp:accept(ListenSocket),
+    spawn(fun() -> handle_connection(Socket) end),
+    accept(ListenSocket).
+
+handle_connection(Socket) ->
+    case gen_tcp:recv(Socket, 0) of
+        {ok, Line} ->
+            Trimmed = binary:replace(Line, <<"\n">>, <<>>, [global]),
+            io:format("~p~n", [Trimmed]),
+            handle_c_message(Trimmed),
+            handle_connection(Socket);
+        {error, closed} ->
+            ok
+    end.
 %%%=======================
 %%% Handle Incoming Messages from C
 %%%=======================
@@ -204,16 +232,74 @@ handle_c_message(Bin) when is_binary(Bin) ->
         _ ->
             io:format("Unknown command: ~p~n", [Bin])
     end.
+%%%=======================
+%%% Init UDP
+%%%=======================
+
+start_udp_sender() ->
+    case gen_udp:open(0, [binary, {active, true}]) of
+        {ok, Socket} ->
+            ets:insert(otel_state, {udp_socket, Socket}),
+            ets:insert(otel_state, {socket_error, false}),
+            {ok, Socket};
+        Error ->
+            io:format("Error ~p", [Error]),
+            Error
+    end.
+
+get_udp_socket() ->
+    case ets:lookup(otel_state, udp_socket) of
+        [{_, Socket}] ->
+            % Check if socket is still valid only when we have a previous error
+            case ets:lookup(otel_state, socket_error) of
+                [{_, true}] ->
+                    case inet:port(Socket) of
+                        {ok, _} -> 
+                            ets:insert(otel_state, {socket_error, false}),
+                            Socket;
+                        {error, _} -> 
+                            %gen_udp:close(Socket),
+                            case start_udp_sender() of
+                                {ok, NewSocket} -> 
+                                    ets:insert(otel_state, {socket_error, false}),
+                                    NewSocket;
+                                _ -> undefined
+                            end
+                    end;
+                _ ->
+                    Socket
+            end;
+        [] ->
+            case start_udp_sender() of
+                {ok, Socket} -> 
+                    ets:insert(otel_state, {socket_error, false}),
+                    Socket;
+                _ -> undefined
+            end
+    end.
 
 %%%=======================
 %%% Sending Span Data to C
 %%%=======================
 
 send_span(NameBin, Start, End, StatusBin) ->
-    Data = io_lib:format("n:~s;b:~p;e:~p;s:~s~n", [
+    Data = io_lib:format("n:~s;b:~p;e:~p;s:~s", [
         NameBin,
         Start,
         End,
         StatusBin
     ]),
-    wrapper_tcp_client:send_span(lists:flatten(Data)).
+    Packet = list_to_binary(lists:flatten(Data)),
+    case get_udp_socket() of
+        undefined ->
+            ok;
+        Socket ->
+            case gen_udp:send(Socket, "127.0.0.1", 8080, Packet) of
+                ok -> 
+                    ets:insert(otel_state, {socket_error, false}),
+                    ok;
+                {error, Reason} ->
+                    io:format("~p", [Reason]),
+                    ets:insert(otel_state, {socket_error, true})
+            end
+    end.

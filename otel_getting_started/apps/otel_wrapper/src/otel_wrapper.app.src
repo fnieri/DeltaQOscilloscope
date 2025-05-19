@@ -2,8 +2,8 @@
  [
   {description, "An OpenTelemetry Wrapper for the DeltaQ Oscilloscope"},
   {vsn, "0.1.0"},
-  {modules, [otel_wrapper, otel_wrapper_sup]},
-  {registered, [otel_wrapper_sup, otel_connection_manager]},
+  {modules, [otel_wrapper, otel_wrapper_sup, wrapper_tcp_client, wrapper_tcp_server]},
+  {registered, [otel_wrapper_sup, wrapper_tcp_client, wrapper_tcp_server]},
   {applications, [kernel, stdlib,  opentelemetry, opentelemetry_api]},
   {mod, {otel_wrapper, []}},
   {env, []}
