@@ -106,8 +106,9 @@ std::vector<std::string> System::getAllComponentsName()
     std::vector<std::string> names;
     names.reserve(observables.size());
 
-    for (auto &[name, _] : observables) {
-        names.emplace_back(name);
+    for (auto &[name, obs] : observables) {
+        if (obs)
+            names.emplace_back(name);
     }
 
     return names;

@@ -18,7 +18,7 @@ TriggersTab::TriggersTab(QWidget *parent)
 
     observableComboBox = new QComboBox(this);
     connect(observableComboBox, &QComboBox::currentTextChanged, this, &TriggersTab::onObservableChanged);
-    formLayout->addRow("Observable:", observableComboBox);
+    formLayout->addRow("Probe:", observableComboBox);
 
     sampleLimitCheckBox = new QCheckBox("Sample Limit >", this);
     sampleLimitSpinBox = new QSpinBox(this);

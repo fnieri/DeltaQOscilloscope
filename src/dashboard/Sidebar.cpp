@@ -31,7 +31,7 @@ Sidebar::Sidebar(QWidget *parent)
     newPlotListLayout = new QVBoxLayout(newPlotListWidget);
     newPlotListLayout->setContentsMargins(5, 5, 5, 5);
 
-    newPlotLabel = new QLabel("Add a new plot:", this);
+    newPlotLabel = new QLabel("Select probes for a new plot:", this);
     newPlotLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     addNewPlotButton = new QPushButton("Add plot");
     newPlotList = new NewPlotList(this);
@@ -93,7 +93,7 @@ void Sidebar::onAddPlotClicked()
     auto selectedItems = newPlotList->getSelectedItems();
 
     if (selectedItems.empty()) {
-        QMessageBox::warning(this, "No Selection", "Please select components before adding a plot.");
+        QMessageBox::warning(this, "No Selection", "Please select probes before adding a plot.");
         return;
     }
 

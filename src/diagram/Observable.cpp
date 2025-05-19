@@ -51,12 +51,11 @@ DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::ui
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
 
     observedInterval.addDeltaQ(deltaQ);
-
     if (observableSnapshot.getObservedSize() > MAX_DQ) {
 
         observedInterval.removeDeltaQ(observableSnapshot.getOldestObservedDeltaQ());
         if (!recording) {
-            observableSnapshot.removeOldestObservedDeltaQ();
+            observableSnapshot.resizeTo(MAX_DQ);
         }
     }
 
@@ -127,7 +126,7 @@ double Observable::setNewParameters(int newExp, int newNBins)
     nBins = newNBins;
     deltaTExp = newExp;
     if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
-        qta = QTA::create(0, 0, 0, qta.cdfMax);
+        qta = QTA::create(0, 0, 0, qta.cdfMax, false);
     }
     maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
 

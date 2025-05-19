@@ -57,7 +57,7 @@ bool DQPlotController::isEmptyAfterReset()
             ++it;
         }
     }
-    return (outcomes.empty() && probes.empty());
+    return (outcomes.empty() && probes.empty() && operators.empty());
 }
 
 bool DQPlotController::containsComponent(std::string name)
@@ -180,11 +180,27 @@ void DQPlotController::addExpressionSeries(const std::string &name, bool isProbe
 void DQPlotController::removeOutcomeSeries(const std::string &name)
 {
     OutcomeSeries series = outcomes[name].first;
+
     plot->removeSeries(series.outcomeS);
+    delete series.outcomeS;
+    series.outcomeS = NULL;
+
     plot->removeSeries(series.lowerBoundS);
+    delete series.lowerBoundS;
+    series.lowerBoundS = NULL;
+
     plot->removeSeries(series.upperBoundS);
+    delete series.upperBoundS;
+    series.upperBoundS = NULL;
+
     plot->removeSeries(series.meanS);
+    delete series.meanS;
+    series.meanS = NULL;
+
     plot->removeSeries(series.qtaS);
+    delete series.qtaS;
+    series.qtaS = NULL;
+
     outcomes.erase(name);
 }
 
@@ -197,16 +213,41 @@ void DQPlotController::removeExpressionSeries(const std::string &name, bool isPr
         series = operators[name].first;
 
     plot->removeSeries(series.obsLowerBoundS);
+    delete series.obsLowerBoundS;
+    series.obsLowerBoundS = NULL;
+
     plot->removeSeries(series.obsUpperBoundS);
+    delete series.obsUpperBoundS;
+    series.obsUpperBoundS = NULL;
+
     plot->removeSeries(series.obsS);
+    delete series.obsS;
+    series.obsS = NULL;
+
     plot->removeSeries(series.obsMeanS);
+    delete series.obsMeanS;
+    series.obsMeanS = NULL;
 
     plot->removeSeries(series.qtaS);
+    delete series.qtaS;
+    series.qtaS = NULL;
 
     plot->removeSeries(series.calcS);
+    delete series.calcS;
+    series.calcS = NULL;
+
     plot->removeSeries(series.calcLowerBoundS);
+    delete series.calcLowerBoundS;
+    series.calcLowerBoundS = NULL;
+
     plot->removeSeries(series.calcUpperBoundS);
+    delete series.calcUpperBoundS;
+    series.calcUpperBoundS = NULL;
+
     plot->removeSeries(series.calcMeanS);
+    delete series.calcMeanS;
+    series.calcMeanS = NULL;
+
     if (isProbe)
         probes.erase(name);
     else
@@ -235,17 +276,21 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 
     double probeMax = 0;
     for (auto &[name, seriesProbe] : probes) {
-        double probeRange = updateProbe(probes[name].first, probes[name].second, timeLowerBound, timeUpperBound);
-        if (probeRange > probeMax) {
-            probeMax = probeRange;
+        if (seriesProbe.second) {
+            double probeRange = updateProbe(probes[name].first, probes[name].second, timeLowerBound, timeUpperBound);
+            if (probeRange > probeMax) {
+                probeMax = probeRange;
+            }
         }
     }
 
     double operatorMax = 0;
-    for (auto &[name, seriesProbe] : operators) {
-        double probeRange = updateOperator(operators[name].first, operators[name].second, timeLowerBound, timeUpperBound);
-        if (probeRange > probeMax) {
-            probeMax = probeRange;
+    for (auto &[name, seriesOp] : operators) {
+        if (seriesOp.second) {
+            double opRange = updateOperator(operators[name].first, operators[name].second, timeLowerBound, timeUpperBound);
+            if (opRange > operatorMax) {
+                operatorMax = opRange;
+            }
         }
     }
     plot->updateXRange((outcomeMax > probeMax) ? outcomeMax : probeMax);
@@ -398,7 +443,7 @@ void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&o
         int calculatedBins = calcDeltaQ.getBins();
         double calculatedBinWidth = calcDeltaQ.getBinWidth();
         for (int i = 0; i < calculatedBins; ++i) {
-            double x = observedBinWidth * (i + 1);
+            double x = calculatedBinWidth * (i + 1);
             calcDeltaQData.emplace_back(QPointF(x, calcDeltaQ.cdfAt(i)));
             calcLowerBoundData.emplace_back(QPointF(x, calcBounds[i].lowerBound));
             calcUpperBoundData.emplace_back(QPointF(x, calcBounds[i].upperBound));

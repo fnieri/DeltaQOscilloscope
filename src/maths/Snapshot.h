@@ -8,8 +8,8 @@
 class Snapshot
 {
     std::string observableName;
-    std::map<std::uint64_t, DeltaQRepr> observedDeltaQs;
-    std::map<std::uint64_t, DeltaQRepr> calculatedDeltaQs;
+    std::map<uint64_t, DeltaQRepr> observedDeltaQs;
+    std::map<uint64_t, DeltaQRepr> calculatedDeltaQs;
 
 public:
     Snapshot() = default;

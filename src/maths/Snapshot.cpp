@@ -21,12 +21,12 @@ void Snapshot::addCalculatedDeltaQ(std::uint64_t time, const DeltaQ &deltaQ, con
 
 DeltaQ Snapshot::getOldestCalculatedDeltaQ() const
 {
-    return calculatedDeltaQs.begin()->first;
+    return calculatedDeltaQs.begin()->second.deltaQ;
 }
 
 DeltaQ Snapshot::getOldestObservedDeltaQ() const
 {
-    return observedDeltaQs.begin()->first;
+    return observedDeltaQs.begin()->second.deltaQ;
 }
 
 void Snapshot::removeOldestCalculatedDeltaQ()

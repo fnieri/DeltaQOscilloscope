@@ -11,23 +11,23 @@ DQPlotList::DQPlotList(DQPlotController *controller, QWidget *parent)
     QVBoxLayout *layout = new QVBoxLayout(this);
 
     // Selected items list
-    QLabel *selectedLabel = new QLabel("Selected Components:");
+    QLabel *selectedLabel = new QLabel("Selected probes:");
     selectedList = new QListWidget(this);
     layout->addWidget(selectedLabel);
     layout->addWidget(selectedList);
     selectedList->setSelectionMode(QAbstractItemView::MultiSelection);
-    removeButton = new QPushButton("Remove selected components", this);
+    removeButton = new QPushButton("Remove selected probes", this);
     layout->addWidget(removeButton);
 
     connect(removeButton, &QPushButton::clicked, this, &DQPlotList::onRemoveSelection);
     // Available items list
-    QLabel *availableLabel = new QLabel("Available Components:");
+    QLabel *availableLabel = new QLabel("Available probes:");
     availableList = new QListWidget(this);
     layout->addWidget(availableLabel);
     layout->addWidget(availableList);
     availableList->setSelectionMode(QAbstractItemView::MultiSelection);
     // Confirm button
-    addButton = new QPushButton("Add selected components", this);
+    addButton = new QPushButton("Add selected probes", this);
     connect(addButton, &QPushButton::clicked, this, &DQPlotList::onConfirmSelection);
     layout->addWidget(addButton);
 

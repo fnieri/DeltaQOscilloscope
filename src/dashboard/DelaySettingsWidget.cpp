@@ -10,7 +10,7 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     mainLayout = new QVBoxLayout(this);
     settingsLayout = new QHBoxLayout(this);
 
-    settingsLabel = new QLabel("Set the parameters for an observable");
+    settingsLabel = new QLabel("Set the parameters for a probe.");
     mainLayout->addWidget(settingsLabel);
 
     observableComboBox = new QComboBox();
