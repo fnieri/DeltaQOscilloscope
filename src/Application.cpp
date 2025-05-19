@@ -95,7 +95,7 @@ SystemDiff Application::diffWith(System &newSystem)
     return diff;
 }
 
-bool Application::componentsDiffer(const std::shared_ptr<DiagramComponent> &a, const std::shared_ptr<DiagramComponent> &b)
+bool Application::componentsDiffer(const std::shared_ptr<Observable> &a, const std::shared_ptr<Observable> &b)
 {
     if (!a || !b || a->getName() != b->getName())
         return true;
@@ -164,8 +164,11 @@ void Application::setSystem(System newSystem)
         system->getProbes().erase(name);
         system->getObservables().erase(name);
     }
-    for (const auto &name : diff.removedOperators)
+    for (const auto &name : diff.removedOperators) {
         system->getOperators().erase(name);
+        system->getObservables().erase(name);
+    }
+
     for (const auto &name : diff.removedOutcomes) {
         system->getOutcomes().erase(name);
         system->getObservables().erase(name);
@@ -180,10 +183,14 @@ void Application::setSystem(System newSystem)
         system->getProbes()[name] = newSystem.getProbes().at(name);
         system->getObservables()[name] = newSystem.getProbes().at(name);
     }
-    for (const auto &name : diff.changedOperators)
+    for (const auto &name : diff.changedOperators) {
         system->getOperators()[name] = newSystem.getOperators().at(name);
-    for (const auto &name : diff.addedOperators)
+        system->getObservables()[name] = newSystem.getOperators().at(name);
+    }
+    for (const auto &name : diff.addedOperators) {
         system->getOperators()[name] = newSystem.getOperators().at(name);
+        system->getObservables()[name] = newSystem.getOperators().at(name);
+    }
 
     for (const auto &name : diff.changedOutcomes)
         system->getOutcomes()[name] = newSystem.getOutcomes().at(name);

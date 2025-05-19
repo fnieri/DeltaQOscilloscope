@@ -4,7 +4,6 @@
 
 #include "../maths/ConfidenceInterval.h"
 #include "../maths/DeltaQ.h"
-#include "DiagramComponent.h"
 #include "Observable.h"
 #include <map>
 #include <memory>
@@ -12,7 +11,7 @@
 
 class Probe : public Observable
 {
-    std::vector<std::shared_ptr<DiagramComponent>> causalLinks;
+    std::vector<std::shared_ptr<Observable>> causalLinks;
 
     std::mutex calcMutex;
 
@@ -21,7 +20,9 @@ class Probe : public Observable
 public:
     Probe(const std::string &name);
 
-    Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>>);
+    Probe(const std::string &name, std::vector<std::shared_ptr<Observable>>);
+
+    ~Probe();
 
     DeltaQ calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
@@ -33,12 +34,12 @@ public:
 
     std::vector<Bound> getCalculatedBounds() const;
 
-    void setCausalLinks(std::vector<std::shared_ptr<DiagramComponent>> newCausalLinks)
+    void setCausalLinks(std::vector<std::shared_ptr<Observable>> newCausalLinks)
     {
         causalLinks = newCausalLinks;
     }
 
-    std::vector<std::shared_ptr<DiagramComponent>> getCausalLinks()
+    std::vector<std::shared_ptr<Observable>> getCausalLinks()
     {
         return causalLinks;
     }

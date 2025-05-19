@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../maths/Snapshot.h"
-#include "DiagramComponent.h"
 #include "Sample.h"
 #include "src/maths/TriggerManager.h"
 #include <deque>
@@ -9,10 +8,11 @@
 #include <mutex>
 
 #define DELTA_T_BASE 0.001
-
-class Observable : virtual public DiagramComponent
+#define MAX_DQ 30
+class Observable
 {
 protected:
+    std::string name;
     std::deque<Sample> samples;
     mutable bool sorted;
 
@@ -39,6 +39,7 @@ private:
 public:
     Observable(const std::string &name);
 
+    virtual ~Observable() { };
     void addSample(const Sample &sample);
 
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
@@ -88,4 +89,6 @@ public:
     void removeTrigger(TriggerType type);
 
     Snapshot getSnapshot();
+
+    [[nodiscard]] std::string getName() const &;
 };

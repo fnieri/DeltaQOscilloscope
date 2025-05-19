@@ -56,10 +56,10 @@ std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext 
     }
 
     system.setOutcomes(outcomes);
-    system.setOperators(operators);
     system.setProbes(probes);
+    system.setOperators(operators);
     /*
-    for (const auto& [name, link] : definitionLinks) {
+    for (const auto &[name, link] : definitionLinks) {
         std::cout << name << " [ ";
         for (auto &name2 : link) {
             std::cout << name2 << " ";
@@ -67,7 +67,7 @@ std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext 
         std::cout << "]\n";
     }
 
-    for (const auto& [name, op] : operatorLinks) {
+    for (const auto &[name, op] : operatorLinks) {
         std::cout << name << " [ ";
         for (auto link : op) {
             std::cout << " [";
@@ -95,8 +95,8 @@ std::any SystemBuilderVisitor::visitDefinition(parser::DQGrammarParser::Definiti
     allNames.insert(probeName);
     currentlyBuildingProbe = probeName;
 
-    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(context->component_chain()));
-    std::vector<std::shared_ptr<DiagramComponent>> probeCausalLinks;
+    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(context->component_chain()));
+    std::vector<std::shared_ptr<Observable>> probeCausalLinks;
     std::vector<std::string> links;
     for (auto &comp : chainComponents) {
         probeCausalLinks.push_back(comp);
@@ -114,7 +114,7 @@ std::any SystemBuilderVisitor::visitDefinition(parser::DQGrammarParser::Definiti
 
 std::any SystemBuilderVisitor::visitSystem(parser::DQGrammarParser::SystemContext *context)
 {
-    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(context->component_chain()));
+    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(context->component_chain()));
 
     std::vector<std::string> links;
     for (auto &comp : chainComponents) {
@@ -144,7 +144,7 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
     std::string name = context->IDENTIFIER()->getText();
 
     if (operators.find(name) != operators.end()) {
-        return std::dynamic_pointer_cast<DiagramComponent>(operators[name]);
+        return std::dynamic_pointer_cast<Observable>(operators[name]);
     }
     if (allNames.find(name) != allNames.end()) {
         throw std::invalid_argument("Duplicate name detected: " + name);
@@ -171,25 +171,22 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
         throw std::invalid_argument("A non probabilistic operator cannot have probabilities");
     }
 
-    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> operatorPtrLinks;
+    std::vector<std::vector<std::shared_ptr<Observable>>> operatorPtrLinks;
 
     if (context->component_list()) {
-        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<DiagramComponent>>>>(visitComponent_list(context->component_list()));
+        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<Observable>>>>(visitComponent_list(context->component_list()));
 
-        for (auto &chain : operatorPtrLinks) {
+        for (auto &chain : childrenChains) {
             if (!chain.empty()) {
-                std::vector<std::shared_ptr<DiagramComponent>> currentChain;
-                for (auto &comp : chain) {
-                    currentChain.push_back(comp);
-                }
-                operatorPtrLinks.push_back(currentChain);
+                operatorPtrLinks.push_back(chain);
             }
         }
     }
+
     op->setCausalLinks(operatorPtrLinks);
 
     if (context->component_list()) {
-        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<DiagramComponent>>>>(visitComponent_list(context->component_list()));
+        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<Observable>>>>(visitComponent_list(context->component_list()));
 
         std::vector<std::vector<std::string>> childrenLinks;
 
@@ -207,7 +204,7 @@ std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::B
     }
 
     operators[name] = op;
-    return std::dynamic_pointer_cast<DiagramComponent>(op);
+    return std::dynamic_pointer_cast<Observable>(op);
 }
 std::any SystemBuilderVisitor::visitProbeComponent(parser::DQGrammarParser::ProbeComponentContext *context)
 {
@@ -218,13 +215,13 @@ std::any SystemBuilderVisitor::visitProbeComponent(parser::DQGrammarParser::Prob
     }
 
     if (probes.find(name) != probes.end()) {
-        return std::dynamic_pointer_cast<DiagramComponent>(probes[name]);
+        return std::dynamic_pointer_cast<Observable>(probes[name]);
     }
 
     // Create a stub probe (may be fleshed out later)
     auto probe = std::make_shared<Probe>(name);
     probes[name] = probe;
-    return std::dynamic_pointer_cast<DiagramComponent>(probe);
+    return std::dynamic_pointer_cast<Observable>(probe);
 }
 
 std::any SystemBuilderVisitor::visitProbability_list(parser::DQGrammarParser::Probability_listContext *context)
@@ -240,10 +237,10 @@ std::any SystemBuilderVisitor::visitProbability_list(parser::DQGrammarParser::Pr
 
 std::any SystemBuilderVisitor::visitComponent_list(parser::DQGrammarParser::Component_listContext *context)
 {
-    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> componentsChains;
+    std::vector<std::vector<std::shared_ptr<Observable>>> componentsChains;
 
     for (auto chainCtx : context->component_chain()) {
-        auto chain = std::any_cast<std::vector<std::shared_ptr<DiagramComponent>>>(visitComponent_chain(chainCtx));
+        auto chain = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(chainCtx));
         componentsChains.push_back(chain);
     }
 
@@ -252,10 +249,10 @@ std::any SystemBuilderVisitor::visitComponent_list(parser::DQGrammarParser::Comp
 
 std::any SystemBuilderVisitor::visitComponent_chain(parser::DQGrammarParser::Component_chainContext *context)
 {
-    std::vector<std::shared_ptr<DiagramComponent>> components;
+    std::vector<std::shared_ptr<Observable>> components;
 
     for (auto compCtx : context->component()) {
-        auto component = std::any_cast<std::shared_ptr<DiagramComponent>>(visitComponent(compCtx));
+        auto component = std::any_cast<std::shared_ptr<Observable>>(visitComponent(compCtx));
         components.push_back(component);
     }
     return components;
@@ -266,7 +263,7 @@ std::any SystemBuilderVisitor::visitOutcome(parser::DQGrammarParser::OutcomeCont
     std::string name = context->IDENTIFIER()->getText();
 
     if (outcomes.find(name) != outcomes.end()) {
-        return std::dynamic_pointer_cast<DiagramComponent>(outcomes[name]);
+        return std::dynamic_pointer_cast<Observable>(outcomes[name]);
     }
     if (allNames.find(name) != allNames.end()) {
         throw std::invalid_argument("Duplicate name detected: " + name);
@@ -275,5 +272,5 @@ std::any SystemBuilderVisitor::visitOutcome(parser::DQGrammarParser::OutcomeCont
 
     auto outcome = std::make_shared<Outcome>(name);
     outcomes[name] = outcome;
-    return std::dynamic_pointer_cast<DiagramComponent>(outcome);
+    return std::dynamic_pointer_cast<Observable>(outcome);
 }

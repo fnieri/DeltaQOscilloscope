@@ -6,9 +6,10 @@
 #pragma once
 
 #include "Observable.h"
-#include "src/maths/DeltaQRepr.h"
+
 class Outcome : public Observable
 {
 public:
     Outcome(const std::string &name);
+    ~Outcome();
 };

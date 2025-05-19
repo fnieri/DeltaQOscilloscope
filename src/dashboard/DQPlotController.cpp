@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QtConcurrent>
 #include <algorithm>
+#include <cstdlib>
 #include <qcontainerfwd.h>
 #include <qlineseries.h>
 using namespace std::chrono;
@@ -13,7 +14,7 @@ DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::stri
 {
     auto system = Application::getInstance().getSystem();
     for (const auto &name : selectedItems) {
-        addComponent(name, (system->hasProbe(name)));
+        addComponent(name, (system->hasOutcome(name)));
     }
     setTitle();
 }
@@ -22,6 +23,7 @@ DQPlotController::~DQPlotController()
 {
     outcomes.clear();
     probes.clear();
+    operators.clear();
 }
 
 bool DQPlotController::isEmptyAfterReset()
@@ -47,12 +49,20 @@ bool DQPlotController::isEmptyAfterReset()
             ++it;
         }
     }
+    for (auto it = operators.begin(); it != operators.end();) {
+        if (!system->hasOperator(it->first)) {
+            removeComponent(it->first);
+            it = operators.begin();
+        } else {
+            ++it;
+        }
+    }
     return (outcomes.empty() && probes.empty());
 }
 
 bool DQPlotController::containsComponent(std::string name)
 {
-    return ((outcomes.find(name) != outcomes.end()) || (probes.find(name) != probes.end()));
+    return ((outcomes.find(name) != outcomes.end()) || (probes.find(name) != probes.end()) || (operators.find(name) != operators.end()));
 }
 
 void DQPlotController::setTitle()
@@ -78,26 +88,26 @@ void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
 
     for (const auto &name : selectedItems) {
         if (!containsComponent(name)) {
-            addComponent(name, system->hasProbe(name));
+            addComponent(name, system->hasOutcome(name));
         }
     }
     setTitle();
 }
 
-void DQPlotController::addComponent(const std::string &name, bool isProbe)
+void DQPlotController::addComponent(const std::string &name, bool isOutcome)
 {
     auto system = Application::getInstance().getSystem();
-    if (!isProbe) {
+    if (isOutcome) {
         addOutcomeSeries(name);
     } else {
-        addProbeSeries(name);
+        addExpressionSeries(name, system->hasProbe(name));
     }
 }
 
 std::vector<std::string> DQPlotController::getComponents()
 {
     std::vector<std::string> components;
-    components.reserve(probes.size() + outcomes.size());
+    components.reserve(probes.size() + outcomes.size() + operators.size());
 
     for (const auto &kv : probes) {
         components.push_back(kv.first);
@@ -105,7 +115,9 @@ std::vector<std::string> DQPlotController::getComponents()
     for (const auto &kv : outcomes) {
         components.push_back(kv.first);
     }
-
+    for (const auto &kv : operators) {
+        components.push_back(kv.first);
+    }
     return components;
 }
 
@@ -132,7 +144,7 @@ void DQPlotController::addOutcomeSeries(const std::string &name)
     outcomes[name] = {series, system->getOutcome(name)};
 }
 
-void DQPlotController::addProbeSeries(const std::string &name)
+void DQPlotController::addExpressionSeries(const std::string &name, bool isProbe)
 {
     auto system = Application::getInstance().getSystem();
 
@@ -148,7 +160,7 @@ void DQPlotController::addProbeSeries(const std::string &name)
     auto calcUpperBoundSeries = createAndAddLineSeries(name + "(C) upper bound");
     auto calcMeanSeries = createAndAddLineSeries(name + "(C) mean");
 
-    ProbeAllSeries series = {
+    ExpressionSeries series = {
         .obsS = obsSeries,
         .obsLowerBoundS = obsLowerBoundSeries,
         .obsUpperBoundS = obsUpperBoundSeries,
@@ -159,7 +171,10 @@ void DQPlotController::addProbeSeries(const std::string &name)
         .calcMeanS = calcMeanSeries,
         .qtaS = qtaSeries,
     };
-    probes[name] = {series, system->getProbe(name)};
+    if (isProbe)
+        probes[name] = {series, system->getProbe(name)};
+    else
+        operators[name] = {series, system->getOperator(name)};
 }
 
 void DQPlotController::removeOutcomeSeries(const std::string &name)
@@ -173,22 +188,29 @@ void DQPlotController::removeOutcomeSeries(const std::string &name)
     outcomes.erase(name);
 }
 
-void DQPlotController::removeProbeSeries(const std::string &name)
+void DQPlotController::removeExpressionSeries(const std::string &name, bool isProbe)
 {
-    ProbeAllSeries allSeries = probes[name].first;
+    ExpressionSeries series;
+    if (isProbe)
+        series = probes[name].first;
+    else
+        series = operators[name].first;
 
-    plot->removeSeries(allSeries.obsLowerBoundS);
-    plot->removeSeries(allSeries.obsUpperBoundS);
-    plot->removeSeries(allSeries.obsS);
-    plot->removeSeries(allSeries.obsMeanS);
+    plot->removeSeries(series.obsLowerBoundS);
+    plot->removeSeries(series.obsUpperBoundS);
+    plot->removeSeries(series.obsS);
+    plot->removeSeries(series.obsMeanS);
 
-    plot->removeSeries(allSeries.qtaS);
+    plot->removeSeries(series.qtaS);
 
-    plot->removeSeries(allSeries.calcS);
-    plot->removeSeries(allSeries.calcLowerBoundS);
-    plot->removeSeries(allSeries.calcUpperBoundS);
-    plot->removeSeries(allSeries.calcMeanS);
-    probes.erase(name);
+    plot->removeSeries(series.calcS);
+    plot->removeSeries(series.calcLowerBoundS);
+    plot->removeSeries(series.calcUpperBoundS);
+    plot->removeSeries(series.calcMeanS);
+    if (isProbe)
+        probes.erase(name);
+    else
+        operators.erase(name);
 }
 
 void DQPlotController::removeComponent(const std::string &name)
@@ -196,9 +218,7 @@ void DQPlotController::removeComponent(const std::string &name)
     if (outcomes.count(name)) {
         removeOutcomeSeries(name);
     }
-    if (probes.count(name)) {
-        removeProbeSeries(name);
-    }
+    removeExpressionSeries(name, probes.count(name));
 }
 
 void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
@@ -216,6 +236,14 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
     double probeMax = 0;
     for (auto &[name, seriesProbe] : probes) {
         double probeRange = updateProbe(probes[name].first, probes[name].second, timeLowerBound, timeUpperBound);
+        if (probeRange > probeMax) {
+            probeMax = probeRange;
+        }
+    }
+
+    double operatorMax = 0;
+    for (auto &[name, seriesProbe] : operators) {
+        double probeRange = updateOperator(operators[name].first, operators[name].second, timeLowerBound, timeUpperBound);
         if (probeRange > probeMax) {
             probeMax = probeRange;
         }
@@ -252,11 +280,9 @@ double DQPlotController::updateOutcome(OutcomeSeries &series, const std::shared_
 
         QVector<QPointF> qtaData;
         auto qta = outcome->getQTA();
-        std::cout << binWidth << "\n";
         for (int i = 0; i < size; ++i) {
             double x = binWidth * (i + 1);
 
-            std::cout << "adding " << x << " " << deltaQ.cdfAt(i) << "\n";
             deltaQData.emplace_back(QPointF(x, deltaQ.cdfAt(i)));
             lowerBoundData.emplace_back(QPointF(x, bounds[i].lowerBound));
             upperBoundData.emplace_back(QPointF(x, bounds[i].upperBound));
@@ -297,20 +323,31 @@ double DQPlotController::updateOutcome(OutcomeSeries &series, const std::shared_
     ret.waitForFinished();
     return outcome->getMaxDelay();
 }
-double DQPlotController::updateProbe(ProbeAllSeries &probeAllSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+
+double DQPlotController::updateOperator(ExpressionSeries &series, std::shared_ptr<Operator> &op, uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    updateExpression(series, op->getObservedDeltaQRepr(timeLowerBound, timeUpperBound), op->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound),
+        op->getQTA(), op->getMaxDelay());
+
+    return op->getMaxDelay();
+}
+
+double DQPlotController::updateProbe(ExpressionSeries &series, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    updateExpression(series, probe->getObservedDeltaQRepr(timeLowerBound, timeUpperBound), probe->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound),
+        probe->getQTA(), probe->getMaxDelay());
+    return probe->getMaxDelay();
+}
+
+void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&obsRepr, DeltaQRepr &&calcRepr, QTA &&qta, double maxDelay)
 {
     auto ret = QtConcurrent::run([=]() {
         auto computeStart = high_resolution_clock::now();
-        DeltaQRepr obsRepr = probe->getObservedDeltaQRepr(timeLowerBound, timeUpperBound);
-        DeltaQRepr calcRepr = probe->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound);
+
         DeltaQ obsDeltaQ = obsRepr.deltaQ;
         std::vector<Bound> obsBounds = obsRepr.bounds;
         DeltaQ calcDeltaQ = calcRepr.deltaQ;
         std::vector<Bound> calcBounds = calcRepr.bounds;
-
-        auto qta = probe->getQTA();
-        double maxDelay = probe->getMaxDelay();
-
         int observedBins = obsDeltaQ.getBins();
         double observedBinWidth = obsDeltaQ.getBinWidth();
 
@@ -390,17 +427,16 @@ double DQPlotController::updateProbe(ProbeAllSeries &probeAllSeries, std::shared
 
                 plot->setUpdatesEnabled(false);
 
-                plot->updateSeries(probeAllSeries.obsS, obsDeltaQData);
-                plot->updateSeries(probeAllSeries.obsLowerBoundS, obsLowerBoundData);
-                plot->updateSeries(probeAllSeries.obsUpperBoundS, obsUpperBoundData);
-                plot->updateSeries(probeAllSeries.obsMeanS, obsMeanData);
-                /*
-                plot->updateSeries(probeAllSeries.calcS, calcDeltaQData);
-                plot->updateSeries(probeAllSeries.calcLowerBoundS, calcLowerBoundData);
-                plot->updateSeries(probeAllSeries.calcUpperBoundS, calcUpperBoundData);
-                plot->updateSeries(probeAllSeries.calcMeanS, calcMeanData);
-*/
-                plot->updateSeries(probeAllSeries.qtaS, qtaData);
+                plot->updateSeries(series.obsS, obsDeltaQData);
+                plot->updateSeries(series.obsLowerBoundS, obsLowerBoundData);
+                plot->updateSeries(series.obsUpperBoundS, obsUpperBoundData);
+                plot->updateSeries(series.obsMeanS, obsMeanData);
+
+                plot->updateSeries(series.calcS, calcDeltaQData);
+                plot->updateSeries(series.calcLowerBoundS, calcLowerBoundData);
+                plot->updateSeries(series.calcUpperBoundS, calcUpperBoundData);
+                plot->updateSeries(series.calcMeanS, calcMeanData);
+                plot->updateSeries(series.qtaS, qtaData);
 
                 plot->setUpdatesEnabled(true);
 
@@ -410,5 +446,4 @@ double DQPlotController::updateProbe(ProbeAllSeries &probeAllSeries, std::shared
             Qt::QueuedConnection);
     });
     ret.waitForFinished();
-    return probe->getMaxDelay();
 }

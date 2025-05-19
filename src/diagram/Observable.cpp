@@ -1,5 +1,4 @@
 #include "Observable.h"
-#include "DiagramComponent.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -7,8 +6,8 @@
 
 #define MAX_DQ 30
 Observable::Observable(const std::string &name)
-    : DiagramComponent(name)
-    , observedInterval(50)
+    : observedInterval(50)
+    , name(name)
 {
     observableSnapshot.setName(name);
 }
@@ -134,4 +133,9 @@ double Observable::setNewParameters(int newExp, int newNBins)
 
     observedInterval = ConfidenceInterval(nBins);
     return maxDelay;
+}
+
+std::string Observable::getName() const &
+{
+    return name;
 }

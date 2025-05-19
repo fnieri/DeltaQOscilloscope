@@ -3,6 +3,7 @@
 #include "../Application.h"
 #include <qlabel.h>
 #include <qpushbutton.h>
+
 DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -32,6 +33,7 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     mainLayout->addWidget(maxDelayLabel);
     saveDelayButton = new QPushButton("Save delay");
     mainLayout->addWidget(saveDelayButton);
+
     connect(delaySlider, &QSlider::valueChanged, this, &DelaySettingsWidget::updateMaxDelay);
     connect(binSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DelaySettingsWidget::updateMaxDelay);
     connect(saveDelayButton, &QPushButton::clicked, this, &DelaySettingsWidget::onSaveDelayClicked);

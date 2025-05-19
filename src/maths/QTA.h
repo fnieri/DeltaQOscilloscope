@@ -10,7 +10,7 @@ struct QTA {
     double perc_25 {0};
     double perc_50 {0};
     double perc_75 {0};
-    double cdfMax {1};
+    double cdfMax {0};
     bool defined = false;
     static QTA create(double p25, double p50, double p75, double cdf)
     {

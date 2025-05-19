@@ -3,17 +3,20 @@
 #include <numeric>
 
 #include "../maths/DeltaQOperations.h"
-#include "DiagramComponent.h"
+#include "Observable.h"
 #include "OperatorType.h"
 #include <cmath>
 #include <limits>
 #define OP_EPSILON std::numeric_limits<double>::epsilon()
 
-Operator::Operator(const std::string name, OperatorType type)
-    : DiagramComponent(name)
+Operator::Operator(const std::string &name, OperatorType type)
+    : Observable(name)
     , type(type)
+    , calculatedInterval(0)
 {
 }
+
+Operator::~Operator() = default;
 
 void Operator::setProbabilities(const std::vector<double> &probs)
 {
@@ -29,8 +32,11 @@ void Operator::setProbabilities(const std::vector<double> &probs)
     probabilities = probs;
 }
 
-DeltaQ Operator::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+DeltaQ Operator::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
+    if (observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).has_value()) {
+        return observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound).value().deltaQ;
+    }
     std::vector<DeltaQ> deltaQs;
 
     // Get DeltaQ for all children
@@ -44,31 +50,35 @@ DeltaQ Operator::calculateObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeU
         // Get the convolution of the components in a children
         deltaQs.push_back(convolveN(childrenDeltaQs));
     }
-
-    DeltaQ observableDeltaQ;
+    DeltaQ calculatedDeltaQ;
 
     // Choose appropriate operation
     if (type == OperatorType::FTF)
-        observableDeltaQ = firstToFinish(deltaQs);
+        calculatedDeltaQ = firstToFinish(deltaQs);
     else if (type == OperatorType::PRB)
-        observableDeltaQ = probabilisticChoice(probabilities, deltaQs);
+        calculatedDeltaQ = probabilisticChoice(probabilities, deltaQs);
     else
-        observableDeltaQ = allToFinish(deltaQs);
+        calculatedDeltaQ = allToFinish(deltaQs);
 
-    observedDeltaQs[timeLowerBound] = observableDeltaQ;
-
-    if (observedDeltaQs.size() > 10) {
-        auto earliest = observedDeltaQs.begin();
-        observedDeltaQs.erase(earliest);
+    calculatedInterval.addDeltaQ(calculatedDeltaQ);
+    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, calculatedDeltaQ, calculatedInterval.getBounds());
+    if (observableSnapshot.getCalculatedSize() > MAX_DQ) {
+        calculatedInterval.removeDeltaQ(observableSnapshot.getOldestCalculatedDeltaQ());
+        if (!recording) {
+            observableSnapshot.removeOldestCalculatedDeltaQ();
+        }
     }
 
-    return observableDeltaQ;
+    return calculatedDeltaQ;
 }
 
-DeltaQ Operator::getObservedDeltaQ(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound)
+DeltaQRepr Operator::getCalculatedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
-    if (observedDeltaQs.count(timeLowerBound)) {
-        return observedDeltaQs[timeLowerBound];
+    std::lock_guard<std::mutex> lock(calcMutex);
+    auto deltaQRepr = observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateCalculatedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getCalculatedDeltaQAtTime(timeLowerBound);
     }
-    return calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+    return deltaQRepr.value();
 }

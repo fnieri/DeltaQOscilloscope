@@ -1,5 +1,6 @@
 
 #pragma once
+#include "diagram/Observable.h"
 #include "diagram/System.h"
 #include "server/ErlangSender.h"
 #include <functional>
@@ -29,7 +30,7 @@ class Application
     std::vector<std::function<void()>> observers; // List of functions to notify
     ErlangSender sender;
 
-    bool componentsDiffer(const std::shared_ptr<DiagramComponent> &a, const std::shared_ptr<DiagramComponent> &b);
+    bool componentsDiffer(const std::shared_ptr<Observable> &a, const std::shared_ptr<Observable> &b);
 
     SystemDiff diffWith(System &newSystem);
 

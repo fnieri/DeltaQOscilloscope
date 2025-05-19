@@ -25,7 +25,6 @@ void NewPlotList::addItems()
     auto system = Application::getInstance().getSystem();
 
     auto observables = system->getObservables();
-
     for (const auto &obs : observables) {
         if (obs.second) {
             QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(obs.first), this);

@@ -1,26 +1,23 @@
 #include "Probe.h"
 #include "../maths/ConfidenceInterval.h"
 #include "../maths/DeltaQOperations.h"
-#include "DiagramComponent.h"
-#include <chrono>
 #include <iostream>
 #include <memory>
 #include <mutex>
-#define MAX_DQ 30
 Probe::Probe(const std::string &name)
-    : DiagramComponent(name)
-    , Observable(name)
+    : Observable(name)
     , calculatedInterval(0)
 {
 }
 
-Probe::Probe(const std::string &name, std::vector<std::shared_ptr<DiagramComponent>> causalLinks)
-    : DiagramComponent(name)
-    , Observable(name)
+Probe::Probe(const std::string &name, std::vector<std::shared_ptr<Observable>> causalLinks)
+    : Observable(name)
     , causalLinks(causalLinks)
     , calculatedInterval(0)
 {
 }
+
+Probe::~Probe() = default;
 
 DeltaQ Probe::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {

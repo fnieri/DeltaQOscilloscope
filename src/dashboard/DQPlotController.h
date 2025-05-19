@@ -29,7 +29,7 @@ struct OutcomeSeries {
 };
 
 // All series pertaining to a probe
-struct ProbeAllSeries {
+struct ExpressionSeries {
     QLineSeries *obsS;
     QLineSeries *obsLowerBoundS;
     QLineSeries *obsUpperBoundS;
@@ -73,7 +73,7 @@ public:
     /**
      * @brief Adds a new component (probe or outcome) to the plot.
      */
-    void addComponent(const std::string &name, bool isProbe);
+    void addComponent(const std::string &name, bool isOutcome);
 
     QLineSeries *createAndAddLineSeries(const std::string &legendName);
 
@@ -81,9 +81,9 @@ public:
 
     void removeOutcomeSeries(const std::string &name);
 
-    void addProbeSeries(const std::string &name);
+    void addExpressionSeries(const std::string &name, bool isProbe);
 
-    void removeProbeSeries(const std::string &name);
+    void removeExpressionSeries(const std::string &name, bool isProbe);
     /**
      * @brief Returns a list of names of all currently plotted components.
      */
@@ -102,9 +102,13 @@ public:
     bool isEmptyAfterReset();
 
 private:
-    double updateOutcome(OutcomeSeries &series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateOutcome(OutcomeSeries &, const std::shared_ptr<Outcome> &, uint64_t, uint64_t);
 
-    double updateProbe(ProbeAllSeries &probeSeries, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound);
+    double updateProbe(ExpressionSeries &, std::shared_ptr<Probe> &, uint64_t, uint64_t);
+
+    double updateOperator(ExpressionSeries &, std::shared_ptr<Operator> &, uint64_t, uint64_t);
+
+    void updateExpression(ExpressionSeries &, DeltaQRepr &&, DeltaQRepr &&, QTA &&, double maxDelay);
 
     DeltaQPlot *plot;
 
@@ -112,7 +116,8 @@ private:
     std::mutex resetMutex;
 
     std::map<std::string, std::pair<OutcomeSeries, std::shared_ptr<Outcome>>> outcomes;
-    std::map<std::string, std::pair<ProbeAllSeries, std::shared_ptr<Probe>>> probes;
+    std::map<std::string, std::pair<ExpressionSeries, std::shared_ptr<Probe>>> probes;
+    std::map<std::string, std::pair<ExpressionSeries, std::shared_ptr<Operator>>> operators;
 };
 
 #endif // DQPLOTCONTROLLER_H
