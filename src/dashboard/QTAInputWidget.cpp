@@ -10,10 +10,10 @@ QTAInputWidget::QTAInputWidget(QWidget *parent)
     auto layout = new QFormLayout(this);
 
     qtaLabel = new QLabel(this);
-    qtaLabel->setText("Set QTA for an observable");
+    qtaLabel->setText("Set QTA for a probe:");
     layout->addRow(qtaLabel);
     observableComboBox = new QComboBox(this);
-    layout->addRow("Observable:", observableComboBox);
+    layout->addRow("Probe:", observableComboBox);
 
     perc25Edit = new QLineEdit(this);
     perc25Edit->setPlaceholderText("Seconds (s)");

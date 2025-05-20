@@ -23,10 +23,9 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
     const auto &cdf = deltaQ.getCdfValues();
 
     if (cdf.size() != numBins) {
-        std::cerr << "CDF size mismatch in addDeltaQ \n";
+        std::cerr << "CDF size mismatch in addDeltaQ, have" << deltaQ.getBins() << " expected" << numBins << "\n";
         return;
     }
-
     for (size_t i = 0; i < cdf.size(); ++i) {
         const double cdfValue = cdf[i];
 
@@ -45,7 +44,6 @@ void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
     }
 
     const auto &cdf = deltaQ.getCdfValues();
-
     if (cdf.size() != numBins) {
         return; // Returning a previous DeltaQ which had different bins
     }

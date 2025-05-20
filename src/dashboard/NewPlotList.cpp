@@ -3,13 +3,10 @@
 #include <iostream>
 #include <qlistwidget.h>
 
-using Outcomes = std::unordered_map<std::string, std::shared_ptr<Outcome>>;
-using Operators = std::unordered_map<std::string, std::shared_ptr<Operator>>;
-using Probes = std::unordered_map<std::string, std::shared_ptr<Probe>>;
-
 NewPlotList::NewPlotList(QWidget *parent)
     : QListWidget(parent)
 {
+
     setSelectionMode(QAbstractItemView::MultiSelection);
     Application::getInstance().addObserver([this]() { this->reset(); });
 }
@@ -23,41 +20,16 @@ void NewPlotList::reset()
     addItems();
 }
 
-void NewPlotList::addCategory(const QString &category)
-{
-    QListWidgetItem *categoryItem = new QListWidgetItem(category, this);
-    categoryItem->setFlags(Qt::NoItemFlags);
-    categoryItem->setFont(QFont("Arial", 10, QFont::Bold)); // Bold label
-}
-
 void NewPlotList::addItems()
 {
     auto system = Application::getInstance().getSystem();
-    Probes probes = system->getProbes();
-    Outcomes outcomes = system->getOutcomes();
-    addProbes(probes);
-    addOutcomes(outcomes);
-}
 
-void NewPlotList::addProbes(Probes probes)
-{
-    QString category = "Probes:";
-    addCategory(category);
-
-    for (const auto &probe : probes) {
-        QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(probe.first), this);
-        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-    }
-}
-
-void NewPlotList::addOutcomes(Outcomes outcomes)
-{
-    QString category = "Outcomes:";
-    addCategory(category);
-
-    for (const auto &outcome : outcomes) {
-        QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(outcome.first), this);
-        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    auto observables = system->getObservables();
+    for (const auto &obs : observables) {
+        if (obs.second) {
+            QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(obs.first), this);
+            item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        }
     }
 }
 

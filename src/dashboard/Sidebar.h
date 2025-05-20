@@ -4,48 +4,40 @@
 #define SIDEBAR_H
 
 #include "DQPlotList.h"
-#include "DelaySettingsWidget.h"
 #include "NewPlotList.h"
+#include "SystemCreationWidget.h"
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QSplitter>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <qboxlayout.h>
-
-#include "QTAInputWidget.h"
-
 class Sidebar : public QWidget
 {
     Q_OBJECT
 
-    QHBoxLayout *systemButtonsLayout;
-    QLabel *systemLabel;
-    QTextEdit *systemTextEdit;
-
-    QPushButton *updateSystemButton;
-    QPushButton *saveSystemButton;
-    QPushButton *loadSystemButton;
-
+    QVBoxLayout *newPlotListLayout;
+    QWidget *newPlotListWidget;
     QLabel *newPlotLabel;
     NewPlotList *newPlotList;
     QPushButton *addNewPlotButton;
 
+    QWidget *currentPlotWidget;
+    QVBoxLayout *currentPlotLayout;
     QLabel *currentPlotLabel;
     DQPlotList *currentPlotList = nullptr;
 
+    QSplitter *mainSplitter;
     QVBoxLayout *layout;
-    DelaySettingsWidget *delaySettingsWidget;
-    QTAInputWidget *qtaInputWidget;
+
+    SystemCreationWidget *systemCreationWidget;
 Q_SIGNALS:
     void addPlotClicked();
 
 private Q_SLOTS:
-    void onUpdateSystem();
-    void saveSystemTo();
-    void loadSystem();
     void onAddPlotClicked();
 
 public:
@@ -53,15 +45,12 @@ public:
 
     void setCurrentPlotList(DQPlotList *currentPlotList);
     void hideCurrentPlot();
+
     NewPlotList *getPlotList() const
     {
         return newPlotList;
     }
 
-    std::string getSystemText() const
-    {
-        return systemTextEdit->toPlainText().toStdString();
-    }
     void clearOnAdd();
 };
 

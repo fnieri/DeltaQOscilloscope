@@ -1,12 +1,17 @@
 
 #include "DelaySettingsWidget.h"
 #include "../Application.h"
+#include <qlabel.h>
 #include <qpushbutton.h>
+
 DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     : QWidget(parent)
 {
-    auto *mainLayout = new QVBoxLayout(this);
-    auto *settingsLayout = new QHBoxLayout();
+    mainLayout = new QVBoxLayout(this);
+    settingsLayout = new QHBoxLayout(this);
+
+    settingsLabel = new QLabel("Set the parameters for a probe.");
+    mainLayout->addWidget(settingsLabel);
 
     observableComboBox = new QComboBox();
     settingsLayout->addWidget(observableComboBox);
@@ -28,6 +33,7 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     mainLayout->addWidget(maxDelayLabel);
     saveDelayButton = new QPushButton("Save delay");
     mainLayout->addWidget(saveDelayButton);
+
     connect(delaySlider, &QSlider::valueChanged, this, &DelaySettingsWidget::updateMaxDelay);
     connect(binSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &DelaySettingsWidget::updateMaxDelay);
     connect(saveDelayButton, &QPushButton::clicked, this, &DelaySettingsWidget::onSaveDelayClicked);
@@ -70,7 +76,6 @@ void DelaySettingsWidget::loadObservableSettings()
     updateMaxDelay();
 }
 
-
 double DelaySettingsWidget::getMaxDelayMs() const
 {
     int exponent = delaySlider->value();
@@ -99,5 +104,4 @@ void DelaySettingsWidget::onSaveDelayClicked()
     std::string nameString = name.toStdString();
     system->setObservableParameters(nameString, exponent, bins);
     Q_EMIT delayParametersChanged();
-
 }

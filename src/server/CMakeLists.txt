@@ -1,8 +1,6 @@
 add_library(${PREFIX}_server
     Server.cpp
     Server.h
-    ErlangSender.cpp 
-    ErlangSender.h
 )
 
 target_link_libraries(${PREFIX}_server

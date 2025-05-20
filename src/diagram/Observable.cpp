@@ -1,14 +1,17 @@
 #include "Observable.h"
-#include "DiagramComponent.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
+
+#define MAX_DQ 30
 Observable::Observable(const std::string &name)
-    : DiagramComponent(name)
-    , observedInterval(50)
+    : observedInterval(50)
+    , name(name)
 {
     observableSnapshot.setName(name);
 }
+
 void Observable::addSample(const Sample &sample)
 {
     samples.emplace_back(sample);
@@ -35,6 +38,53 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
     samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
 
     return selectedSamples;
+}
+
+DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound)
+{
+    auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
+    if (samplesInRange.empty()) {
+        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
+        return DeltaQ();
+    }
+
+    std::cout << samplesInRange.size() << "\n";
+    DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
+
+    observedInterval.addDeltaQ(deltaQ);
+    if (observableSnapshot.getObservedSize() > MAX_DQ) {
+
+        observedInterval.removeDeltaQ(observableSnapshot.getOldestObservedDeltaQ());
+        if (!recording) {
+            observableSnapshot.resizeTo(MAX_DQ);
+        }
+    }
+
+    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+    triggerManager.evaluate(deltaQ, qta, timeLowerBound);
+    return deltaQ;
+}
+
+DeltaQ Observable::getObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    std::lock_guard<std::mutex> lock(observedMutex);
+    auto deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    }
+    return deltaQRepr.value().deltaQ;
+}
+
+DeltaQRepr Observable::getObservedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUpperBound)
+{
+    std::lock_guard<std::mutex> lock(observedMutex);
+    auto deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    if (!deltaQRepr.has_value()) {
+        calculateObservedDeltaQ(timeLowerBound, timeUpperBound);
+        deltaQRepr = observableSnapshot.getObservedDeltaQAtTime(timeLowerBound);
+    }
+    return deltaQRepr.value();
 }
 
 void Observable::setQTA(const QTA &newQTA)
@@ -69,4 +119,23 @@ void Observable::setRecording(bool isRecording)
 Snapshot Observable::getSnapshot()
 {
     return observableSnapshot;
+}
+
+double Observable::setNewParameters(int newExp, int newNBins)
+{
+    std::lock_guard<decltype(paramMutex)> lock(paramMutex);
+    nBins = newNBins;
+    deltaTExp = newExp;
+    if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
+        qta = QTA::create(0, 0, 0, qta.cdfMax, false);
+    }
+    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
+
+    observedInterval.setNumBins(nBins);
+    return maxDelay;
+}
+
+std::string Observable::getName() const &
+{
+    return name;
 }

@@ -1,4 +1,10 @@
 add_library(${PREFIX}_dashboard
+    ColorRegistry.cpp
+    ColorRegistry.h
+    CustomLegendEntry.h
+    CustomLegendEntry.cpp
+    CustomLegendPanel.h
+    CustomLegendPanel.cpp
     DelaySettingsWidget.h
     DelaySettingsWidget.cpp
     DQPlotController.h
@@ -11,11 +17,16 @@ add_library(${PREFIX}_dashboard
     MainWindow.cpp
     NewPlotList.h
     NewPlotList.cpp
-    Point.h
+    ObservableSettings.h
+    ObservableSettings.cpp
     Sidebar.h
     Sidebar.cpp
     SnapshotViewerWindow.h
     SnapshotViewerWindow.cpp
+    StubControlWidget.h
+    StubControlWidget.cpp
+    SystemCreationWidget.h
+    SystemCreationWidget.cpp 
     QTAInputWidget.cpp
     QTAInputWidget.h
     TriggersTab.cpp

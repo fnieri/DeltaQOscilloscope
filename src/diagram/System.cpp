@@ -27,8 +27,10 @@ void System::setProbes(std::unordered_map<std::string, std::shared_ptr<Probe>> p
 void System::setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap)
 {
     operators = operatorsMap;
+    for (auto &[name, op] : operators) {
+        observables[name] = op;
+    }
 }
-
 std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
 {
     return outcomes[name];
@@ -36,11 +38,7 @@ std::shared_ptr<Outcome> System::getOutcome(const std::string &name)
 
 void System::setObservableParameters(std::string &componentName, int exponent, int numBins)
 {
-    if (auto it = outcomes.find(componentName); it != outcomes.end()) {
-        double maxDelay = it->second->setNewParameters(exponent, numBins);
-        Application::getInstance().sendDelayChange(componentName, maxDelay * 1000);
-    }
-    if (auto it = probes.find(componentName); it != probes.end()) {
+    if (auto it = observables.find(componentName); it != observables.end()) {
         double maxDelay = it->second->setNewParameters(exponent, numBins);
         Application::getInstance().sendDelayChange(componentName, maxDelay * 1000);
     }
@@ -88,6 +86,16 @@ bool System::hasProbe(const std::string &name)
     return probes.find(name) != probes.end();
 }
 
+bool System::hasOperator(const std::string &name)
+{
+    return operators.find(name) != operators.end();
+}
+
+std::shared_ptr<Operator> System::getOperator(const std::string &name)
+{
+    return operators[name];
+}
+
 std::shared_ptr<Probe> System::getProbe(const std::string &name)
 {
     return probes[name];
@@ -96,14 +104,13 @@ std::shared_ptr<Probe> System::getProbe(const std::string &name)
 std::vector<std::string> System::getAllComponentsName()
 {
     std::vector<std::string> names;
-    int probesSize = probes.size();
-    int outcomesSize = outcomes.size();
+    names.reserve(observables.size());
 
-    names.reserve(probesSize + outcomesSize);
-    for (auto &[name, _] : getProbes())
-        names.push_back(name);
-    for (auto &[name, k] : getOutcomes())
-        names.push_back(name);
+    for (auto &[name, obs] : observables) {
+        if (obs)
+            names.emplace_back(name);
+    }
+
     return names;
 }
 

@@ -21,12 +21,12 @@ void Snapshot::addCalculatedDeltaQ(std::uint64_t time, const DeltaQ &deltaQ, con
 
 DeltaQ Snapshot::getOldestCalculatedDeltaQ() const
 {
-    return calculatedDeltaQs.begin()->first;
+    return calculatedDeltaQs.begin()->second.deltaQ;
 }
 
 DeltaQ Snapshot::getOldestObservedDeltaQ() const
 {
-    return observedDeltaQs.begin()->first;
+    return observedDeltaQs.begin()->second.deltaQ;
 }
 
 void Snapshot::removeOldestCalculatedDeltaQ()
@@ -61,16 +61,18 @@ void Snapshot::resizeTo(size_t newSize)
 
 std::optional<DeltaQRepr> Snapshot::getObservedDeltaQAtTime(std::uint64_t time)
 {
-    if (observedDeltaQs.count(time)) {
-        return observedDeltaQs[time];
+    auto it = observedDeltaQs.find(time);
+    if (it != observedDeltaQs.end()) {
+        return it->second;
     }
     return std::nullopt;
 }
 
 std::optional<DeltaQRepr> Snapshot::getCalculatedDeltaQAtTime(std::uint64_t time)
 {
-    if (calculatedDeltaQs.count(time)) {
-        return calculatedDeltaQs[time];
+    auto it = calculatedDeltaQs.find(time);
+    if (it != calculatedDeltaQs.end()) {
+        return it->second;
     }
     return std::nullopt;
 }

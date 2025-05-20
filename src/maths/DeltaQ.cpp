@@ -266,7 +266,7 @@ std::string DeltaQ::toString() const
     // Iterate through CDF values to construct the string
     for (size_t i = 0; i < cdfValues.size(); ++i) {
         const double bin = i * binWidth;
-        oss << "(" << std::fixed << std::setprecision(3) << bin << ", " << std::setprecision(6) << cdfValues[i] << ")";
+        oss << "(" << std::fixed << std::setprecision(7) << bin << ", " << std::setprecision(7) << cdfValues[i] << ")";
         if (i < cdfValues.size() - 1) {
             oss << ", ";
         }

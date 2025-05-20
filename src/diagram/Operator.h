@@ -1,25 +1,29 @@
 #pragma once
 
 #include "../maths/DeltaQ.h"
-#include "DiagramComponent.h"
+#include "Observable.h"
 #include "OperatorType.h"
-#include <memory>
 
-class Operator : virtual public DiagramComponent
+class Operator : public Observable
 {
     OperatorType type;
 
     std::vector<double> probabilities;
 
-    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> causalLinks;
+    std::vector<std::vector<std::shared_ptr<Observable>>> causalLinks;
 
-    std::map<uint64_t, DeltaQ> observedDeltaQs;
+    ConfidenceInterval calculatedInterval;
 
-    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t) override;
+    std::mutex calcMutex;
 
 public:
-    DeltaQ getObservedDeltaQ(uint64_t, uint64_t) override;
-    Operator(const std::string name, OperatorType);
+    Operator(const std::string &name, OperatorType);
+
+    ~Operator();
+
+    DeltaQ calculateCalculatedDeltaQ(uint64_t, uint64_t);
+
+    DeltaQRepr getCalculatedDeltaQRepr(uint64_t, uint64_t);
 
     void setProbabilities(const std::vector<double> &);
 
@@ -27,14 +31,14 @@ public:
     {
         return probabilities;
     }
-    std::vector<std::shared_ptr<DiagramComponent>> getChildren();
+    std::vector<std::shared_ptr<Observable>> getChildren();
 
-    void setCausalLinks(std::vector<std::vector<std::shared_ptr<DiagramComponent>>> links)
+    void setCausalLinks(std::vector<std::vector<std::shared_ptr<Observable>>> links)
     {
         causalLinks = links;
     }
 
-    std::vector<std::vector<std::shared_ptr<DiagramComponent>>> getCausalLinks()
+    std::vector<std::vector<std::shared_ptr<Observable>>> getCausalLinks()
     {
         return causalLinks;
     }

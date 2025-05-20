@@ -1,6 +1,4 @@
 add_library(${PREFIX}_diagram
-    DiagramComponent.h
-    DiagramComponent.cpp
     Outcome.h
     Outcome.cpp
     Operator.h
@@ -17,7 +15,6 @@ add_library(${PREFIX}_diagram
 target_link_libraries(${PREFIX}_diagram
     PUBLIC
         ${PREFIX}_maths
-        ${PREFIX}_parser
         ${PREFIX}_application
 )
 

@@ -6,8 +6,6 @@
 #pragma once
 
 #include "../maths/DeltaQ.h"
-
-#include "DiagramComponent.h"
 #include "Observable.h"
 #include "Operator.h"
 #include "Outcome.h"
@@ -31,8 +29,6 @@ class System
 public:
     System() = default;
 
-    void setFirstComponent(std::shared_ptr<DiagramComponent> component);
-
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Outcome>> &getOutcomes();
 
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Probe>> &getProbes();
@@ -48,7 +44,11 @@ public:
 
     bool hasOutcome(const std::string &name);
 
+    bool hasOperator(const std::string &name);
+
     std::shared_ptr<Outcome> getOutcome(const std::string &outcomeName);
+
+    std::shared_ptr<Operator> getOperator(const std::string &);
 
     bool hasProbe(const std::string &name);
 
