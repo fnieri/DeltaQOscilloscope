@@ -39,14 +39,11 @@ void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 
 void ConfidenceInterval::removeDeltaQ(const DeltaQ &deltaQ)
 {
-    std::cout << "removing \n";
     if (deltaQ == DeltaQ()) {
-        std::cout << "empty \n";
         return;
     }
 
     const auto &cdf = deltaQ.getCdfValues();
-    std::cout << "removing size" << cdfSampleCounts[0] << " \n";
     if (cdf.size() != numBins) {
         return; // Returning a previous DeltaQ which had different bins
     }

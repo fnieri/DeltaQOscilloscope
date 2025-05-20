@@ -2,7 +2,6 @@
 #pragma once
 #include "diagram/Observable.h"
 #include "diagram/System.h"
-#include "server/ErlangSender.h"
 #include "server/Server.h"
 #include <functional>
 #include <iostream>

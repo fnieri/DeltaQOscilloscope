@@ -48,6 +48,7 @@ DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::ui
         return DeltaQ();
     }
 
+    std::cout << samplesInRange.size() << "\n";
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
 
     observedInterval.addDeltaQ(deltaQ);
@@ -130,7 +131,7 @@ double Observable::setNewParameters(int newExp, int newNBins)
     }
     maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
 
-    observedInterval = ConfidenceInterval(nBins);
+    observedInterval.setNumBins(nBins);
     return maxDelay;
 }
 

@@ -9,10 +9,10 @@
         opentelemetry,
         opentelemetry_api,
     opentelemetry_exporter,
-    otel_wrapper
+    dqsd_otel
     ]},
     {env, []},
-    {modules, [ example]},
+    {modules, [example]},
     {licenses, ["Apache-2.0"]},
     {links, []}
  ]}.

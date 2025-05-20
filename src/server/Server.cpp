@@ -6,8 +6,9 @@
 #include <fcntl.h>
 #include <iostream>
 #include <regex>
+#include <signal.h>
+#include <sys/socket.h>
 #include <unistd.h>
-
 #define TIMEOUT "to"
 #define EXEC_OK "ok"
 #define FAIL "fa"
@@ -135,7 +136,7 @@ bool Server::connectToErlang()
     erlang_addr.sin_family = AF_INET;
     erlang_addr.sin_port = htons(8081);
     inet_pton(AF_INET, "127.0.0.1", &erlang_addr.sin_addr);
-
+    int set = 1;
     if (connect(erlang_socket, (struct sockaddr *)&erlang_addr, sizeof(erlang_addr)) < 0) {
         perror("Failed to connect to Erlang");
         close(erlang_socket);
@@ -148,6 +149,8 @@ bool Server::connectToErlang()
 }
 void Server::sendToErlang(const std::string &command)
 {
+
+    signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE so when Erlang closes socket it will not crash
     if (!connectToErlang()) {
         std::cerr << "Unable to send to Erlang: not connected.\n";
         return;

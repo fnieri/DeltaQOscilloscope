@@ -2,7 +2,6 @@
 #include "Application.h"
 #include "dashboard/MainWindow.h"
 #include "diagram/System.h"
-#include "server/ErlangSender.h"
 #include "server/Server.h"
 #include <QApplication>
 #include <cstring>
