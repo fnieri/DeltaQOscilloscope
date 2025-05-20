@@ -23,12 +23,13 @@ add_library(${PREFIX}_dashboard
     Sidebar.cpp
     SnapshotViewerWindow.h
     SnapshotViewerWindow.cpp
+    StubControlWidget.h
+    StubControlWidget.cpp
     SystemCreationWidget.h
-    SystemCreationWidget.cpp
+    SystemCreationWidget.cpp 
     QTAInputWidget.cpp
     QTAInputWidget.h
     TriggersTab.cpp
-
     TriggersTab.h
 )
 

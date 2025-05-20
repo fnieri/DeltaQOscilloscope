@@ -10,7 +10,7 @@
 #include <QApplication>
 #include <QPalette>
 #include <QStyleFactory>
-
+#include <signal.h>
 void setLightMode(QApplication &app)
 {
     // Use the Fusion style (consistent across platforms)
@@ -38,13 +38,13 @@ void setLightMode(QApplication &app)
 
 int main(int argc, char *argv[])
 {
-    Application &application = Application::getInstance();
-
-    System system = System();
 
     Server server(8080);
     server.start();
-
+    signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE so when Erlang closes socket it will not crash
+    Application &application = Application::getInstance();
+    application.setServer(&server);
+    System system = System();
     application.setSystem(system);
     QApplication app(argc, argv);
     setLightMode(app);

@@ -18,6 +18,8 @@ public:
     ~Server();
     void start();
 
+    void sendToErlang(const std::string &command);
+
 private:
     void run();
 
@@ -37,6 +39,12 @@ private:
     void handleClient(int clientSocket);
     void cleanupThreads();
     void stop();
+
+    int erlang_socket = -1;
+    std::mutex erlangMutex;
+    bool connectToErlang();
+
+    int client_socket;
 
     // For adding samples in a non blocking way
     std::queue<std::pair<std::string, Sample>> sampleQueue;

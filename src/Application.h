@@ -3,6 +3,7 @@
 #include "diagram/Observable.h"
 #include "diagram/System.h"
 #include "server/ErlangSender.h"
+#include "server/Server.h"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -28,8 +29,7 @@ class Application
 
     std::shared_ptr<System> system = nullptr;
     std::vector<std::function<void()>> observers; // List of functions to notify
-    ErlangSender sender;
-
+    Server *server = nullptr;
     bool componentsDiffer(const std::shared_ptr<Observable> &a, const std::shared_ptr<Observable> &b);
 
     SystemDiff diffWith(System &newSystem);
@@ -39,8 +39,10 @@ class Application
 
 public:
     static Application &getInstance();
+    void setServer(Server *);
     void setSystem(System newSystem);
     std::shared_ptr<System> getSystem();
     void addObserver(std::function<void()> callback);
     void sendDelayChange(std::string &, double);
+    void setStubRunning(bool running);
 };

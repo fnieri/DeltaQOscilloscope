@@ -40,13 +40,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Tab widget to hold sidebar and triggers tab
     sideTabWidget = new QTabWidget(this);
-    sideTabWidget->addTab(sidebar, "Sidebar");
+    sideTabWidget->addTab(sidebar, "System/Plots");
     sideTabWidget->addTab(observableSettings, "Probes settings");
     sideTabWidget->addTab(triggersTab, "Triggers");
     sideTabWidget->setTabPosition(QTabWidget::West);
 
-    mainLayout->addWidget(sideTabWidget, 0);
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
+
+    stubWidget = new StubControlWidget(this);
+    sideContainer = new QWidget(this);
+    sideLayout = new QVBoxLayout(sideContainer);
+    sideLayout->addWidget(sideTabWidget);
+    sideLayout->addWidget(stubWidget);
+    sideLayout->setStretch(1, 0); // Make tabs take up most space
+    sideLayout->setStretch(1, 0); // Buttons stay at fixed size
+
+    mainLayout->addWidget(sideContainer, 0);
 
     timerThread = new QThread(this);
     updateTimer = new QTimer();

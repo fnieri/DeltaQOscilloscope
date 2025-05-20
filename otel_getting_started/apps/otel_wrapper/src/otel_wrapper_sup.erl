@@ -19,7 +19,7 @@ init([]) ->
           shutdown => brutal_kill,
           type => worker,
           modules => [otel_wrapper]},
-          
+         
         #{id => tcp_server,
           start => {wrapper_tcp_server, start_link, []},
           restart => permanent,
@@ -27,7 +27,7 @@ init([]) ->
           type => worker,
           modules => [wrapper_tcp_server]},
           
-        #{id => tcp_client,
+        #{id => tcp_client,      
           start => {wrapper_tcp_client, start_link, []},
           restart => permanent,
           shutdown => brutal_kill,

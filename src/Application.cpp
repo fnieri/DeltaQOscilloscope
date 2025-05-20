@@ -26,9 +26,22 @@ void Application::notifyObservers()
     }
 }
 
+void Application::setServer(Server *s)
+{
+    server = s;
+}
+
 void Application::sendDelayChange(std::string &name, double newDelay)
 {
-    sender.sendToErlang("set_timeout;" + name + ';' + std::to_string(newDelay));
+    server->sendToErlang("set_timeout;" + name + ';' + std::to_string(newDelay));
+}
+
+void Application::setStubRunning(bool running)
+{
+    if (running)
+        server->sendToErlang("start_stub");
+    else
+        server->sendToErlang("stop_stub");
 }
 
 SystemDiff Application::diffWith(System &newSystem)

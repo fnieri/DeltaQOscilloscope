@@ -45,6 +45,8 @@ init_ets() ->
     ets:new(otel_state, [named_table, public, set]),
     ets:insert(otel_state, {stub_running, false}),
     {ok, self()}.
+
+
 %%%=======================
 %%% For testing purposes
 %%% ======================
@@ -198,9 +200,12 @@ handle_c_message(Bin) when is_binary(Bin) ->
                 _ ->
                     io:format("Invalid timeout: ~p~n", [TimeoutBin])
             end;
-         [<<"start_stub">>] ->
+        [<<"start_stub">>] ->
             ets:insert(otel_state, {stub_running, true}),
             io:format("Stub enabled~n");
+        [<<"stop_stub">>] ->
+            ets:insert(otel_state, {stub_running, false}),
+            io:format("Stub stopped~n");
         _ ->
             io:format("Unknown command: ~p~n", [Bin])
     end.

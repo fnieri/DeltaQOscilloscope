@@ -22,6 +22,11 @@ Server::Server(int port)
 
 Server::~Server()
 {
+    std::lock_guard<std::mutex> lock(erlangMutex);
+    if (erlang_socket > 0) {
+        close(erlang_socket);
+        erlang_socket = -1;
+    }
     close(new_socket);
     close(server_fd);
     if (serverThread.joinable())
@@ -91,7 +96,7 @@ void Server::run()
 
     while (running) {
         int addrlen = sizeof(address);
-        int client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
+        client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
 
         if (client_socket < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
@@ -111,6 +116,61 @@ void Server::run()
     // Cleanup
     close(server_fd);
     cleanupThreads();
+}
+
+bool Server::connectToErlang()
+{
+    std::lock_guard<std::mutex> lock(erlangMutex);
+
+    if (erlang_socket > 0)
+        return true; // Already connected
+
+    erlang_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (erlang_socket < 0) {
+        perror("Erlang socket creation failed");
+        return false;
+    }
+
+    sockaddr_in erlang_addr {};
+    erlang_addr.sin_family = AF_INET;
+    erlang_addr.sin_port = htons(8081);
+    inet_pton(AF_INET, "127.0.0.1", &erlang_addr.sin_addr);
+
+    if (connect(erlang_socket, (struct sockaddr *)&erlang_addr, sizeof(erlang_addr)) < 0) {
+        perror("Failed to connect to Erlang");
+        close(erlang_socket);
+        erlang_socket = -1;
+        return false;
+    }
+
+    std::cout << "Connected to Erlang on 127.0.0.1:8081\n";
+    return true;
+}
+void Server::sendToErlang(const std::string &command)
+{
+    if (!connectToErlang()) {
+        std::cerr << "Unable to send to Erlang: not connected.\n";
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(erlangMutex);
+
+    std::string msgWithNewline = command + "\n";
+    ssize_t sent = send(erlang_socket, msgWithNewline.c_str(), msgWithNewline.size(), 0);
+
+    if (sent == -1) {
+        perror("send failed");
+
+        if (errno == EPIPE) {
+            std::cerr << "Broken pipe: Erlang side likely disconnected." << std::endl;
+
+            close(erlang_socket);
+            erlang_socket = -1;
+        }
+
+        return;
+    }
+    std::cout << "Sent to Erlang: " << command << std::endl;
 }
 
 void Server::handleClient(int clientSocket)

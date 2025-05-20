@@ -27,5 +27,6 @@ handle_client(Socket) ->
             otel_wrapper:handle_c_message(Trimmed),
             handle_client(Socket);
         {error, closed} ->
+             io:format("Closed"),
             ok
     end.

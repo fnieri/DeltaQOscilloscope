@@ -5,6 +5,7 @@
 #include "NewPlotList.h"
 #include "ObservableSettings.h"
 #include "Sidebar.h"
+#include "StubControlWidget.h"
 #include "TriggersTab.h"
 
 #include <QHBoxLayout>
@@ -14,7 +15,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <qboxlayout.h>
-
+#include <qwidget.h>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,10 +32,15 @@ class MainWindow : public QMainWindow
     QThread *timerThread;
     QTimer *updateTimer;
 
+    QWidget *sideContainer;
+    QVBoxLayout *sideLayout;
+
     QTabWidget *sideTabWidget;
     TriggersTab *triggersTab;
     Sidebar *sidebar;
     ObservableSettings *observableSettings;
+
+    StubControlWidget *stubWidget;
 
     QPushButton *addPlotButton;
 
