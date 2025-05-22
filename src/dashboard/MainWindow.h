@@ -50,6 +50,8 @@ class MainWindow : public QMainWindow
     std::mutex plotDelMutex;
     std::mutex updateMutex;
 
+    int pollingRate {200};
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();

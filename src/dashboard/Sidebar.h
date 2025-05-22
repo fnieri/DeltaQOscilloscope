@@ -5,6 +5,7 @@
 
 #include "DQPlotList.h"
 #include "NewPlotList.h"
+#include "PollingRateWidget.h"
 #include "SystemCreationWidget.h"
 #include <QComboBox>
 #include <QLabel>
@@ -34,11 +35,14 @@ class Sidebar : public QWidget
     QVBoxLayout *layout;
 
     SystemCreationWidget *systemCreationWidget;
+    PollingRateWidget *pollingRateWidget;
 Q_SIGNALS:
     void addPlotClicked();
+    void onPollingRateChanged(int milliseconds);
 
 private Q_SLOTS:
     void onAddPlotClicked();
+    void handlePollingRateChanged(int ms);
 
 public:
     explicit Sidebar(QWidget *parent = nullptr);

@@ -22,20 +22,20 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
 {
     std::lock_guard<std::mutex> lock(samplesMutex);
     if (!sorted) {
-        std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.startTime < b.startTime; });
+        std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.endTime < b.endTime; });
         sorted = true;
     }
 
     std::vector<Sample> selectedSamples;
 
-    auto lower = std::lower_bound(samples.begin(), samples.end(), lowerTime, [](const Sample &s, long long time) { return s.startTime < time; });
+    auto lower = std::lower_bound(samples.begin(), samples.end(), lowerTime, [](const Sample &s, long long time) { return s.endTime < time; });
 
-    auto upper = std::upper_bound(samples.begin(), samples.end(), upperTime, [](long long time, const Sample &s) { return time < s.startTime; });
+    auto upper = std::upper_bound(samples.begin(), samples.end(), upperTime, [](long long time, const Sample &s) { return time < s.endTime; });
 
     for (auto it = lower; it != upper; ++it) {
         selectedSamples.emplace_back(*it);
     }
-    samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
+    samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.endTime < upperTime; }), samples.end());
 
     return selectedSamples;
 }

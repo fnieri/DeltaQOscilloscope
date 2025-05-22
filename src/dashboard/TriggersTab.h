@@ -41,7 +41,6 @@ private:
     QSpinBox *sampleLimitSpinBox;
 
     QCheckBox *qtaBoundsCheckBox;
-    QCheckBox *failureRateCheckBox;
 
     QListWidget *triggeredList;
 

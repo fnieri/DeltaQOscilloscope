@@ -34,10 +34,6 @@ SystemCreationWidget::SystemCreationWidget(QWidget *parent)
     connect(loadSystemButton, &QPushButton::clicked, this, &SystemCreationWidget::loadSystem);
 }
 
-SystemCreationWidget::~SystemCreationWidget()
-{
-}
-
 std::string SystemCreationWidget::getSystemText() const
 {
     return systemTextEdit->toPlainText().toStdString();

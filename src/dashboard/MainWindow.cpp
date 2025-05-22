@@ -53,7 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
     sideLayout->addWidget(sideTabWidget);
     sideLayout->addWidget(stubWidget);
     sideLayout->setStretch(1, 0); // Make tabs take up most space
-    sideLayout->setStretch(1, 0); // Buttons stay at fixed size
 
     mainLayout->addWidget(sideContainer, 0);
 
@@ -67,8 +66,14 @@ MainWindow::MainWindow(QWidget *parent)
     Application::getInstance().addObserver([this] { this->reset(); });
 
     auto now = std::chrono::system_clock::now();
-    auto adjustedTime = now - std::chrono::milliseconds(3000);
+    auto adjustedTime = now - std::chrono::milliseconds(200);
     timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
+
+    connect(sidebar, &Sidebar::onPollingRateChanged, this, [this](int ms) {
+        qDebug() << "MainWindow received polling rate:" << ms;
+        pollingRate = ms;
+        QMetaObject::invokeMethod(updateTimer, [ms, this]() { updateTimer->setInterval(ms); }, Qt::QueuedConnection);
+    });
 }
 
 void MainWindow::reset()
@@ -100,8 +105,8 @@ void MainWindow::reset()
 
 void MainWindow::updatePlots()
 {
-    timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
-    uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(200)).count();
+    timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
+    uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
     auto system = Application::getInstance().getSystem();
 
     std::lock_guard<std::mutex> lock(plotDelMutex);

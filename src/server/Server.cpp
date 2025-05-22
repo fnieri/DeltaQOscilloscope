@@ -75,6 +75,9 @@ void Server::run()
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 
+    int bufSize = 1 << 20; // 1MB
+    setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &bufSize, sizeof(bufSize));
+    setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &bufSize, sizeof(bufSize));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
@@ -197,11 +200,14 @@ void Server::handleClient(int clientSocket)
         buffer.append(tempBuf, valread);
 
         size_t pos;
-        while ((pos = buffer.find('\n')) != std::string::npos) {
-            std::string message = buffer.substr(0, pos);
-            buffer.erase(0, pos + 1);
-            parseErlangMessage(message.c_str(), message.size());
+
+        size_t offset = 0;
+        while ((pos = buffer.find('\n', offset)) != std::string::npos) {
+            std::string_view message(buffer.data() + offset, pos - offset);
+            parseErlangMessage(message.data(), message.size());
+            offset = pos + 1;
         }
+        buffer.erase(0, offset);
     }
 
     close(clientSocket);
@@ -259,22 +265,19 @@ void Server::parseErlangMessage(const char *buffer, int len)
     std::string statusStr = message.substr(sPos + 3);
 
     uint64_t startTime = std::stoull(bStr);
-    uint64_t endTime = 0;
+    uint64_t endTime = std::stoull(eStr);
     Sample sample;
     Status status = Status::SUCCESS;
 
     if (statusStr == TIMEOUT || statusStr == FAIL) {
         status = (statusStr == TIMEOUT) ? Status::TIMEDOUT : Status::FAILED;
-        sample = {startTime, 0, 0, status};
     } else if (statusStr == EXEC_OK) {
-        endTime = std::stoull(eStr);
-        double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
-        sample = {startTime, endTime, elapsed, status};
     } else {
         std::cerr << "Unknown status: " << statusStr << std::endl;
         return;
     }
-
+    double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
+    sample = {startTime, endTime, elapsed, status};
     {
         std::lock_guard lock(queueMutex);
         sampleQueue.emplace(name, sample);

@@ -15,7 +15,6 @@ class SystemCreationWidget : public QWidget
 
 public:
     explicit SystemCreationWidget(QWidget *parent = nullptr);
-    ~SystemCreationWidget();
 
     std::string getSystemText() const;
     void setSystemText(const std::string &text);

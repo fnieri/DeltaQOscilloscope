@@ -19,6 +19,8 @@ add_library(${PREFIX}_dashboard
     NewPlotList.cpp
     ObservableSettings.h
     ObservableSettings.cpp
+    PollingRateWidget.h
+    PollingRateWidget.cpp
     Sidebar.h
     Sidebar.cpp
     SnapshotViewerWindow.h

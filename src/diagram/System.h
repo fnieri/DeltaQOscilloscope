@@ -23,7 +23,6 @@ class System
     std::string systemDefinitionText;
 
     bool recordingTrigger = false;
-
     std::map<uint64_t, std::vector<Snapshot>> snapshots;
 
 public:

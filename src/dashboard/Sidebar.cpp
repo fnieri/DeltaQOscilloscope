@@ -2,6 +2,7 @@
 #include "Sidebar.h"
 
 #include "NewPlotList.h"
+#include "PollingRateWidget.h"
 #include "SystemCreationWidget.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -52,6 +53,10 @@ Sidebar::Sidebar(QWidget *parent)
     currentPlotLayout->addWidget(currentPlotLabel);
     mainSplitter->addWidget(currentPlotWidget);
 
+    pollingRateWidget = new PollingRateWidget(this);
+    mainSplitter->addWidget(pollingRateWidget);
+
+    connect(pollingRateWidget, &PollingRateWidget::onPollingRateChanged, this, &Sidebar::handlePollingRateChanged);
     layout->addWidget(mainSplitter);
 }
 
@@ -72,6 +77,11 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
         currentPlotList->show();
         currentPlotLabel->show();
     }
+}
+
+void Sidebar::handlePollingRateChanged(int ms)
+{
+    Q_EMIT onPollingRateChanged(ms);
 }
 
 void Sidebar::hideCurrentPlot()

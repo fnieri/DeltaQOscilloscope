@@ -34,15 +34,12 @@ TriggersTab::TriggersTab(QWidget *parent)
     formLayout->addRow(sampleLimitWidget);
 
     qtaBoundsCheckBox = new QCheckBox("QTA Bound Violation", this);
-    failureRateCheckBox = new QCheckBox("Failure Rate < 0.95", this);
 
     formLayout->addRow(qtaBoundsCheckBox);
-    formLayout->addRow(failureRateCheckBox);
 
     connect(sampleLimitCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
     connect(sampleLimitSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &TriggersTab::onTriggerChanged);
     connect(qtaBoundsCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
-    connect(failureRateCheckBox, &QCheckBox::checkStateChanged, this, &TriggersTab::onTriggerChanged);
 
     mainLayout->addLayout(formLayout);
 
@@ -103,14 +100,6 @@ void TriggersTab::onTriggerChanged()
         } else {
             observable->removeTrigger(TriggerType::QTAViolation);
         }
-
-        if (failureRateCheckBox->isChecked()) {
-            observable->addTrigger(
-                TriggerType::Failure, TriggerDefs::Conditions::FailureRate(observable->getQTA().cdfMax),
-                [this, name](const DeltaQ &, const QTA &, std::uint64_t time) { this->captureSnapshots(time, name); }, true, std::nullopt);
-        } else {
-            observable->removeTrigger(TriggerType::Failure);
-        }
     } catch (std::exception &) {
         return;
     }
@@ -167,7 +156,6 @@ void TriggersTab::updateCheckboxStates()
 
         sampleLimitCheckBox->setChecked(activeTypes.count(TriggerType::SampleLimit));
         qtaBoundsCheckBox->setChecked(activeTypes.count(TriggerType::QTAViolation));
-        failureRateCheckBox->setChecked(activeTypes.count(TriggerType::Failure));
 
         for (const auto &t : all) {
             if (t.type == TriggerType::SampleLimit && t.sampleLimitValue) {
@@ -177,7 +165,6 @@ void TriggersTab::updateCheckboxStates()
     } catch (std::exception &) {
         sampleLimitCheckBox->setChecked(false);
         qtaBoundsCheckBox->setChecked(false);
-        failureRateCheckBox->setChecked(false);
     }
 }
 
