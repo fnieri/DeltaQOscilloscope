@@ -108,8 +108,25 @@ void MainWindow::updatePlots()
     timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
     uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
     auto system = Application::getInstance().getSystem();
-
     std::lock_guard<std::mutex> lock(plotDelMutex);
+    for (auto &[name, probe] : system->getProbes()) {
+        if (probe) {
+            probe->getObservedDeltaQ(timeLowerBound, timeUpperBound);
+            probe->calculateCalculatedDeltaQ(timeLowerBound, timeUpperBound);
+        }
+    }
+
+    for (auto &[name, op] : system->getOperators()) {
+        if (op) {
+            op->getObservedDeltaQ(timeLowerBound, timeUpperBound);
+            op->calculateCalculatedDeltaQ(timeLowerBound, timeUpperBound);
+        }
+    }
+    for (auto &[name, outcome] : system->getOutcomes()) {
+        if (outcome) {
+            outcome->getObservedDeltaQ(timeLowerBound, timeUpperBound);
+        }
+    }
     for (auto [plot, _] : plotContainers.asKeyValueRange()) {
         plot->update(timeLowerBound, timeUpperBound);
     }

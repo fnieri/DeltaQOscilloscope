@@ -28,7 +28,6 @@ add_executable(diagram
         main.cpp
 )
 
-
 target_link_libraries(diagram
         PRIVATE
         ${PREFIX}_diagram

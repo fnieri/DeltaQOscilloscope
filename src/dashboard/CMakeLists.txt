@@ -41,8 +41,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Charts Widgets Graphs)
 
 target_link_libraries(${PREFIX}_dashboard
         PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::Graphs
-        ${PREFIX}_maths
-        ${PREFIX}_server
         ${PREFIX}_parser
     )
 

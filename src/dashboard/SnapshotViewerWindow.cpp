@@ -65,7 +65,6 @@ void SnapshotViewerWindow::onObservableChanged(const QString &name)
 
     const auto &snapshot = snapshots.at(currentObservable);
     int count = static_cast<int>(snapshot.getObservedSize());
-
     timeSlider->setRange(0, std::max(0, count - 1));
     timeSlider->setValue(0);
     onTimeSliderChanged(0);
@@ -77,15 +76,21 @@ void SnapshotViewerWindow::onTimeSliderChanged(int value)
         return;
 
     const auto &snapshot = snapshots.at(currentObservable);
-    timeLabel->setText(QString("Time Index: %1").arg(value));
 
     if (snapshot.getObservedSize() == 0 || value >= static_cast<int>(snapshot.getObservedSize()))
         return;
 
     const auto obs = snapshot.getObservedDeltaQs()[value];
     const auto calc = snapshot.getCalculatedSize() > value ? std::optional<DeltaQRepr>(snapshot.getCalculatedDeltaQs()[value]) : std::nullopt;
+    auto time = obs.time;
 
-    QtConcurrent::run([=]() {
+    qint64 msTime = time / 1000000;
+    QDateTime timestamp = QDateTime::fromMSecsSinceEpoch(msTime);
+
+    QString timestampStr = timestamp.toString();
+    timeLabel->setText(QString("Snapshot at: %1").arg(timestampStr));
+
+    auto ret = QtConcurrent::run([=]() {
         int bins = obs.deltaQ.getBins();
         double binWidth = obs.deltaQ.getBinWidth();
 

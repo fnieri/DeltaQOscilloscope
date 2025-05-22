@@ -35,8 +35,6 @@ protected:
     bool recording = false;
 
 private:
-    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t);
-
 public:
     Observable(const std::string &name);
 
@@ -46,6 +44,8 @@ public:
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
 
     DeltaQ getObservedDeltaQ(uint64_t, uint64_t);
+
+    DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t);
 
     DeltaQRepr getObservedDeltaQRepr(uint64_t, uint64_t);
 

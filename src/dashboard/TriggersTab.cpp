@@ -196,7 +196,6 @@ void TriggersTab::onTriggeredItemClicked(QListWidgetItem *item)
     auto it = snapshots.find(timestamp);
     if (it != snapshots.end()) {
         const auto &snapshotList = it->second;
-        qDebug() << "Snapshot at" << timestamp << "contains" << snapshotList.size() << "entries";
 
         auto *viewer = new SnapshotViewerWindow(const_cast<std::vector<Snapshot> &>(snapshotList));
         viewer->setAttribute(Qt::WA_DeleteOnClose);
