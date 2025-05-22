@@ -48,11 +48,9 @@ void DelaySettingsWidget::populateComboBox()
     if (!system)
         return;
     observableComboBox->clear();
-    for (const auto [name, _] : system->getProbes()) {
-        observableComboBox->addItem(QString::fromStdString(name));
-    }
-    for (const auto &[name, _] : system->getOutcomes()) {
-        observableComboBox->addItem(QString::fromStdString(name));
+    for (const auto &[name, obs] : system->getObservables()) {
+        if (obs)
+            observableComboBox->addItem(QString::fromStdString(name));
     }
 }
 

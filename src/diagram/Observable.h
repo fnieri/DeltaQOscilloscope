@@ -16,6 +16,7 @@ protected:
     std::deque<Sample> samples;
     mutable bool sorted;
 
+    std::deque<DeltaQ> confidenceIntervalHistory;
     double maxDelay {0.05};
     int deltaTExp {0}; // Exponent for dynamic binning
     int nBins {50}; // Number of bins

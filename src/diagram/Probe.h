@@ -16,6 +16,7 @@ class Probe : public Observable
     std::mutex calcMutex;
 
     ConfidenceInterval calculatedInterval;
+    std::deque<DeltaQ> calculatedDeltaQHistory;
 
 public:
     Probe(const std::string &name);

@@ -16,6 +16,8 @@ class Operator : public Observable
 
     std::mutex calcMutex;
 
+    std::deque<DeltaQ> calculatedDeltaQHistory;
+
 public:
     Operator(const std::string &name, OperatorType);
 

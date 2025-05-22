@@ -21,6 +21,9 @@ ConfidenceInterval::ConfidenceInterval(int numBins)
 void ConfidenceInterval::addDeltaQ(const DeltaQ &deltaQ)
 {
     const auto &cdf = deltaQ.getCdfValues();
+    if (deltaQ == DeltaQ()) {
+        return;
+    }
 
     if (cdf.size() != numBins) {
         std::cerr << "CDF size mismatch in addDeltaQ, have" << deltaQ.getBins() << " expected" << numBins << "\n";
@@ -99,10 +102,8 @@ void ConfidenceInterval::reset()
 
 void ConfidenceInterval::setNumBins(int newNumBins)
 {
-    if (numBins != newNumBins) {
-        numBins = newNumBins;
-        reset();
-    }
+    numBins = newNumBins;
+    reset();
 }
 
 std::vector<Bound> ConfidenceInterval::getBounds() const

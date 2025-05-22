@@ -48,19 +48,21 @@ DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::ui
         return DeltaQ();
     }
 
-    std::cout << samplesInRange.size() << "\n";
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
 
     observedInterval.addDeltaQ(deltaQ);
-    if (observableSnapshot.getObservedSize() > MAX_DQ) {
+    confidenceIntervalHistory.push_back(deltaQ);
 
-        observedInterval.removeDeltaQ(observableSnapshot.getOldestObservedDeltaQ());
-        if (!recording) {
-            observableSnapshot.resizeTo(MAX_DQ);
-        }
+    if (confidenceIntervalHistory.size() > MAX_DQ) {
+        observedInterval.removeDeltaQ(confidenceIntervalHistory.front());
+        confidenceIntervalHistory.pop_front();
     }
 
     observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+    if (!recording && confidenceIntervalHistory.size() > MAX_DQ) {
+        observableSnapshot.resizeTo(MAX_DQ); // Still useful for snapshot trim
+    }
+
     triggerManager.evaluate(deltaQ, qta, timeLowerBound);
     return deltaQ;
 }
@@ -124,14 +126,24 @@ Snapshot Observable::getSnapshot()
 double Observable::setNewParameters(int newExp, int newNBins)
 {
     std::lock_guard<decltype(paramMutex)> lock(paramMutex);
+
+    bool binsChanged = (newNBins != nBins);
+    bool expChanged = (newExp != deltaTExp);
+
     nBins = newNBins;
     deltaTExp = newExp;
+
     if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
         qta = QTA::create(0, 0, 0, qta.cdfMax, false);
     }
+
     maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
 
-    observedInterval.setNumBins(nBins);
+    if (binsChanged || expChanged) {
+        observedInterval.setNumBins(nBins);
+        confidenceIntervalHistory.clear();
+    }
+
     return maxDelay;
 }
 

@@ -293,7 +293,7 @@ void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
             }
         }
     }
-    plot->updateXRange((outcomeMax > probeMax) ? outcomeMax : probeMax);
+    plot->updateXRange(std::max({outcomeMax, probeMax, operatorMax}));
 }
 
 double DQPlotController::updateOutcome(OutcomeSeries &series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
@@ -387,7 +387,7 @@ double DQPlotController::updateProbe(ExpressionSeries &series, std::shared_ptr<P
 void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&obsRepr, DeltaQRepr &&calcRepr, QTA &&qta, double maxDelay)
 {
     auto ret = QtConcurrent::run([=]() {
-        auto computeStart = high_resolution_clock::now();
+        //   auto computeStart = high_resolution_clock::now();
 
         DeltaQ obsDeltaQ = obsRepr.deltaQ;
         std::vector<Bound> obsBounds = obsRepr.bounds;
@@ -461,7 +461,7 @@ void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&o
             qtaData.emplace_back(maxDelay, qta.cdfMax);
         }
         auto computeEnd = high_resolution_clock::now();
-        qDebug() << "Computation took" << duration_cast<microseconds>(computeEnd - computeStart).count() << "µs";
+        // qDebug() << "Computation took" << duration_cast<microseconds>(computeEnd - computeStart).count() << "µs";
 
         // --- Push results back to GUI thread ---
 
@@ -485,8 +485,8 @@ void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&o
 
                 plot->setUpdatesEnabled(true);
 
-                auto guiEnd = high_resolution_clock::now();
-                qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "µs";
+                //  auto guiEnd = high_resolution_clock::now();
+                //    qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "µs";
             },
             Qt::QueuedConnection);
     });

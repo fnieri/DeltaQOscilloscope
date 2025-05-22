@@ -14,6 +14,7 @@ class ConfidenceInterval
 private:
     std::vector<Bound> bounds;
     unsigned int numBins;
+    unsigned int size {0};
     std::vector<double> cdfSum;
     std::vector<double> cdfSumSquares;
     std::vector<unsigned int> cdfSampleCounts;
