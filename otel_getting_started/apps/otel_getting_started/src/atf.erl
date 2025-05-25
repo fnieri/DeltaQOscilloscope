@@ -1,5 +1,4 @@
-
--module(ftf).
+-module(atf).
 -export([start/2, start/3, send/2, worker_loop/5, stop/1, worker_buffer/4, coordinator/2]).
 
 -include_lib("opentelemetry_api/include/otel_tracer.hrl").
@@ -29,11 +28,10 @@ send(X, {Worker1Buffer, Worker2Buffer}) ->
     timer:sleep(trunc(Delay * 1000)),
 
     B = maps:new(),
-    {ProbeCtx, ProbePid} = dqsd_otel:start_span(<<"ftf">>, #{attributes => [{carmine, <<"sossio">>}]}),
+    {ProbeCtx, ProbePid} = dqsd_otel:start_span(<<"atf">>, #{attributes => [{carmine, <<"sossio">>}]}),
     B1 = maps:put(<<"probe_id">>, ProbePid, B),
     Baggage = maps:put(<<"probe_ctx">>, ProbeCtx, B1),
 
-    % Create coordinator per probe
     CoordinatorPid = spawn(fun() -> coordinator(ProbeCtx, ProbePid) end),
     FullBaggage = maps:put(<<"coordinator">>, CoordinatorPid, Baggage),
 
@@ -43,9 +41,18 @@ send(X, {Worker1Buffer, Worker2Buffer}) ->
     send(X, {Worker1Buffer, Worker2Buffer}).
 
 coordinator(ProbeCtx, ProbePid) ->
+    coordinator_wait(ProbeCtx, ProbePid, []).
+
+coordinator_wait(ProbeCtx, ProbePid, WorkersDone) ->
     receive
-        {done, _FromWorker} ->
-            dqsd_otel:end_span(ProbeCtx, ProbePid)
+        {done, Worker} ->
+            NewDone = lists:usort([Worker | WorkersDone]),
+            case NewDone of
+                [worker_1, worker_2] ->
+                    dqsd_otel:end_span(ProbeCtx, ProbePid);
+                _ ->
+                    coordinator_wait(ProbeCtx, ProbePid, NewDone)
+            end
     end.
 
 worker_buffer(WorkerName, WorkerPid, K, QueueLength) ->
@@ -89,7 +96,7 @@ worker_loop(WorkerName, Y, Worker1Buffer, Worker2Buffer, _Placeholder) ->
                 otel_ctx:attach(ProbeCtx),
                 ?set_current_span(WorkerCtx),
                 case WorkerName of
-                    worker_2 -> timer:sleep(20);
+                    worker_2 -> timer:sleep(2);
                     _ -> ok
                 end,
                 Loops = rand:uniform(Y),

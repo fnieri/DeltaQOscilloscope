@@ -1,4 +1,4 @@
--module(example_2).
+-module(mm1k).
 -export([start/2, start/3, send/2, worker_loop/4, stop/1, worker_buffer/4]).
 
 -include_lib("opentelemetry_api/include/otel_tracer.hrl").
@@ -127,12 +127,12 @@ worker_loop(worker_2, Y, Worker1Buffer, Worker2Buffer) ->
                         Loops = rand:uniform(Y),
                         loop(Loops),
 
-                      % Prob = rand:uniform(),
-                      %   if Prob > 0.5 -> 
-                      %      timer:sleep(10);
-                      %  true ->
-                      %      ok
-                      %  end,
+                        %Prob = rand:uniform(),
+                        % if Prob > 0.5 -> 
+                        %    timer:sleep(1000);
+                        %true ->
+                        %    ok
+                        %end,
                         dqsd_otel:end_span(WorkerCtx, WorkerPid),
                         ?set_current_span(ProbeCtx),
                         dqsd_otel:end_span(ProbeCtx, ProbePid)
