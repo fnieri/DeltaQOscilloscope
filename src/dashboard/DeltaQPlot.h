@@ -20,7 +20,7 @@ class DQPlotList;
 
 /**
  * @class DeltaQPlot
- * @brief A class representing a DeltaQ chart view that allows visualization of  probes over time.
+ * @brief A class representing a DeltaQ chart view that allows visualization of probes over time.
  */
 class DeltaQPlot : public QWidget
 {

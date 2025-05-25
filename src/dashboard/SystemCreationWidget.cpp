@@ -5,6 +5,10 @@
 #include <QMessageBox>
 #include <fstream>
 
+/**
+ * @brief Constructs the SystemCreationWidget and sets up the UI.
+ * @param parent Parent QWidget.
+ */
 SystemCreationWidget::SystemCreationWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -34,16 +38,27 @@ SystemCreationWidget::SystemCreationWidget(QWidget *parent)
     connect(loadSystemButton, &QPushButton::clicked, this, &SystemCreationWidget::loadSystem);
 }
 
+/**
+ * @brief Gets the text currently in the system text editor.
+ * @return System text as a std::string.
+ */
 std::string SystemCreationWidget::getSystemText() const
 {
     return systemTextEdit->toPlainText().toStdString();
 }
 
+/**
+ * @brief Sets the content of the system text editor.
+ * @param text The new system text.
+ */
 void SystemCreationWidget::setSystemText(const std::string &text)
 {
     systemTextEdit->setText(QString::fromStdString(text));
 }
 
+/**
+ * @brief Parses the system text and updates the application system if valid.
+ */
 void SystemCreationWidget::onUpdateSystem()
 {
     std::string text = getSystemText();
@@ -60,6 +75,9 @@ void SystemCreationWidget::onUpdateSystem()
     }
 }
 
+/**
+ * @brief Opens a dialog to save the current system to a file.
+ */
 void SystemCreationWidget::saveSystemTo()
 {
     QFileDialog dialog(this);
@@ -86,6 +104,9 @@ void SystemCreationWidget::saveSystemTo()
     }
 }
 
+/**
+ * @brief Opens a dialog to load a system from a file, parses it, and updates the editor.
+ */
 void SystemCreationWidget::loadSystem()
 {
     QFileDialog dialog(this);

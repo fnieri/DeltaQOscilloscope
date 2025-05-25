@@ -57,6 +57,16 @@ void Snapshot::resizeTo(size_t newSize)
         auto endItC = std::next(calculatedDeltaQs.begin(), toCalculated);
         calculatedDeltaQs.erase(calculatedDeltaQs.begin(), endItC);
     }
+
+    if (QTAs.size() > newSize) {
+        int toSize = QTAs.size() - newSize;
+        auto endIt = std::next(QTAs.begin(), toSize);
+        QTAs.erase(QTAs.begin(), endIt);
+    }
+}
+void Snapshot::addQTA(uint64_t time, const QTA &qta)
+{
+    QTAs[time] = qta;
 }
 
 std::optional<DeltaQRepr> Snapshot::getObservedDeltaQAtTime(std::uint64_t time)
@@ -87,20 +97,29 @@ std::size_t Snapshot::getCalculatedSize() const
     return calculatedDeltaQs.size();
 }
 
-std::vector<DeltaQRepr> Snapshot::getObservedDeltaQs() const
+std::vector<DeltaQRepr> Snapshot::getObservedDeltaQs() const &
 {
     auto obs = std::vector<DeltaQRepr>();
     for (const auto &s : observedDeltaQs)
-        obs.push_back(s.second);
+        obs.emplace_back(s.second);
     return obs;
 }
 
-std::vector<DeltaQRepr> Snapshot::getCalculatedDeltaQs() const
+std::vector<DeltaQRepr> Snapshot::getCalculatedDeltaQs() const &
 {
     auto calc = std::vector<DeltaQRepr>();
     for (const auto &s : calculatedDeltaQs)
-        calc.push_back(s.second);
+        calc.emplace_back(s.second);
     return calc;
+}
+
+std::vector<QTA> Snapshot::getQTAs() const &
+{
+    auto QTAsVec = std::vector<QTA>();
+    for (const auto &q : QTAs) {
+        QTAsVec.emplace_back(q.second);
+    }
+    return QTAsVec;
 }
 
 void Snapshot::setName(const std::string &name)

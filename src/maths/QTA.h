@@ -1,17 +1,19 @@
-
-
 #ifndef QTA_H
 #define QTA_H
+
 #include <iostream>
 #include <limits>
 #define QTA_EPSILON std::numeric_limits<double>::epsilon()
-
+/**
+ * @struct QTA Quantitative Timeliness Agreement for an observable
+ */
 struct QTA {
-    double perc_25 {0};
-    double perc_50 {0};
-    double perc_75 {0};
-    double cdfMax {0};
-    bool defined = false;
+    double perc_25 {0}; ///< 25 percentile value
+    double perc_50 {0}; ///< 50 percentile value
+    double perc_75 {0}; ///< 75 percentile value
+    double cdfMax {0}; ///< Least failure rate
+    bool defined = false; ///< If defined or not
+
     static QTA create(double p25, double p50, double p75, double cdf)
     {
         return QTA::create(p25, p50, p75, cdf, true);

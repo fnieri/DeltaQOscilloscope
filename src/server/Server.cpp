@@ -13,6 +13,10 @@
 #define EXEC_OK "ok"
 #define FAIL "fa"
 
+/**
+ * @brief Constructs the Server and registers system observer.
+ * @param port The TCP port to listen on.
+ */
 Server::Server(int port)
     : port(port)
     , server_fd(0)
@@ -21,6 +25,9 @@ Server::Server(int port)
     Application::getInstance().addObserver([this]() { this->updateSystem(); });
 }
 
+/**
+ * @brief Destructor cleans up sockets and joins threads.
+ */
 Server::~Server()
 {
     std::lock_guard<std::mutex> lock(erlangMutex);
@@ -34,6 +41,9 @@ Server::~Server()
         serverThread.join();
 }
 
+/**
+ * @brief Starts the server and worker threads.
+ */
 void Server::start()
 {
     serverThread = std::thread(&Server::run, this);
@@ -46,10 +56,10 @@ void Server::start()
             while (!sampleQueue.empty()) {
                 auto [name, sample] = sampleQueue.front();
                 sampleQueue.pop();
-                lock.unlock(); // Unlock during processing (non-blocking)
+                lock.unlock(); // Unlock during processing
 
                 if (system) {
-                    system->addSample(name, sample); // Now OK to block if needed
+                    system->addSample(name, sample);
                 }
 
                 lock.lock();
@@ -58,11 +68,17 @@ void Server::start()
     });
 }
 
+/**
+ * @brief Updates the system reference from Application.
+ */
 void Server::updateSystem()
 {
     system = Application::getInstance().getSystem();
 }
 
+/**
+ * @brief Main server loop handling client connections.
+ */
 void Server::run()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -71,13 +87,17 @@ void Server::run()
         return;
     }
 
+    // Configure socket options
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 
+    // Set large buffer sizes
     int bufSize = 1 << 20; // 1MB
     setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &bufSize, sizeof(bufSize));
     setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &bufSize, sizeof(bufSize));
+
+    // Bind socket
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
@@ -87,7 +107,7 @@ void Server::run()
         return;
     }
 
-    // Set socket to non-blocking
+    // Set non-blocking mode
     fcntl(server_fd, F_SETFL, O_NONBLOCK);
 
     if (listen(server_fd, SOMAXCONN) < 0) {
@@ -104,7 +124,7 @@ void Server::run()
 
         if (client_socket < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                // No pending connections, sleep a bit
+                // No pending connections, sleep briefly
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 cleanupThreads();
                 continue;
@@ -122,6 +142,10 @@ void Server::run()
     cleanupThreads();
 }
 
+/**
+ * @brief Connects to the Erlang process.
+ * @return true if connection succeeded.
+ */
 bool Server::connectToErlang()
 {
     std::lock_guard<std::mutex> lock(erlangMutex);
@@ -150,10 +174,15 @@ bool Server::connectToErlang()
     std::cout << "Connected to Erlang on 127.0.0.1:8081\n";
     return true;
 }
+
+/**
+ * @brief Sends a command to the Erlang process.
+ * @param command The command string to send.
+ */
 void Server::sendToErlang(const std::string &command)
 {
+    signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE to prevent crashes on disconnect
 
-    signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE so when Erlang closes socket it will not crash
     if (!connectToErlang()) {
         std::cerr << "Unable to send to Erlang: not connected.\n";
         return;
@@ -169,7 +198,6 @@ void Server::sendToErlang(const std::string &command)
 
         if (errno == EPIPE) {
             std::cerr << "Broken pipe: Erlang side likely disconnected." << std::endl;
-
             close(erlang_socket);
             erlang_socket = -1;
         }
@@ -179,10 +207,14 @@ void Server::sendToErlang(const std::string &command)
     std::cout << "Sent to Erlang: " << command << std::endl;
 }
 
+/**
+ * @brief Handles communication with a client.
+ * @param clientSocket The client socket file descriptor.
+ */
 void Server::handleClient(int clientSocket)
 {
     std::string buffer;
-    char tempBuf[1024];
+    char tempBuf[4096];
 
     while (running) {
         int valread = read(clientSocket, tempBuf, sizeof(tempBuf));
@@ -200,7 +232,6 @@ void Server::handleClient(int clientSocket)
         buffer.append(tempBuf, valread);
 
         size_t pos;
-
         size_t offset = 0;
         while ((pos = buffer.find('\n', offset)) != std::string::npos) {
             std::string_view message(buffer.data() + offset, pos - offset);
@@ -213,6 +244,9 @@ void Server::handleClient(int clientSocket)
     close(clientSocket);
 }
 
+/**
+ * @brief Cleans up finished client threads.
+ */
 void Server::cleanupThreads()
 {
     std::lock_guard<std::mutex> lock(clientsMutex);
@@ -227,10 +261,12 @@ void Server::cleanupThreads()
     }
 }
 
+/**
+ * @brief Stops the server and worker threads.
+ */
 void Server::stop()
 {
     running = false;
-
     {
         std::lock_guard lock(queueMutex);
         shutdownWorker = true;
@@ -240,6 +276,11 @@ void Server::stop()
         workerThread.join();
 }
 
+/**
+ * @brief Parses messages from Erlang and adds samples to queue.
+ * @param buffer The message buffer.
+ * @param len Length of the message.
+ */
 void Server::parseErlangMessage(const char *buffer, int len)
 {
     if (buffer == nullptr || len <= 0 || len >= 1024) {
@@ -249,6 +290,7 @@ void Server::parseErlangMessage(const char *buffer, int len)
 
     std::string message(buffer, len);
 
+    // Parse message components
     size_t nPos = message.find("n:");
     size_t bPos = message.find(";b:");
     size_t ePos = message.find(";e:");
@@ -259,11 +301,13 @@ void Server::parseErlangMessage(const char *buffer, int len)
         return;
     }
 
+    // Extract message fields
     std::string name = message.substr(2, bPos - 2);
     std::string bStr = message.substr(bPos + 3, ePos - (bPos + 3));
     std::string eStr = message.substr(ePos + 3, sPos - (ePos + 3));
     std::string statusStr = message.substr(sPos + 3);
 
+    // Convert to sample data
     uint64_t startTime = std::stoull(bStr);
     uint64_t endTime = std::stoull(eStr);
     Sample sample;
@@ -271,13 +315,15 @@ void Server::parseErlangMessage(const char *buffer, int len)
 
     if (statusStr == TIMEOUT || statusStr == FAIL) {
         status = (statusStr == TIMEOUT) ? Status::TIMEDOUT : Status::FAILED;
-    } else if (statusStr == EXEC_OK) {
-    } else {
+    } else if (statusStr != EXEC_OK) {
         std::cerr << "Unknown status: " << statusStr << std::endl;
         return;
     }
+
     double long elapsed = (endTime - startTime) / 1'000'000'000.0L;
     sample = {startTime, endTime, elapsed, status};
+
+    // Add to processing queue
     {
         std::lock_guard lock(queueMutex);
         sampleQueue.emplace(name, sample);

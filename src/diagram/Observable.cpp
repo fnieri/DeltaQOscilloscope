@@ -44,27 +44,34 @@ DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::ui
 {
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
     if (samplesInRange.empty()) {
-        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
-        return DeltaQ();
+        DeltaQ deltaQ = DeltaQ();
+        updateSnapshot(timeLowerBound, deltaQ);
+        return deltaQ;
     }
 
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
-
-    observedInterval.addDeltaQ(deltaQ);
-    confidenceIntervalHistory.push_back(deltaQ);
-
-    if (confidenceIntervalHistory.size() > MAX_DQ) {
-        observedInterval.removeDeltaQ(confidenceIntervalHistory.front());
-        confidenceIntervalHistory.pop_front();
-    }
-
-    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
-    if (!recording && confidenceIntervalHistory.size() > MAX_DQ) {
-        observableSnapshot.resizeTo(MAX_DQ); // Still useful for snapshot trim
-    }
+    updateSnapshot(timeLowerBound, deltaQ);
 
     triggerManager.evaluate(deltaQ, qta, timeLowerBound);
     return deltaQ;
+}
+
+void Observable::updateSnapshot(uint64_t timeLowerBound, DeltaQ &deltaQ)
+{
+    if (!(deltaQ == DeltaQ())) {
+        observedInterval.addDeltaQ(deltaQ);
+        confidenceIntervalHistory.push_back(deltaQ);
+
+        if (confidenceIntervalHistory.size() > MAX_DQ) {
+            observedInterval.removeDeltaQ(confidenceIntervalHistory.front());
+            confidenceIntervalHistory.pop_front();
+        }
+    }
+    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+    observableSnapshot.addQTA(timeLowerBound, qta);
+    if (!recording && (confidenceIntervalHistory.size() > MAX_DQ)) {
+        observableSnapshot.resizeTo(MAX_DQ); // Still useful for snapshot trim
+    }
 }
 
 DeltaQ Observable::getObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)

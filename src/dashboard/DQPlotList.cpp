@@ -1,4 +1,3 @@
-
 #include "DQPlotList.h"
 #include "../Application.h"
 #include <QLabel>
@@ -39,12 +38,6 @@ bool DQPlotList::isEmptyAfterReset()
     return controller->isEmptyAfterReset();
 }
 
-void DQPlotList::addCategory(const QString &category)
-{
-    QListWidgetItem *categoryItem = new QListWidgetItem(category, availableList);
-    categoryItem->setFlags(Qt::NoItemFlags); // Non-selectable
-    categoryItem->setFont(QFont("Arial", 10, QFont::Bold));
-}
 
 void DQPlotList::updateLists()
 {
@@ -75,7 +68,7 @@ void DQPlotList::onConfirmSelection()
     QList<QListWidgetItem *> selected = availableList->selectedItems();
     auto system = Application::getInstance().getSystem();
     for (QListWidgetItem *item : selected) {
-        controller->addComponent(item->text().toStdString(), system->hasProbe(item->text().toStdString()));
+        controller->addComponent(item->text().toStdString(), system->hasOutcome(item->text().toStdString()));
     }
     updateLists();
 }

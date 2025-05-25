@@ -35,20 +35,44 @@ protected:
     bool recording = false;
 
 private:
+    void updateSnapshot(uint64_t timeLowerBound, DeltaQ &deltaQ);
+
 public:
+    /**
+     * @brief Constructor an observable with its name
+     */
     Observable(const std::string &name);
 
     virtual ~Observable() { };
+    /**
+     * Add a sample (outcome instance) to an observable
+     */
     void addSample(const Sample &sample);
-
+    /**
+     * @brief Get all sample with endTime timeLowerBound - timeUpperBound
+     * @return The sample in range timeLowerBound - timeUpperBound
+     */
     std::vector<Sample> getSamplesInRange(std::uint64_t timeLowerBound, std::uint64_t timeUpperBound);
-
+    /**
+     * @brief Get observed DeltaQ in range timeLowerBound - timeUpperBound from snapshot, if it has not been calculated, calculate it
+     * @return DeltaQ
+     */
     DeltaQ getObservedDeltaQ(uint64_t, uint64_t);
-
+    /**
+     * @brief Calculate the observed DeltaQ in range timeLowerBound - timeUpperBound, add it to snapshot and ConfidenceInterval
+     * @return The calculated DeltaQ
+     */
     DeltaQ calculateObservedDeltaQ(uint64_t, uint64_t);
 
+    /**
+     * @brief Get DeltaQ representation for graphical plotting
+     */
     DeltaQRepr getObservedDeltaQRepr(uint64_t, uint64_t);
 
+    /**
+     * @brief Set new parameters for a DeltaQ
+     * @return new dMax
+     */
     double setNewParameters(int newExp, int newNBins);
 
     double getBinWidth() const
@@ -81,15 +105,38 @@ public:
         return triggerManager;
     }
 
+    /**
+     * @brief Set recoding snapshot
+     * @param bool is recording
+     */
     void setRecording(bool);
 
-    void setQTA(const QTA &newQTA);
-
+    /**
+     * @brief Set QTA for an observable
+     * @param qta new QTA
+     */
+    void setQTA(const QTA &);
+    /**
+     * @brief add a trigger to an observable
+     * @param type the observable type
+     * @param condition the condition to evalute
+     * @param action action to perform on trigger fired
+     * @param enabled
+     * @param sampleLimit sampleLimit sample limit for sample limit trigger
+     */
     void addTrigger(TriggerType type, TriggerDefs::Condition condition, TriggerDefs::Action action, bool enabled, std::optional<int> sampleLimit);
-
+    /**
+     * @brief Remove observable trigger
+     */
     void removeTrigger(TriggerType type);
 
+    /**
+     * @brief Get snapshot of observable
+     */
     Snapshot getSnapshot();
-
+    /**
+     * @brief Get observable name
+     * @return its name
+     */
     [[nodiscard]] std::string getName() const &;
 };
