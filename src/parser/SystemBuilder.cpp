@@ -1,67 +1,275 @@
-#ifndef SYSTEMBUILDER_H
-#define SYSTEMBUILDER_H
-
-#include "../diagram/System.h"
-#include "DQGrammarVisitor.h"
+#include "SystemBuilder.h"
 #include <memory>
-#include <unordered_map>
+#include <stdexcept>
 
-/**
- * @brief Visitor class that builds a System from a parsed grammar tree.
- */
-class SystemBuilderVisitor : public parser::DQGrammarVisitor
+#include <locale>
+System SystemBuilderVisitor::getSystem() const
 {
-private:
-    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes;   ///< Map of outcome names to Outcome objects.
-    std::unordered_map<std::string, std::shared_ptr<Operator>> operators; ///< Map of operator names to Operator objects.
-    std::unordered_map<std::string, std::shared_ptr<Probe>> probes;       ///< Map of probe names to Probe objects.
+    return system;
+}
 
-    std::vector<std::string> definedProbes; ///< List of defined probe names.
-    System system; ///< The final system constructed by the visitor.
+void SystemBuilderVisitor::checkForCycles() const
+{
+    std::set<std::string> visited;
+    std::set<std::string> recursionStack;
 
-    std::string currentlyBuildingProbe; ///< Tracks the probe currently being built for dependency management.
-    std::map<std::string, std::vector<std::string>> dependencies; ///< Graph of probe dependencies.
+    for (const auto &[node, _] : dependencies) {
+        if (hasCycle(node, visited, recursionStack)) {
+            throw std::invalid_argument("Cycle detected in system definition involving: " + node);
+        }
+    }
+}
 
-    std::unordered_map<std::string, std::vector<std::string>> definitionLinks; ///< For debugging: links between definitions.
-    std::unordered_map<std::string, std::vector<std::vector<std::string>>> operatorLinks; ///< For debugging: operator chains.
-    std::vector<std::string> systemLinks; ///< Top-level system observable links.
-    std::unordered_set<std::string> allNames; ///< Tracks all used names to detect duplicates.
+bool SystemBuilderVisitor::hasCycle(const std::string &node, std::set<std::string> &visited, std::set<std::string> &recursionStack) const
+{
+    if (recursionStack.find(node) != recursionStack.end()) {
+        return true;
+    }
+    if (visited.find(node) != visited.end()) {
+        return false;
+    }
 
-    /**
-     * @brief Checks the dependency graph for cycles.
-     * @throws std::invalid_argument if a cycle is detected.
-     */
-    void checkForCycles() const;
+    visited.insert(node);
+    recursionStack.insert(node);
 
-    /**
-     * @brief Recursive utility to detect cycles in a graph.
-     * @param node Current node.
-     * @param visited Set of visited nodes.
-     * @param recursionStack Stack of nodes in the current DFS path.
-     * @return True if a cycle is found.
-     */
-    bool hasCycle(const std::string& node,
-                  std::set<std::string>& visited,
-                  std::set<std::string>& recursionStack) const;
+    if (dependencies.find(node) != dependencies.end()) {
+        for (const auto &neighbor : dependencies.at(node)) {
+            if (hasCycle(neighbor, visited, recursionStack)) {
+                return true;
+            }
+        }
+    }
 
-public:
-    /**
-     * @brief Returns the constructed System.
-     * @return The system object.
-     */
-    System getSystem() const;
+    recursionStack.erase(node);
+    return false;
+}
 
-    // Visitor overrides from DQGrammarVisitor:
-    std::any visitStart(parser::DQGrammarParser::StartContext *context) override;
-    std::any visitDefinition(parser::DQGrammarParser::DefinitionContext *context) override;
-    std::any visitSystem(parser::DQGrammarParser::SystemContext *context) override;
-    std::any visitComponent(parser::DQGrammarParser::ComponentContext *context) override;
-    std::any visitBehaviorComponent(parser::DQGrammarParser::BehaviorComponentContext *context) override;
-    std::any visitProbeComponent(parser::DQGrammarParser::ProbeComponentContext *context) override;
-    std::any visitProbability_list(parser::DQGrammarParser::Probability_listContext *context) override;
-    std::any visitComponent_list(parser::DQGrammarParser::Component_listContext *context) override;
-    std::any visitOutcome(parser::DQGrammarParser::OutcomeContext *context) override;
-    std::any visitComponent_chain(parser::DQGrammarParser::Component_chainContext *context) override;
-};
+std::any SystemBuilderVisitor::visitStart(parser::DQGrammarParser::StartContext *context)
+{
+    for (const auto definition : context->definition()) {
+        visitDefinition(definition);
+    }
 
-#endif // SYSTEMBUILDER_H
+    if (context->system()) {
+        visitSystem(context->system());
+    }
+
+    system.setOutcomes(outcomes);
+    system.setProbes(probes);
+    system.setOperators(operators);
+    /*
+    for (const auto &[name, link] : definitionLinks) {
+        std::cout << name << " [ ";
+        for (auto &name2 : link) {
+            std::cout << name2 << " ";
+        }
+        std::cout << "]\n";
+    }
+
+    for (const auto &[name, op] : operatorLinks) {
+        std::cout << name << " [ ";
+        for (auto link : op) {
+            std::cout << " [";
+            for (auto lill : link) {
+                std::cout << lill << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]\n";
+    }
+    */
+    checkForCycles();
+    return nullptr;
+}
+
+std::any SystemBuilderVisitor::visitDefinition(parser::DQGrammarParser::DefinitionContext *context)
+{
+    std::string probeName = context->IDENTIFIER()->getText();
+    if (std::find(definedProbes.begin(), definedProbes.end(), probeName) != definedProbes.end()) {
+        throw std::invalid_argument("Probe has already been defined");
+    }
+    if (allNames.find(probeName) != allNames.end()) {
+        throw std::invalid_argument("Duplicate name detected: " + probeName);
+    }
+    allNames.insert(probeName);
+    currentlyBuildingProbe = probeName;
+
+    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(context->component_chain()));
+    std::vector<std::shared_ptr<Observable>> probeCausalLinks;
+    std::vector<std::string> links;
+    for (auto &comp : chainComponents) {
+        probeCausalLinks.push_back(comp);
+        links.push_back(comp->getName());
+    }
+
+    const auto probe = std::make_shared<Probe>(probeName, probeCausalLinks);
+
+    probes[probeName] = probe;
+    definedProbes.push_back(probeName);
+    definitionLinks[probeName] = links;
+    currentlyBuildingProbe = "";
+    return nullptr;
+}
+
+std::any SystemBuilderVisitor::visitSystem(parser::DQGrammarParser::SystemContext *context)
+{
+    const auto chainComponents = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(context->component_chain()));
+
+    std::vector<std::string> links;
+    for (auto &comp : chainComponents) {
+        links.push_back(comp->getName());
+    }
+
+    systemLinks = links;
+
+    return nullptr;
+}
+
+std::any SystemBuilderVisitor::visitComponent(parser::DQGrammarParser::ComponentContext *context)
+{
+    if (context->behaviorComponent()) {
+        return visitBehaviorComponent(context->behaviorComponent());
+    } else if (context->probeComponent()) {
+        return visitProbeComponent(context->probeComponent());
+    } else if (context->outcome()) {
+        return visitOutcome(context->outcome());
+    }
+    return nullptr;
+}
+
+std::any SystemBuilderVisitor::visitBehaviorComponent(parser::DQGrammarParser::BehaviorComponentContext *context)
+{
+    const std::string typeStr = context->BEHAVIOR_TYPE()->getText();
+    std::string name = context->IDENTIFIER()->getText();
+
+    if (operators.find(name) != operators.end()) {
+        return std::dynamic_pointer_cast<Observable>(operators[name]);
+    }
+    if (allNames.find(name) != allNames.end()) {
+        throw std::invalid_argument("Duplicate name detected: " + name);
+    }
+
+    allNames.insert(name);
+    OperatorType type;
+    if (typeStr == "a")
+        type = OperatorType::ATF;
+    else if (typeStr == "f")
+        type = OperatorType::FTF;
+    else if (typeStr == "p")
+        type = OperatorType::PRB;
+    else
+        throw std::invalid_argument("Unknown operator type: " + typeStr);
+
+    const auto op = std::make_shared<Operator>(name, type);
+    if (type == OperatorType::PRB && context->probability_list()) {
+        const auto probabilities = std::any_cast<std::vector<double>>(visitProbability_list(context->probability_list()));
+        op->setProbabilities(probabilities);
+    } else if (type == OperatorType::PRB && !context->probability_list()) {
+        throw std::invalid_argument("A probabilistic operator must have probabilities");
+    } else if (type != OperatorType::PRB && context->probability_list()) {
+        throw std::invalid_argument("A non probabilistic operator cannot have probabilities");
+    }
+
+    std::vector<std::vector<std::shared_ptr<Observable>>> operatorPtrLinks;
+
+    if (context->component_list()) {
+        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<Observable>>>>(visitComponent_list(context->component_list()));
+
+        for (auto &chain : childrenChains) {
+            if (!chain.empty()) {
+                operatorPtrLinks.push_back(chain);
+            }
+        }
+    }
+
+    op->setCausalLinks(operatorPtrLinks);
+
+    if (context->component_list()) {
+        auto childrenChains = std::any_cast<std::vector<std::vector<std::shared_ptr<Observable>>>>(visitComponent_list(context->component_list()));
+
+        std::vector<std::vector<std::string>> childrenLinks;
+
+        for (auto &chain : childrenChains) {
+            if (!chain.empty()) {
+                std::vector<std::string> chainNames;
+                for (auto &comp : chain) {
+                    chainNames.push_back(comp->getName());
+                }
+                childrenLinks.push_back(chainNames);
+            }
+        }
+
+        operatorLinks[name] = childrenLinks;
+    }
+
+    operators[name] = op;
+    return std::dynamic_pointer_cast<Observable>(op);
+}
+std::any SystemBuilderVisitor::visitProbeComponent(parser::DQGrammarParser::ProbeComponentContext *context)
+{
+    std::string name = context->IDENTIFIER()->getText();
+
+    if (!currentlyBuildingProbe.empty()) {
+        dependencies[currentlyBuildingProbe].push_back(name);
+    }
+
+    if (probes.find(name) != probes.end()) {
+        return std::dynamic_pointer_cast<Observable>(probes[name]);
+    }
+
+    // Create a stub probe (may be fleshed out later)
+    auto probe = std::make_shared<Probe>(name);
+    probes[name] = probe;
+    return std::dynamic_pointer_cast<Observable>(probe);
+}
+
+std::any SystemBuilderVisitor::visitProbability_list(parser::DQGrammarParser::Probability_listContext *context)
+{
+    std::locale::global(std::locale("C"));
+
+    std::vector<double> probabilities;
+    for (auto num : context->NUMBER()) {
+        probabilities.push_back(std::stod(num->getText()));
+    }
+    return probabilities;
+}
+
+std::any SystemBuilderVisitor::visitComponent_list(parser::DQGrammarParser::Component_listContext *context)
+{
+    std::vector<std::vector<std::shared_ptr<Observable>>> componentsChains;
+
+    for (auto chainCtx : context->component_chain()) {
+        auto chain = std::any_cast<std::vector<std::shared_ptr<Observable>>>(visitComponent_chain(chainCtx));
+        componentsChains.push_back(chain);
+    }
+
+    return componentsChains;
+}
+
+std::any SystemBuilderVisitor::visitComponent_chain(parser::DQGrammarParser::Component_chainContext *context)
+{
+    std::vector<std::shared_ptr<Observable>> components;
+
+    for (auto compCtx : context->component()) {
+        auto component = std::any_cast<std::shared_ptr<Observable>>(visitComponent(compCtx));
+        components.push_back(component);
+    }
+    return components;
+}
+
+std::any SystemBuilderVisitor::visitOutcome(parser::DQGrammarParser::OutcomeContext *context)
+{
+    std::string name = context->IDENTIFIER()->getText();
+
+    if (outcomes.find(name) != outcomes.end()) {
+        return std::dynamic_pointer_cast<Observable>(outcomes[name]);
+    }
+    if (allNames.find(name) != allNames.end()) {
+        throw std::invalid_argument("Duplicate name detected: " + name);
+    }
+    allNames.insert(name);
+
+    auto outcome = std::make_shared<Outcome>(name);
+    outcomes[name] = outcome;
+    return std::dynamic_pointer_cast<Observable>(outcome);
+}
