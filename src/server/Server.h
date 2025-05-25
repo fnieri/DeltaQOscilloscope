@@ -30,15 +30,26 @@ public:
     ~Server();
 
     /**
-     * @brief Starts the server and worker threads.
-     */
-    void start();
-
-    /**
      * @brief Sends a command to the Erlang process.
      * @param command The command string to send.
      */
     void sendToErlang(const std::string &command);
+
+    bool startServer(const std::string &ip = "0.0.0.0", int port = 8080);
+
+    void stopServer();
+
+    bool setErlangEndpoint(const std::string &ip, int port);
+
+    bool isServerRunning() const
+    {
+        return server_started;
+    }
+
+    /**
+     * @brief Stops the server and worker threads.
+     */
+    void stop();
 
 private:
     /**
@@ -46,12 +57,12 @@ private:
      */
     void run();
 
-    int server_fd;                  ///< Server socket file descriptor
-    int new_socket;                 ///< Client socket file descriptor
-    struct sockaddr_in address;     ///< Server address structure
-    int port;                       ///< Listening port number
+    int server_fd; ///< Server socket file descriptor
+    int new_socket; ///< Client socket file descriptor
+    struct sockaddr_in address; ///< Server address structure
+    int port; ///< Listening port number
 
-    std::thread serverThread;       ///< Thread for server operations
+    std::thread serverThread; ///< Thread for server operations
 
     /**
      * @brief Updates the system reference from Application.
@@ -68,7 +79,7 @@ private:
     std::shared_ptr<System> system; ///< Reference to the system being monitored
 
     std::vector<std::thread> clientThreads; ///< Active client handler threads
-    std::mutex clientsMutex;        ///< Mutex for client threads access
+    std::mutex clientsMutex; ///< Mutex for client threads access
     std::atomic<bool> running {false}; ///< Server running state flag
 
     /**
@@ -82,13 +93,8 @@ private:
      */
     void cleanupThreads();
 
-    /**
-     * @brief Stops the server and worker threads.
-     */
-    void stop();
-
-    int erlang_socket = -1;         ///< Socket for Erlang communication
-    std::mutex erlangMutex;         ///< Mutex for Erlang socket operations
+    int erlang_socket = -1; ///< Socket for Erlang communication
+    std::mutex erlangMutex; ///< Mutex for Erlang socket operations
 
     /**
      * @brief Establishes connection to Erlang.
@@ -96,14 +102,19 @@ private:
      */
     bool connectToErlang();
 
-    int client_socket;              ///< Current client socket
+    int client_socket; ///< Current client socket
 
     // Asynchronous sample processing
     std::queue<std::pair<std::string, Sample>> sampleQueue; ///< Sample processing queue
-    std::mutex queueMutex;          ///< Mutex for queue access
+    std::mutex queueMutex; ///< Mutex for queue access
     std::condition_variable queueCond; ///< Condition variable for queue notifications
-    std::thread workerThread;       ///< Worker thread for sample processing
-    bool shutdownWorker = false;    ///< Flag to signal worker thread shutdown
+    std::thread workerThread; ///< Worker thread for sample processing
+    bool shutdownWorker = false; ///< Flag to signal worker thread shutdown
+
+    std::string erlang_ip = "127.0.0.1"; ///< Erlang server IP
+    int erlang_port = 8081; ///< Erlang server port
+    std::string server_ip = "0.0.0.0"; ///< Current C++ server IP
+    bool server_started = false;
 };
 
 #endif

@@ -21,8 +21,29 @@ Server::Server(int port)
     : port(port)
     , server_fd(0)
     , new_socket(0)
+    , server_started(false)
 {
     Application::getInstance().addObserver([this]() { this->updateSystem(); });
+
+    // Start worker thread (this can run independently)
+    workerThread = std::thread([this]() {
+        while (!shutdownWorker) {
+            std::unique_lock lock(queueMutex);
+            queueCond.wait(lock, [this] { return !sampleQueue.empty() || shutdownWorker; });
+
+            while (!sampleQueue.empty()) {
+                auto [name, sample] = sampleQueue.front();
+                sampleQueue.pop();
+                lock.unlock();
+
+                if (system) {
+                    system->addSample(name, sample);
+                }
+
+                lock.lock();
+            }
+        }
+    });
 }
 
 /**
@@ -40,34 +61,6 @@ Server::~Server()
     if (serverThread.joinable())
         serverThread.join();
 }
-
-/**
- * @brief Starts the server and worker threads.
- */
-void Server::start()
-{
-    serverThread = std::thread(&Server::run, this);
-
-    workerThread = std::thread([this]() {
-        while (!shutdownWorker) {
-            std::unique_lock lock(queueMutex);
-            queueCond.wait(lock, [this] { return !sampleQueue.empty() || shutdownWorker; });
-
-            while (!sampleQueue.empty()) {
-                auto [name, sample] = sampleQueue.front();
-                sampleQueue.pop();
-                lock.unlock(); // Unlock during processing
-
-                if (system) {
-                    system->addSample(name, sample);
-                }
-
-                lock.lock();
-            }
-        }
-    });
-}
-
 /**
  * @brief Updates the system reference from Application.
  */
@@ -97,13 +90,24 @@ void Server::run()
     setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &bufSize, sizeof(bufSize));
     setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &bufSize, sizeof(bufSize));
 
-    // Bind socket
+    // Bind socket to specified IP
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
+
+    // Parse IP address
+    if (server_ip == "0.0.0.0" || server_ip.empty()) {
+        address.sin_addr.s_addr = INADDR_ANY;
+    } else {
+        if (inet_pton(AF_INET, server_ip.c_str(), &address.sin_addr) <= 0) {
+            std::cerr << "Invalid IP address: " << server_ip << std::endl;
+            close(server_fd);
+            return;
+        }
+    }
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("Bind failed");
+        close(server_fd);
         return;
     }
 
@@ -112,11 +116,13 @@ void Server::run()
 
     if (listen(server_fd, SOMAXCONN) < 0) {
         perror("Listen failed");
+        close(server_fd);
         return;
     }
 
-    std::cout << "Server running on port " << port << std::endl;
+    std::cout << "Server running on " << server_ip << ":" << port << std::endl;
     running = true;
+    server_started = true;
 
     while (running) {
         int addrlen = sizeof(address);
@@ -124,11 +130,12 @@ void Server::run()
 
         if (client_socket < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
-                // No pending connections, sleep briefly
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 cleanupThreads();
                 continue;
             }
+            if (!running)
+                break; // Server was stopped
             perror("Accept failed");
             continue;
         }
@@ -139,7 +146,85 @@ void Server::run()
 
     // Cleanup
     close(server_fd);
+    server_fd = 0;
     cleanupThreads();
+    server_started = false;
+}
+
+/**
+ * @brief Starts the server on specified IP and port.
+ * @param ip The IP address to bind to (default: "0.0.0.0" for all interfaces)
+ * @param port The port to listen on
+ * @return true if server started successfully
+ */
+bool Server::startServer(const std::string &ip, int port)
+{
+    if (server_started) {
+        std::cerr << "Server already running. Stop it first." << std::endl;
+        return false;
+    }
+
+    this->server_ip = ip;
+    this->port = port;
+
+    serverThread = std::thread(&Server::run, this);
+
+    // Wait a bit to see if server started successfully
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    return server_started;
+}
+
+/**
+ * @brief Stops the server and closes all sockets.
+ */
+void Server::stopServer()
+{
+    if (!server_started) {
+        std::cout << "Server not running." << std::endl;
+        return;
+    }
+
+    running = false;
+    server_started = false;
+
+    // Close server socket to break accept loop
+    if (server_fd > 0) {
+        close(server_fd);
+        server_fd = 0;
+    }
+
+    // Join server thread
+    if (serverThread.joinable()) {
+        serverThread.join();
+    }
+
+    // Cleanup client threads
+    cleanupThreads();
+
+    std::cout << "Server stopped." << std::endl;
+}
+
+/**
+ * @brief Sets the Erlang endpoint for connections.
+ * @param ip Erlang server IP address
+ * @param port Erlang server port
+ * @return true if endpoint set successfully
+ */
+bool Server::setErlangEndpoint(const std::string &ip, int port)
+{
+    std::lock_guard<std::mutex> lock(erlangMutex);
+
+    // Close existing connection if any
+    if (erlang_socket > 0) {
+        close(erlang_socket);
+        erlang_socket = -1;
+    }
+
+    erlang_ip = ip;
+    erlang_port = port;
+
+    std::cout << "Erlang endpoint set to " << ip << ":" << port << std::endl;
+    return true;
 }
 
 /**
@@ -161,9 +246,15 @@ bool Server::connectToErlang()
 
     sockaddr_in erlang_addr {};
     erlang_addr.sin_family = AF_INET;
-    erlang_addr.sin_port = htons(8081);
-    inet_pton(AF_INET, "127.0.0.1", &erlang_addr.sin_addr);
-    int set = 1;
+    erlang_addr.sin_port = htons(erlang_port);
+
+    if (inet_pton(AF_INET, erlang_ip.c_str(), &erlang_addr.sin_addr) <= 0) {
+        std::cerr << "Invalid Erlang IP: " << erlang_ip << std::endl;
+        close(erlang_socket);
+        erlang_socket = -1;
+        return false;
+    }
+
     if (connect(erlang_socket, (struct sockaddr *)&erlang_addr, sizeof(erlang_addr)) < 0) {
         perror("Failed to connect to Erlang");
         close(erlang_socket);
@@ -171,7 +262,7 @@ bool Server::connectToErlang()
         return false;
     }
 
-    std::cout << "Connected to Erlang on 127.0.0.1:8081\n";
+    std::cout << "Connected to Erlang on " << erlang_ip << ":" << erlang_port << std::endl;
     return true;
 }
 

@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
 {
 
     Server server(8080);
-    server.start();
     signal(SIGPIPE, SIG_IGN); // Ignore SIGPIPE so when Erlang closes socket it will not crash
     Application &application = Application::getInstance();
     application.setServer(&server);
@@ -51,6 +50,6 @@ int main(int argc, char *argv[])
     window.show();
 
     int result = app.exec();
-
+    server.stop();
     return result;
 }

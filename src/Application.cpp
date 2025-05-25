@@ -216,3 +216,17 @@ void Application::setSystem(System newSystem)
 
     notifyObservers();
 }
+
+bool Application::startCppServer(const std::string &&ip, int port)
+{
+    return server->startServer(ip, port);
+}
+
+void Application::stopCppServer()
+{
+    server->stopServer();
+}
+void Application::setErlangEndpoint(const std::string &&ip, int port)
+{
+    server->setErlangEndpoint(ip, port);
+}

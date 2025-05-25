@@ -38,23 +38,22 @@ MainWindow::MainWindow(QWidget *parent)
     sidebar = new Sidebar(this);
     triggersTab = new TriggersTab(this);
     observableSettings = new ObservableSettings(this);
+    stubWidget = new StubControlWidget(this);
 
     // Configure tabbed side panel
     sideTabWidget = new QTabWidget(this);
     sideTabWidget->addTab(sidebar, "System/Plots");
     sideTabWidget->addTab(observableSettings, "Probes settings");
     sideTabWidget->addTab(triggersTab, "Triggers");
+    sideTabWidget->addTab(stubWidget, "Connection controls");
     sideTabWidget->setTabPosition(QTabWidget::West);
-
     // Connect sidebar signals
     connect(sidebar, &Sidebar::addPlotClicked, this, &MainWindow::onAddPlotClicked);
 
     // Set up side container layout
-    stubWidget = new StubControlWidget(this);
     sideContainer = new QWidget(this);
     sideLayout = new QVBoxLayout(sideContainer);
     sideLayout->addWidget(sideTabWidget);
-    sideLayout->addWidget(stubWidget);
     sideLayout->setStretch(1, 0); // Make tabs take up most space
     mainLayout->addWidget(sideContainer, 0);
 

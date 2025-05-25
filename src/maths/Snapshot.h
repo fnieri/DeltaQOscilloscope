@@ -10,10 +10,11 @@
  * @class Snapshot
  * @brief Represents a snapshot of observed and calculated DeltaQ values along with QTAs
  */
-class Snapshot {
+class Snapshot
+{
     std::string observableName; ///< Name of the observable being tracked.
-    std::map<uint64_t, DeltaQRepr> observedDeltaQs; ///< Map of observed DeltaQ values (timestamp → DeltaQRepr).
-    std::map<uint64_t, DeltaQRepr> calculatedDeltaQs; ///< Map of calculated DeltaQ values (timestamp → DeltaQRepr).
+    std::map<uint64_t, DeltaQRepr> observedDeltaQs; ///< Map of observed DeltaQ values at times t.
+    std::map<uint64_t, DeltaQRepr> calculatedDeltaQs; ///< Map of calculated DeltaQ values at times t
     std::map<uint64_t, QTA> QTAs; ///< Map of QTAs at time t
 
 public:

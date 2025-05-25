@@ -43,5 +43,10 @@ public:
     std::shared_ptr<System> getSystem();
     void addObserver(std::function<void()> callback);
     void sendDelayChange(std::string &, double);
+
+    bool startCppServer(const std::string &&, int);
+    void stopCppServer();
+
+    void setErlangEndpoint(const std::string &&, int);
     void setStubRunning(bool running);
 };
