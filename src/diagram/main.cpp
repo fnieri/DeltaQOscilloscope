@@ -15,7 +15,7 @@
 
 #define ASSERT_NEAR(a, b, tol)                                                                                                                                 \
     if (std::fabs((a) - (b)) > tol) {                                                                                                                          \
-        std::cerr << "Assertion failed at " << __LINE__ << ": " << #a << " ≈ " << #b << " (" << a << " vs " << b << ")" << std::endl;                          \
+        std::cerr << "Assertion failed at " << __LINE__ << ": " << #a << " = " << #b << " (" << a << " vs " << b << ")" << std::endl;                          \
         std::exit(1);                                                                                                                                          \
     }
 

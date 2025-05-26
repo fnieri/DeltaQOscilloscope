@@ -1,7 +1,7 @@
 /**
  * @author: Francesco Nieri
  * @date 26/10/2024
- * Class representing a Delta Q
+ * Class representing a DeltaQ
  */
 
 #ifndef DELTAQ_H

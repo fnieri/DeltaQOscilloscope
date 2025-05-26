@@ -87,7 +87,7 @@ void QTAInputWidget::onSaveButtonClicked()
         return;
 
     try {
-        QTA newQTA = QTA::create(getPerc25(), getPerc50(), getPerc75(), getCdfMax());
+        QTA newQTA = QTA::create(getPerc25(), getPerc50(), getPerc75(), getCdfMax(), true);
         observable->setQTA(newQTA);
     } catch (std::exception &e) {
         QMessageBox::warning(this, "Error", e.what());

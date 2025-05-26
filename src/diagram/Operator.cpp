@@ -12,7 +12,7 @@
 Operator::Operator(const std::string &name, OperatorType type)
     : Observable(name)
     , type(type)
-    , calculatedInterval(0)
+    , calculatedInterval(50)
 {
 }
 
@@ -50,26 +50,37 @@ DeltaQ Operator::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t tim
         // Get the convolution of the components in a children
         deltaQs.push_back(convolveN(childrenDeltaQs));
     }
-    DeltaQ calculatedDeltaQ;
+    DeltaQ result;
 
     // Choose appropriate operation
     if (type == OperatorType::FTF)
-        calculatedDeltaQ = firstToFinish(deltaQs);
+        result = firstToFinish(deltaQs);
     else if (type == OperatorType::PRB)
-        calculatedDeltaQ = probabilisticChoice(probabilities, deltaQs);
+        result = probabilisticChoice(probabilities, deltaQs);
     else
-        calculatedDeltaQ = allToFinish(deltaQs);
+        result = allToFinish(deltaQs);
 
-    calculatedInterval.addDeltaQ(calculatedDeltaQ);
-    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, calculatedDeltaQ, calculatedInterval.getBounds());
-    if (observableSnapshot.getCalculatedSize() > MAX_DQ) {
-        calculatedInterval.removeDeltaQ(observableSnapshot.getOldestCalculatedDeltaQ());
-        if (!recording) {
-            observableSnapshot.removeOldestCalculatedDeltaQ();
-        }
+    int calculatedBins = result.getBins();
+
+    if (calculatedBins != calculatedInterval.getBins()) {
+        calculatedInterval.setNumBins(calculatedBins);
+        calculatedDeltaQHistory.clear();
     }
 
-    return calculatedDeltaQ;
+    calculatedInterval.addDeltaQ(result);
+    calculatedDeltaQHistory.push_back(result);
+
+    if (calculatedDeltaQHistory.size() > MAX_DQ) {
+        calculatedInterval.removeDeltaQ(calculatedDeltaQHistory.front());
+        calculatedDeltaQHistory.pop_front();
+    }
+
+    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
+
+    if (!recording && calculatedDeltaQHistory.size() > MAX_DQ) {
+        observableSnapshot.removeOldestCalculatedDeltaQ();
+    }
+    return result;
 }
 
 DeltaQRepr Operator::getCalculatedDeltaQRepr(uint64_t timeLowerBound, uint64_t timeUpperBound)

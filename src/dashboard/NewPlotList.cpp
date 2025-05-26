@@ -1,3 +1,8 @@
+/**
+ * @file NewPlotList.cpp
+ * @brief Implementation of the NewPlotList class, which provides a UI list for selecting observables to create a new plot.
+ */
+
 #include "NewPlotList.h"
 #include "../Application.h"
 #include <iostream>
@@ -6,11 +11,14 @@
 NewPlotList::NewPlotList(QWidget *parent)
     : QListWidget(parent)
 {
-
     setSelectionMode(QAbstractItemView::MultiSelection);
     Application::getInstance().addObserver([this]() { this->reset(); });
 }
 
+/**
+ * @brief Clears and repopulates the list with updated observables.
+ *
+ */
 void NewPlotList::reset()
 {
     this->blockSignals(true);
@@ -20,11 +28,14 @@ void NewPlotList::reset()
     addItems();
 }
 
+/**
+ * @brief Adds all observables from the system as items in the list.
+ */
 void NewPlotList::addItems()
 {
     auto system = Application::getInstance().getSystem();
-
     auto observables = system->getObservables();
+
     for (const auto &obs : observables) {
         if (obs.second) {
             QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(obs.first), this);
@@ -33,6 +44,10 @@ void NewPlotList::addItems()
     }
 }
 
+/**
+ * @brief Returns a list of selected observable names.
+ * @return A vector of strings corresponding to selected item labels.
+ */
 std::vector<std::string> NewPlotList::getSelectedItems()
 {
     std::vector<std::string> selectedItems;
@@ -42,4 +57,12 @@ std::vector<std::string> NewPlotList::getSelectedItems()
         selectedItems.push_back(item->text().toStdString());
     }
     return selectedItems;
+}
+
+/**
+ * @brief Deselects all currently selected items in the list.
+ */
+void NewPlotList::deselectAll()
+{
+    clearSelection();
 }

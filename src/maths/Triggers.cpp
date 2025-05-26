@@ -13,7 +13,7 @@ namespace Conditions
     {
         return [](const DeltaQ &dq, const QTA &qta) {
             const QTA &dqQta = dq.getQTA();
-            return dqQta.perc_25 > qta.perc_25 || dqQta.perc_50 > qta.perc_50 || dqQta.perc_75 > qta.perc_75;
+            return dqQta.perc_25 > qta.perc_25 || dqQta.perc_50 > qta.perc_50 || dqQta.perc_75 > qta.perc_75 || dqQta.cdfMax < qta.cdfMax;
         };
     }
 

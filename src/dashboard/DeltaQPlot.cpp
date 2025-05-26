@@ -18,13 +18,13 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
     // Create legend panel and toggle
     legendPanel = new CustomLegendPanel(this);
     QToolButton *toggleButton = new QToolButton(this);
-    toggleButton->setText("▶ Legend");
+    toggleButton->setText("> Legend");
     toggleButton->setCheckable(true);
     toggleButton->setChecked(true);
     toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
     connect(toggleButton, &QToolButton::toggled, legendPanel, &QWidget::setVisible);
-    connect(toggleButton, &QToolButton::toggled, [toggleButton](bool checked) { toggleButton->setText(checked ? "▼ Legend" : "▶ Legend"); });
+    connect(toggleButton, &QToolButton::toggled, [toggleButton](bool checked) { toggleButton->setText(checked ? "^ Legend" : "> Legend"); });
 
     // Create chart and view
     chart = new QChart();

@@ -1,3 +1,7 @@
+/**
+ * @file SnapshotViewerWindow.cpp
+ * @brief Implementation of the SnapshotViewerWindow class.
+ */
 
 #include "SnapshotViewerWindow.h"
 
@@ -10,7 +14,11 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtConcurrent>
+#include <qnamespace.h>
 
+/**
+ * @brief Constructs a new SnapshotViewerWindow.
+ */
 SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, QWidget *parent)
     : QWidget(parent)
     , observableSelector(new QComboBox(this))
@@ -18,7 +26,6 @@ SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, 
     , timeLabel(new QLabel(this))
     , chartView(new QChartView(new QChart(), this))
 {
-
     auto *mainLayout = new QHBoxLayout(this);
 
     // Chart area
@@ -26,14 +33,13 @@ SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, 
     mainLayout->addWidget(chartView, 3); // 3/4 of space
 
     // Controls
-    auto *controlLayout = new QVBoxLayout();
+    auto *controlLayout = new QVBoxLayout(this);
     controlLayout->addWidget(new QLabel("Select Observable:"));
     controlLayout->addWidget(observableSelector);
 
     controlLayout->addWidget(new QLabel("Select Time:"));
     controlLayout->addWidget(timeSlider);
     controlLayout->addWidget(timeLabel);
-
     controlLayout->addStretch();
     mainLayout->addLayout(controlLayout, 1); // 1/4 of space
 
@@ -43,6 +49,9 @@ SnapshotViewerWindow::SnapshotViewerWindow(std::vector<Snapshot> &snapshotList, 
     setSnapshots(snapshotList);
 }
 
+/**
+ * @brief Sets the snapshot data and updates the UI.
+ */
 void SnapshotViewerWindow::setSnapshots(std::vector<Snapshot> &snapshotList)
 {
     snapshots.clear();
@@ -59,46 +68,56 @@ void SnapshotViewerWindow::setSnapshots(std::vector<Snapshot> &snapshotList)
     }
 }
 
+/**
+ * @brief Handles the change of observable by updating the slider range and triggering a plot update.
+ */
 void SnapshotViewerWindow::onObservableChanged(const QString &name)
 {
     currentObservable = name.toStdString();
 
     const auto &snapshot = snapshots.at(currentObservable);
     int count = static_cast<int>(snapshot.getObservedSize());
-
     timeSlider->setRange(0, std::max(0, count - 1));
     timeSlider->setValue(0);
     onTimeSliderChanged(0);
 }
 
+/**
+ * @brief Handles changes in the time slider by updating the chart.
+ */
 void SnapshotViewerWindow::onTimeSliderChanged(int value)
 {
     if (snapshots.empty() || !snapshots.count(currentObservable))
         return;
 
     const auto &snapshot = snapshots.at(currentObservable);
-    timeLabel->setText(QString("Time Index: %1").arg(value));
 
     if (snapshot.getObservedSize() == 0 || value >= static_cast<int>(snapshot.getObservedSize()))
         return;
 
     const auto obs = snapshot.getObservedDeltaQs()[value];
     const auto calc = snapshot.getCalculatedSize() > value ? std::optional<DeltaQRepr>(snapshot.getCalculatedDeltaQs()[value]) : std::nullopt;
+    const auto qta = snapshot.getQTAs()[value];
+    auto time = obs.time;
 
-    QtConcurrent::run([=]() {
+    qint64 msTime = time / 1000000;
+    QDateTime timestamp = QDateTime::fromMSecsSinceEpoch(msTime);
+    timeLabel->setText(QString("Snapshot at: %1").arg(timestamp.toString()));
+
+    auto ret = QtConcurrent::run([=]() {
         int bins = obs.deltaQ.getBins();
         double binWidth = obs.deltaQ.getBinWidth();
 
-        QVector<QPointF> obsCdf;
-        obsCdf.reserve(bins);
-        QVector<QPointF> obsMean, obsLower, obsUpper;
-        obsMean.reserve(bins);
-        obsLower.reserve(bins);
-        obsUpper.reserve(bins);
-        obsCdf.emplace_back(QPointF(0, 0));
-        obsMean.emplace_back(QPointF(0, 0));
-        obsLower.emplace_back(QPointF(0, 0));
-        obsUpper.emplace_back(QPointF(0, 0));
+        QVector<QPointF> obsMean, obsLower, obsUpper, obsCdf, qtaData;
+        obsCdf.reserve(bins + 1);
+        obsMean.reserve(bins + 1);
+        obsLower.reserve(bins + 1);
+        obsUpper.reserve(bins + 1);
+
+        obsCdf.append(QPointF(0, 0));
+        obsMean.append(QPointF(0, 0));
+        obsLower.append(QPointF(0, 0));
+        obsUpper.append(QPointF(0, 0));
 
         for (int i = 0; i < bins; ++i) {
             double x = binWidth * (i + 1);
@@ -108,20 +127,34 @@ void SnapshotViewerWindow::onTimeSliderChanged(int value)
             obsMean.append(QPointF(x, obs.bounds[i].mean));
         }
 
+        if (qta.defined) {
+            double maxDelay = bins * binWidth;
+            qtaData = {
+                {qta.perc_25, 0         },
+                {qta.perc_25, 0.25      },
+                {qta.perc_50, 0.25      },
+                {qta.perc_50, 0.5       },
+                {qta.perc_75, 0.5       },
+                {qta.perc_75, 0.75      },
+                {maxDelay,    0.75      },
+                {maxDelay,    qta.cdfMax}
+            };
+        }
+
         QVector<QPointF> calcCdf, calcMean, calcLower, calcUpper;
         if (calc) {
             int cbins = calc->deltaQ.getBins();
             double cbinWidth = calc->deltaQ.getBinWidth();
-            calcCdf.reserve(cbins);
-            calcMean.reserve(cbins);
-            calcLower.reserve(cbins);
-            calcUpper.reserve(cbins);
+            calcCdf.reserve(cbins + 1);
+            calcMean.reserve(cbins + 1);
+            calcLower.reserve(cbins + 1);
+            calcUpper.reserve(cbins + 1);
 
-            calcCdf.emplace_back(QPointF(0, 0));
+            calcCdf.append(QPointF(0, 0));
+            calcMean.append(QPointF(0, 0));
+            calcLower.append(QPointF(0, 0));
+            calcUpper.append(QPointF(0, 0));
 
-            calcMean.emplace_back(QPointF(0, 0));
-            calcLower.emplace_back(QPointF(0, 0));
-            calcUpper.emplace_back(QPointF(0, 0));
             for (int i = 0; i < cbins; ++i) {
                 double x = cbinWidth * (i + 1);
                 calcCdf.append(QPointF(x, calc->deltaQ.cdfAt(i)));
@@ -131,9 +164,17 @@ void SnapshotViewerWindow::onTimeSliderChanged(int value)
             }
         }
 
-        // GUI update
         QMetaObject::invokeMethod(this, [=]() {
-            QChart *chart = new QChart();
+            QChart *chart = chartView->chart();
+
+            // Clear previous content
+            chart->removeAllSeries();
+            const auto axes = chart->axes();
+            for (QAbstractAxis *axis : axes) {
+                chart->removeAxis(axis);
+                axis->deleteLater(); // Safe axis cleanup
+            }
+
             chart->setTitle(QString::fromStdString(currentObservable) + QString(" - Time Index: %1").arg(value));
 
             auto addSeries = [&](const QVector<QPointF> &data, const QString &name, const QColor &color) {
@@ -145,33 +186,32 @@ void SnapshotViewerWindow::onTimeSliderChanged(int value)
                 return series;
             };
 
-            auto *obsS = addSeries(obsCdf, "Observed", Qt::blue);
-            auto *obsMeanS = addSeries(obsMean, "Obs Mean", Qt::darkGreen);
-            auto *obsLowerS = addSeries(obsLower, "Obs Lower", Qt::darkCyan);
-            auto *obsUpperS = addSeries(obsUpper, "Obs Upper", Qt::darkMagenta);
+            addSeries(obsCdf, "Observed", Qt::blue);
+            addSeries(obsMean, "Obs Mean", Qt::yellow);
+            addSeries(obsLower, "Obs Lower", Qt::green);
+            addSeries(obsUpper, "Obs Upper", Qt::darkGreen);
+            addSeries(qtaData, "QTA", Qt::darkBlue);
 
-            QLineSeries *calcS = nullptr, *calcMeanS = nullptr, *calcLowerS = nullptr, *calcUpperS = nullptr;
             if (!calcCdf.isEmpty()) {
-                calcS = addSeries(calcCdf, "Calculated", Qt::red);
-                calcMeanS = addSeries(calcMean, "Calc Mean", Qt::darkYellow);
-                calcLowerS = addSeries(calcLower, "Calc Lower", Qt::gray);
-                calcUpperS = addSeries(calcUpper, "Calc Upper", Qt::lightGray);
+                addSeries(calcCdf, "Calculated", Qt::red);
+                addSeries(calcMean, "Calc Mean", Qt::darkYellow);
+                addSeries(calcLower, "Calc Lower", Qt::magenta);
+                addSeries(calcUpper, "Calc Upper", Qt::darkMagenta);
             }
 
             auto *axisX = new QValueAxis();
-            axisX->setTitleText("Delay (ms)");
+            axisX->setTitleText("Delay (s)");
             chart->addAxis(axisX, Qt::AlignBottom);
 
             auto *axisY = new QValueAxis();
-            axisY->setTitleText("CDF");
+            axisY->setTitleText("ΔQ(x)");
+            axisY->setRange(0, 1);
             chart->addAxis(axisY, Qt::AlignLeft);
 
             for (auto *series : chart->series()) {
                 series->attachAxis(axisX);
                 series->attachAxis(axisY);
             }
-
-            chartView->setChart(chart);
         });
     });
 }

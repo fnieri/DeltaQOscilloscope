@@ -15,15 +15,14 @@
 
 class System
 {
-    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes {};
-    std::unordered_map<std::string, std::shared_ptr<Operator>> operators {};
-    std::unordered_map<std::string, std::shared_ptr<Probe>> probes {};
-    std::unordered_map<std::string, std::shared_ptr<Observable>> observables {};
+    std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomes {}; ///< All outcome
+    std::unordered_map<std::string, std::shared_ptr<Operator>> operators {}; ///< All operators
+    std::unordered_map<std::string, std::shared_ptr<Probe>> probes {}; /// < All probes
+    std::unordered_map<std::string, std::shared_ptr<Observable>> observables {}; ///< The above grouped together
 
-    std::string systemDefinitionText;
+    std::string systemDefinitionText; ///< The definition of the system
 
     bool recordingTrigger = false;
-
     std::map<uint64_t, std::vector<Snapshot>> snapshots;
 
 public:
@@ -36,6 +35,7 @@ public:
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Operator>> &getOperators();
 
     [[nodiscard]] std::unordered_map<std::string, std::shared_ptr<Observable>> &getObservables();
+
     void setOutcomes(std::unordered_map<std::string, std::shared_ptr<Outcome>> outcomesMap);
 
     void setOperators(std::unordered_map<std::string, std::shared_ptr<Operator>> operatorsMap);
@@ -62,19 +62,35 @@ public:
 
     void setObservableParameters(std::string &, int, int);
 
+    /**
+     * @brief Add outcome instance for an observable, if it exists
+     */
     void addSample(std::string &componentName, Sample &sample);
 
-    void setRecording(bool);
+    /**
+     * @brief Set all observables to record snapshots
+     */
+     void setRecording(bool);
 
     bool isRecording() const;
 
+    /**
+     * @brief Add the snapshots of all observables for a trigger at time t
+     */
     void getObservablesSnapshotAt(std::uint64_t);
 
+    /**
+     * Get the snapshots of all observables for a trigger at time t
+     */
     std::map<std::uint64_t, std::vector<Snapshot>> getAllSnapshots();
 
+    /**
+     * @brief Get the name of all components
+     */
     std::vector<std::string> getAllComponentsName();
 
     /**
+     * @deprecated This may be used in the future
      * Calculate the resulting DeltaQ for the whole system
      */
     DeltaQ calculateDeltaQ();

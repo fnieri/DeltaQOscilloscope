@@ -146,54 +146,106 @@ DeltaQ convolveN(const std::vector<DeltaQ> &deltaQs)
     return result;
 }
 
-DeltaQ allToFinish(const std::vector<DeltaQ> &deltaQs)
+DeltaQ probabilisticChoice(const std::vector<double> &probabilities, const std::vector<DeltaQ> &deltaQs)
 {
-    DeltaQ result = deltaQs[0];
-    for (size_t i = 1; i < deltaQs.size(); ++i) {
-        result = result * deltaQs[i];
+    std::vector<DeltaQ> nonEmpty;
+    std::vector<double> effectiveProbs;
+    double commonBinWidth = 0.0;
+
+    for (size_t i = 0; i < deltaQs.size(); ++i) {
+        if (deltaQs[i] == DeltaQ()) {
+            continue;
+        }
+        nonEmpty.push_back(deltaQs[i]);
+        effectiveProbs.push_back(probabilities[i]);
+        commonBinWidth = std::max(commonBinWidth, deltaQs[i].getBinWidth());
     }
+
+    if (nonEmpty.empty()) {
+        return DeltaQ();
+    }
+
+    for (auto &dq : nonEmpty) {
+        dq = rebin(dq, commonBinWidth);
+    }
+
+    std::vector<DeltaQ> scaledDeltaQs;
+    for (size_t i = 0; i < nonEmpty.size(); ++i) {
+        scaledDeltaQs.push_back(nonEmpty[i] * effectiveProbs[i]);
+    }
+
+    DeltaQ result = scaledDeltaQs[0];
+    for (size_t i = 1; i < scaledDeltaQs.size(); ++i) {
+        result = result + scaledDeltaQs[i];
+    }
+
     return result;
 }
 
 DeltaQ firstToFinish(const std::vector<DeltaQ> &deltaQs)
 {
+    std::vector<DeltaQ> nonEmpty;
+    double commonBinWidth = 0.0;
+
+    for (const auto &dq : deltaQs) {
+        if (dq == DeltaQ()) {
+            continue;
+        }
+        nonEmpty.push_back(dq);
+        commonBinWidth = std::max(commonBinWidth, dq.getBinWidth());
+    }
+
+    if (nonEmpty.empty()) {
+        return DeltaQ();
+    }
+
+    for (auto &dq : nonEmpty) {
+        dq = rebin(dq, commonBinWidth);
+    }
+
+    const int largestSize = chooseLongestDeltaQSize(nonEmpty);
     std::vector<double> resultingCdf;
 
-    const double binWidth = deltaQs[0].getBinWidth();
-    const int largestDeltaQSize = chooseLongestDeltaQSize(deltaQs);
-
-    for (size_t i = 0; i < largestDeltaQSize; i++) {
+    for (int i = 0; i < largestSize; ++i) {
         double sumAtI = 0;
         double productAtI = 1;
-        for (const DeltaQ &deltaQ : deltaQs) {
-            const double cdfAtI = deltaQ.cdfAt(i);
+        for (const auto &dq : nonEmpty) {
+            const double cdfAtI = dq.cdfAt(i);
             sumAtI += cdfAtI;
             productAtI *= cdfAtI;
         }
-        double resultAtI = sumAtI - productAtI;
-        resultingCdf.push_back(resultAtI);
+        resultingCdf.push_back(sumAtI - productAtI);
     }
-    return {binWidth, resultingCdf, false};
+    return {commonBinWidth, resultingCdf, false};
 }
 
-DeltaQ probabilisticChoice(const std::vector<double> &probabilities, const std::vector<DeltaQ> &deltaQs)
+DeltaQ allToFinish(const std::vector<DeltaQ> &deltaQs)
 {
-    std::vector<double> resultingCdf;
+    std::vector<DeltaQ> nonEmpty;
+    double commonBinWidth = 0.0;
 
-    double binWidth = deltaQs[0].getBinWidth();
-
-    const int noOfDeltaQs = deltaQs.size();
-    std::vector<DeltaQ> scaledDeltaQs;
-
-    for (size_t i = 0; i < noOfDeltaQs; i++) {
-        scaledDeltaQs.push_back(deltaQs[i] * probabilities[i]); // Use operator* to scale
+    for (const auto &dq : deltaQs) {
+        if (dq == DeltaQ()) {
+            continue;
+        }
+        nonEmpty.push_back(dq);
+        commonBinWidth = std::max(commonBinWidth, dq.getBinWidth());
     }
 
-    DeltaQ result = scaledDeltaQs[0];
-    for (size_t i = 1; i < noOfDeltaQs; ++i) {
-        result = result + deltaQs[i];
+    if (nonEmpty.empty()) {
+        return DeltaQ();
     }
-    return {binWidth, resultingCdf, true};
+
+    for (auto &dq : nonEmpty) {
+        dq = rebin(dq, commonBinWidth);
+    }
+
+    DeltaQ result = nonEmpty[0];
+    for (size_t i = 1; i < nonEmpty.size(); ++i) {
+        result = result * nonEmpty[i];
+    }
+
+    return result;
 }
 
 int chooseLongestDeltaQSize(const std::vector<DeltaQ> &deltaQs)

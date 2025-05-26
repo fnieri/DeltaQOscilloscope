@@ -1,4 +1,3 @@
-
 #include "SystemBuilder.h"
 #include <memory>
 #include <stdexcept>

@@ -178,18 +178,24 @@ int DeltaQ::getBins() const
 
 double DeltaQ::pdfAt(int x) const
 {
-    if (x >= bins) {
-        return 0.0;
+    if (bins != 0) {
+        if (x >= bins) {
+            return 0.0;
+        }
+        return pdfValues.at(x);
     }
-    return pdfValues.at(x);
+    return 0;
 }
 
 double DeltaQ::cdfAt(int x) const
 {
-    if (x >= bins) {
-        return cdfValues.at(bins - 1);
+    if (bins != 0) {
+        if (x >= bins) {
+            return cdfValues.at(bins - 1);
+        }
+        return cdfValues.at(x);
     }
-    return cdfValues.at(x);
+    return 0;
 }
 
 bool DeltaQ::operator<(const DeltaQ &other) const

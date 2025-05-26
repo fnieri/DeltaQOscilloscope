@@ -22,20 +22,20 @@ std::vector<Sample> Observable::getSamplesInRange(std::uint64_t lowerTime, std::
 {
     std::lock_guard<std::mutex> lock(samplesMutex);
     if (!sorted) {
-        std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.startTime < b.startTime; });
+        std::sort(samples.begin(), samples.end(), [](const Sample &a, const Sample &b) { return a.endTime < b.endTime; });
         sorted = true;
     }
 
     std::vector<Sample> selectedSamples;
 
-    auto lower = std::lower_bound(samples.begin(), samples.end(), lowerTime, [](const Sample &s, long long time) { return s.startTime < time; });
+    auto lower = std::lower_bound(samples.begin(), samples.end(), lowerTime, [](const Sample &s, long long time) { return s.endTime < time; });
 
-    auto upper = std::upper_bound(samples.begin(), samples.end(), upperTime, [](long long time, const Sample &s) { return time < s.startTime; });
+    auto upper = std::upper_bound(samples.begin(), samples.end(), upperTime, [](long long time, const Sample &s) { return time < s.endTime; });
 
     for (auto it = lower; it != upper; ++it) {
         selectedSamples.emplace_back(*it);
     }
-    samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.startTime < upperTime; }), samples.end());
+    samples.erase(std::remove_if(samples.begin(), samples.end(), [upperTime](const Sample &s) { return s.endTime < upperTime; }), samples.end());
 
     return selectedSamples;
 }
@@ -44,25 +44,34 @@ DeltaQ Observable::calculateObservedDeltaQ(std::uint64_t timeLowerBound, std::ui
 {
     auto samplesInRange = getSamplesInRange(timeLowerBound, timeUpperBound);
     if (samplesInRange.empty()) {
-        observableSnapshot.addObservedDeltaQ(timeLowerBound, DeltaQ(), observedInterval.getBounds());
-        return DeltaQ();
+        DeltaQ deltaQ = DeltaQ();
+        updateSnapshot(timeLowerBound, deltaQ);
+        return deltaQ;
     }
 
-    std::cout << samplesInRange.size() << "\n";
     DeltaQ deltaQ {getBinWidth(), samplesInRange, nBins};
+    updateSnapshot(timeLowerBound, deltaQ);
 
-    observedInterval.addDeltaQ(deltaQ);
-    if (observableSnapshot.getObservedSize() > MAX_DQ) {
-
-        observedInterval.removeDeltaQ(observableSnapshot.getOldestObservedDeltaQ());
-        if (!recording) {
-            observableSnapshot.resizeTo(MAX_DQ);
-        }
-    }
-
-    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
     triggerManager.evaluate(deltaQ, qta, timeLowerBound);
     return deltaQ;
+}
+
+void Observable::updateSnapshot(uint64_t timeLowerBound, DeltaQ &deltaQ)
+{
+    if (!(deltaQ == DeltaQ())) {
+        observedInterval.addDeltaQ(deltaQ);
+        confidenceIntervalHistory.push_back(deltaQ);
+
+        if (confidenceIntervalHistory.size() > MAX_DQ) {
+            observedInterval.removeDeltaQ(confidenceIntervalHistory.front());
+            confidenceIntervalHistory.pop_front();
+        }
+    }
+    observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
+    observableSnapshot.addQTA(timeLowerBound, qta);
+    if (!recording && (confidenceIntervalHistory.size() > MAX_DQ)) {
+        observableSnapshot.resizeTo(MAX_DQ); // Still useful for snapshot trim
+    }
 }
 
 DeltaQ Observable::getObservedDeltaQ(uint64_t timeLowerBound, uint64_t timeUpperBound)
@@ -124,14 +133,24 @@ Snapshot Observable::getSnapshot()
 double Observable::setNewParameters(int newExp, int newNBins)
 {
     std::lock_guard<decltype(paramMutex)> lock(paramMutex);
+
+    bool binsChanged = (newNBins != nBins);
+    bool expChanged = (newExp != deltaTExp);
+
     nBins = newNBins;
     deltaTExp = newExp;
+
     if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
         qta = QTA::create(0, 0, 0, qta.cdfMax, false);
     }
+
     maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
 
-    observedInterval.setNumBins(nBins);
+    if (binsChanged || expChanged) {
+        observedInterval.setNumBins(nBins);
+        confidenceIntervalHistory.clear();
+    }
+
     return maxDelay;
 }
 

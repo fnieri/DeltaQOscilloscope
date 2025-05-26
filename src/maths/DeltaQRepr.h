@@ -6,12 +6,15 @@
 #include <cstdint>
 #include <vector>
 
+/**
+ * Class storing a DeltaQ representation for graphical plotting
+ */
+
 struct DeltaQRepr {
     std::uint64_t time;
     DeltaQ deltaQ;
     std::vector<Bound> bounds;
 
-    // Add a proper default constructor
     DeltaQRepr()
         : time(0)
         , deltaQ()
@@ -19,7 +22,7 @@ struct DeltaQRepr {
     {
     }
 
-    // Add a proper copy constructor
+    // DeltaQRepr copy constructor
     DeltaQRepr(const DeltaQRepr &other)
         : time(other.time)
         , deltaQ(other.deltaQ)
@@ -27,7 +30,7 @@ struct DeltaQRepr {
     {
     }
 
-    // Ensure proper move semantics
+    // DeltaQRepr move semantics
     DeltaQRepr(DeltaQRepr &&other) noexcept
         : time(other.time)
         , deltaQ(std::move(other.deltaQ))
@@ -35,7 +38,7 @@ struct DeltaQRepr {
     {
     }
 
-    // Add assignment operators
+    // DeltaQRepr assignment operators
     DeltaQRepr &operator=(const DeltaQRepr &other)
     {
         if (this != &other) {

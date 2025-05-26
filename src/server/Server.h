@@ -1,4 +1,3 @@
-
 #ifndef SERVER_H
 #define SERVER_H
 
@@ -11,47 +10,111 @@
 #include <queue>
 #include <sys/socket.h>
 #include <thread>
+
+/**
+ * @class Server
+ * @brief TCP server for handling client connections and Erlang communication.
+ */
 class Server
 {
 public:
+    /**
+     * @brief Constructs a Server instance.
+     * @param port The TCP port to listen on.
+     */
     Server(int port);
-    ~Server();
-    void start();
 
+    /**
+     * @brief Destructor cleans up sockets and threads.
+     */
+    ~Server();
+
+    /**
+     * @brief Sends a command to the Erlang process.
+     * @param command The command string to send.
+     */
     void sendToErlang(const std::string &command);
 
-private:
-    void run();
+    bool startServer(const std::string &ip = "0.0.0.0", int port = 8080);
 
-    int server_fd, new_socket;
-    struct sockaddr_in address;
-    int port;
+    void stopServer();
 
-    std::thread serverThread;
-    void updateSystem();
-    void parseErlangMessage(const char *buffer, int len);
-    std::shared_ptr<System> system;
+    bool setErlangEndpoint(const std::string &ip, int port);
 
-    std::vector<std::thread> clientThreads;
-    std::mutex clientsMutex;
-    std::atomic<bool> running {false};
+    bool isServerRunning() const
+    {
+        return server_started;
+    }
 
-    void handleClient(int clientSocket);
-    void cleanupThreads();
+    /**
+     * @brief Stops the server and worker threads.
+     */
     void stop();
 
-    int erlang_socket = -1;
-    std::mutex erlangMutex;
+private:
+    /**
+     * @brief Main server loop running in a separate thread.
+     */
+    void run();
+
+    int server_fd; ///< Server socket file descriptor
+    int new_socket; ///< Client socket file descriptor
+    struct sockaddr_in address; ///< Server address structure
+    int port; ///< Listening port number
+
+    std::thread serverThread; ///< Thread for server operations
+
+    /**
+     * @brief Updates the system reference from Application.
+     */
+    void updateSystem();
+
+    /**
+     * @brief Parses messages from Erlang.
+     * @param buffer The message buffer.
+     * @param len Length of the message.
+     */
+    void parseErlangMessage(const char *buffer, int len);
+
+    std::shared_ptr<System> system; ///< Reference to the system being monitored
+
+    std::vector<std::thread> clientThreads; ///< Active client handler threads
+    std::mutex clientsMutex; ///< Mutex for client threads access
+    std::atomic<bool> running {false}; ///< Server running state flag
+
+    /**
+     * @brief Handles communication with a client.
+     * @param clientSocket The client socket file descriptor.
+     */
+    void handleClient(int clientSocket);
+
+    /**
+     * @brief Cleans up finished client threads.
+     */
+    void cleanupThreads();
+
+    int erlang_socket = -1; ///< Socket for Erlang communication
+    std::mutex erlangMutex; ///< Mutex for Erlang socket operations
+
+    /**
+     * @brief Establishes connection to Erlang.
+     * @return true if connection succeeded.
+     */
     bool connectToErlang();
 
-    int client_socket;
+    int client_socket; ///< Current client socket
 
-    // For adding samples in a non blocking way
-    std::queue<std::pair<std::string, Sample>> sampleQueue;
-    std::mutex queueMutex;
-    std::condition_variable queueCond;
-    std::thread workerThread;
-    bool shutdownWorker = false;
+    // Asynchronous sample processing
+    std::queue<std::pair<std::string, Sample>> sampleQueue; ///< Sample processing queue
+    std::mutex queueMutex; ///< Mutex for queue access
+    std::condition_variable queueCond; ///< Condition variable for queue notifications
+    std::thread workerThread; ///< Worker thread for sample processing
+    bool shutdownWorker = false; ///< Flag to signal worker thread shutdown
+
+    std::string erlang_ip = "127.0.0.1"; ///< Erlang server IP
+    int erlang_port = 8081; ///< Erlang server port
+    std::string server_ip = "0.0.0.0"; ///< Current C++ server IP
+    bool server_started = false;
 };
 
 #endif

@@ -1,7 +1,7 @@
-
 #include "Sidebar.h"
 
 #include "NewPlotList.h"
+#include "PollingRateWidget.h"
 #include "SystemCreationWidget.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -19,14 +19,17 @@
 Sidebar::Sidebar(QWidget *parent)
     : QWidget(parent)
 {
+    // Main layout setup
     layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
     mainSplitter = new QSplitter(Qt::Vertical, this);
 
+    // System creation section
     systemCreationWidget = new SystemCreationWidget(this);
     mainSplitter->addWidget(systemCreationWidget);
 
+    // New plot section
     newPlotListWidget = new QWidget(this);
     newPlotListLayout = new QVBoxLayout(newPlotListWidget);
     newPlotListLayout->setContentsMargins(5, 5, 5, 5);
@@ -43,6 +46,7 @@ Sidebar::Sidebar(QWidget *parent)
 
     mainSplitter->addWidget(newPlotListWidget);
 
+    // Current plot section (initially hidden)
     currentPlotWidget = new QWidget(this);
     currentPlotLayout = new QVBoxLayout(currentPlotWidget);
     currentPlotLabel = new QLabel("Modify current plot:", this);
@@ -52,9 +56,18 @@ Sidebar::Sidebar(QWidget *parent)
     currentPlotLayout->addWidget(currentPlotLabel);
     mainSplitter->addWidget(currentPlotWidget);
 
+    // Polling rate section
+    pollingRateWidget = new PollingRateWidget(this);
+    mainSplitter->addWidget(pollingRateWidget);
+
+    connect(pollingRateWidget, &PollingRateWidget::onPollingRateChanged, this, &Sidebar::handlePollingRateChanged);
     layout->addWidget(mainSplitter);
 }
 
+/**
+ * @brief Sets the current plot list widget to display.
+ * @param plotList The DQPlotList widget to show in the current plot section.
+ */
 void Sidebar::setCurrentPlotList(DQPlotList *plotList)
 {
     if (currentPlotList == plotList) {
@@ -74,6 +87,18 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
     }
 }
 
+/**
+ * @brief Handles polling rate change events from the PollingRateWidget.
+ * @param ms The new polling rate in milliseconds.
+ */
+void Sidebar::handlePollingRateChanged(int ms)
+{
+    Q_EMIT onPollingRateChanged(ms);
+}
+
+/**
+ * @brief Hides the current plot management section.
+ */
 void Sidebar::hideCurrentPlot()
 {
     if (currentPlotList) {
@@ -83,11 +108,18 @@ void Sidebar::hideCurrentPlot()
     currentPlotLabel->hide();
 }
 
+/**
+ * @brief Clears new plot selection after plot creation.
+ */
 void Sidebar::clearOnAdd()
 {
     newPlotList->clearSelection();
 }
 
+/**
+ * @brief Handles the "Add plot" button click event.
+ * Validates selection and emits addPlotClicked() signal.
+ */
 void Sidebar::onAddPlotClicked()
 {
     auto selectedItems = newPlotList->getSelectedItems();

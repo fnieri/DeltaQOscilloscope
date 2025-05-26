@@ -6,14 +6,14 @@
 #include <mutex>
 Probe::Probe(const std::string &name)
     : Observable(name)
-    , calculatedInterval(0)
+    , calculatedInterval(50)
 {
 }
 
 Probe::Probe(const std::string &name, std::vector<std::shared_ptr<Observable>> causalLinks)
     : Observable(name)
     , causalLinks(causalLinks)
-    , calculatedInterval(0)
+    , calculatedInterval(50)
 {
 }
 
@@ -35,17 +35,22 @@ DeltaQ Probe::calculateCalculatedDeltaQ(uint64_t timeLowerBound, uint64_t timeUp
 
     if (calculatedBins != calculatedInterval.getBins()) {
         calculatedInterval.setNumBins(calculatedBins);
+        calculatedDeltaQHistory.clear();
     }
 
     calculatedInterval.addDeltaQ(result);
-    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
-    if (observableSnapshot.getCalculatedSize() > MAX_DQ) {
-        calculatedInterval.removeDeltaQ(observableSnapshot.getOldestCalculatedDeltaQ());
-        if (!recording) {
-            observableSnapshot.removeOldestCalculatedDeltaQ();
-        }
+    calculatedDeltaQHistory.push_back(result);
+
+    if (calculatedDeltaQHistory.size() > MAX_DQ) {
+        calculatedInterval.removeDeltaQ(calculatedDeltaQHistory.front());
+        calculatedDeltaQHistory.pop_front();
     }
 
+    observableSnapshot.addCalculatedDeltaQ(timeLowerBound, result, calculatedInterval.getBounds());
+
+    if (!recording && calculatedDeltaQHistory.size() > MAX_DQ) {
+        observableSnapshot.removeOldestCalculatedDeltaQ();
+    }
     return result;
 }
 std::vector<Bound> Probe::getBounds() const

@@ -1,3 +1,7 @@
+/**
+ * @file DelaySettingsWidget.cpp
+ * @brief Implementation of the DelaySettingsWidget class.
+ */
 
 #include "DelaySettingsWidget.h"
 #include "../Application.h"
@@ -31,6 +35,7 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
 
     maxDelayLabel = new QLabel("Max delay is: ");
     mainLayout->addWidget(maxDelayLabel);
+
     saveDelayButton = new QPushButton("Save delay");
     mainLayout->addWidget(saveDelayButton);
 
@@ -42,20 +47,25 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     Application::getInstance().addObserver([this]() { this->populateComboBox(); });
 }
 
+/**
+ * @brief Populates the combo box with available observables from the system.
+ */
 void DelaySettingsWidget::populateComboBox()
 {
     auto system = Application::getInstance().getSystem();
     if (!system)
         return;
+
     observableComboBox->clear();
-    for (const auto [name, _] : system->getProbes()) {
-        observableComboBox->addItem(QString::fromStdString(name));
-    }
-    for (const auto &[name, _] : system->getOutcomes()) {
-        observableComboBox->addItem(QString::fromStdString(name));
+    for (const auto &[name, obs] : system->getObservables()) {
+        if (obs)
+            observableComboBox->addItem(QString::fromStdString(name));
     }
 }
 
+/**
+ * @brief Loads delay settings for the currently selected observable.
+ */
 void DelaySettingsWidget::loadObservableSettings()
 {
     auto system = Application::getInstance().getSystem();
@@ -76,6 +86,10 @@ void DelaySettingsWidget::loadObservableSettings()
     updateMaxDelay();
 }
 
+/**
+ * @brief Computes the current maximum delay.
+ * @return Maximum delay value based on bin count and delay exponent.
+ */
 double DelaySettingsWidget::getMaxDelayMs() const
 {
     int exponent = delaySlider->value();
@@ -83,12 +97,18 @@ double DelaySettingsWidget::getMaxDelayMs() const
     return 1.0 * std::pow(2.0, exponent) * bins;
 }
 
+/**
+ * @brief Updates the label that shows the computed max delay value.
+ */
 void DelaySettingsWidget::updateMaxDelay()
 {
     double delay = getMaxDelayMs();
     maxDelayLabel->setText(QString("Max delay is: %1 ms").arg(delay, 0, 'f', 2));
 }
 
+/**
+ * @brief Saves the current delay settings to the system and emits a change signal.
+ */
 void DelaySettingsWidget::onSaveDelayClicked()
 {
     auto system = Application::getInstance().getSystem();
@@ -103,5 +123,6 @@ void DelaySettingsWidget::onSaveDelayClicked()
     int bins = binSpinBox->value();
     std::string nameString = name.toStdString();
     system->setObservableParameters(nameString, exponent, bins);
+
     Q_EMIT delayParametersChanged();
 }
