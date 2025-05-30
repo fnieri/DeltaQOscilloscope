@@ -12,6 +12,7 @@
 #include <signal.h>
 void setLightMode(QApplication &app)
 {
+    // Taken from https://forum.qt.io/topic/104406/styling-the-qmdiarea-using-the-the-fusion-style-and-qpalette-dark-theme
     // Use the Fusion style (consistent across platforms)
     app.setStyle(QStyleFactory::create("Fusion"));
 

@@ -20,13 +20,13 @@ StubControlWidget::StubControlWidget(QWidget *parent)
     erlangMainLayout->addLayout(erlangIpPortLayout);
 
     // Second row: Set Endpoint Button
-    setErlangEndpointButton = new QPushButton("Set Erlang Endpoint", this);
+    setErlangEndpointButton = new QPushButton("Set Adapter Endpoint", this);
     erlangMainLayout->addWidget(setErlangEndpointButton, 0, Qt::AlignLeft);
 
     // Third row: Start/Stop Wrapper
     QHBoxLayout *erlangButtonsLayout = new QHBoxLayout();
-    stopErlangButton = new QPushButton("Stop Wrapper", this);
-    startErlangButton = new QPushButton("Start Wrapper", this);
+    stopErlangButton = new QPushButton("Stop Adapter", this);
+    startErlangButton = new QPushButton("Start Adapter", this);
     erlangButtonsLayout->addWidget(stopErlangButton);
     erlangButtonsLayout->addWidget(startErlangButton);
     erlangMainLayout->addLayout(erlangButtonsLayout);
@@ -67,6 +67,7 @@ StubControlWidget::StubControlWidget(QWidget *parent)
     connect(stopServerButton, &QPushButton::clicked, this, &StubControlWidget::onStopServerClicked);
     connect(setErlangEndpointButton, &QPushButton::clicked, this, &StubControlWidget::onSetErlangEndpointClicked);
 }
+
 void StubControlWidget::onStartErlangClicked()
 {
     Application::getInstance().setStubRunning(true);

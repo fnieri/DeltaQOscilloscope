@@ -1,7 +1,7 @@
 #include "Sidebar.h"
 
 #include "NewPlotList.h"
-#include "PollingRateWidget.h"
+#include "SamplingRateWidget.h"
 #include "SystemCreationWidget.h"
 #include <QBoxLayout>
 #include <QFileDialog>
@@ -56,11 +56,11 @@ Sidebar::Sidebar(QWidget *parent)
     currentPlotLayout->addWidget(currentPlotLabel);
     mainSplitter->addWidget(currentPlotWidget);
 
-    // Polling rate section
-    pollingRateWidget = new PollingRateWidget(this);
-    mainSplitter->addWidget(pollingRateWidget);
+    // Sampling rate section
+    samplingRateWidget = new SamplingRateWidget(this);
+    mainSplitter->addWidget(samplingRateWidget);
 
-    connect(pollingRateWidget, &PollingRateWidget::onPollingRateChanged, this, &Sidebar::handlePollingRateChanged);
+    connect(samplingRateWidget, &SamplingRateWidget::onSamplingRateChanged, this, &Sidebar::handleSamplingRateChanged);
     layout->addWidget(mainSplitter);
 }
 
@@ -88,12 +88,12 @@ void Sidebar::setCurrentPlotList(DQPlotList *plotList)
 }
 
 /**
- * @brief Handles polling rate change events from the PollingRateWidget.
- * @param ms The new polling rate in milliseconds.
+ * @brief Handles sampling rate change events from the SamplingRateWidget.
+ * @param ms The new sampling rate in milliseconds.
  */
-void Sidebar::handlePollingRateChanged(int ms)
+void Sidebar::handleSamplingRateChanged(int ms)
 {
-    Q_EMIT onPollingRateChanged(ms);
+    Q_EMIT onSamplingRateChanged(ms);
 }
 
 /**
