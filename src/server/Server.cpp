@@ -9,9 +9,12 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #define TIMEOUT "to"
 #define EXEC_OK "ok"
 #define FAIL "fa"
+
+// Inspired from https://beej.us/guide/bgnet/html//index.html#client-server-background
 
 /**
  * @brief Constructs the Server and registers system observer.

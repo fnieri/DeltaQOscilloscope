@@ -3,7 +3,7 @@
 
 #include "DQPlotList.h"
 #include "NewPlotList.h"
-#include "PollingRateWidget.h"
+#include "SamplingRateWidget.h"
 #include "SystemCreationWidget.h"
 #include <QComboBox>
 #include <QLabel>
@@ -19,32 +19,27 @@
  * @class Sidebar
  * @brief Main sidebar widget containing plot management controls and system configuration.
  *
- * The Sidebar provides UI components for:
- * - Creating new plots
- * - Managing existing plots
- * - System configuration
- * - Polling rate adjustment
  */
 class Sidebar : public QWidget
 {
     Q_OBJECT
 
-    QVBoxLayout *newPlotListLayout;      ///< Layout for new plot selection components
-    QWidget *newPlotListWidget;          ///< Container widget for new plot controls
-    QLabel *newPlotLabel;                ///< Label for new plot section
-    NewPlotList *newPlotList;            ///< List widget for selecting probes for new plots
-    QPushButton *addNewPlotButton;       ///< Button to create new plot
+    QVBoxLayout *newPlotListLayout; ///< Layout for new plot selection components
+    QWidget *newPlotListWidget; ///< Container widget for new plot controls
+    QLabel *newPlotLabel; ///< Label for new plot section
+    NewPlotList *newPlotList; ///< List widget for selecting probes for new plots
+    QPushButton *addNewPlotButton; ///< Button to create new plot
 
-    QWidget *currentPlotWidget;          ///< Container widget for current plot controls
-    QVBoxLayout *currentPlotLayout;      ///< Layout for current plot components
-    QLabel *currentPlotLabel;            ///< Label for current plot section
+    QWidget *currentPlotWidget; ///< Container widget for current plot controls
+    QVBoxLayout *currentPlotLayout; ///< Layout for current plot components
+    QLabel *currentPlotLabel; ///< Label for current plot section
     DQPlotList *currentPlotList = nullptr; ///< List widget for managing current plot's probes
 
-    QSplitter *mainSplitter;             ///< Main splitter organizing sections vertically
-    QVBoxLayout *layout;                 ///< Main layout of the sidebar
+    QSplitter *mainSplitter; ///< Main splitter organizing sections vertically
+    QVBoxLayout *layout; ///< Main layout of the sidebar
 
     SystemCreationWidget *systemCreationWidget; ///< Widget for system creation/configuration
-    PollingRateWidget *pollingRateWidget; ///< Widget for adjusting polling rate
+    SamplingRateWidget *samplingRateWidget; ///< Widget for adjusting sampling rate
 
 Q_SIGNALS:
     /**
@@ -53,10 +48,10 @@ Q_SIGNALS:
     void addPlotClicked();
 
     /**
-     * @brief Emitted when polling rate is changed.
-     * @param milliseconds The new polling rate in milliseconds.
+     * @brief Emitted when sampling rate is changed.
+     * @param milliseconds The new sampling rate in milliseconds.
      */
-    void onPollingRateChanged(int milliseconds);
+    void onSamplingRateChanged(int milliseconds);
 
 private Q_SLOTS:
     /**
@@ -65,10 +60,10 @@ private Q_SLOTS:
     void onAddPlotClicked();
 
     /**
-     * @brief Handles polling rate change events.
-     * @param ms The new polling rate in milliseconds.
+     * @brief Handles sampling rate change events.
+     * @param ms The new sampling rate in milliseconds.
      */
-    void handlePollingRateChanged(int ms);
+    void handleSamplingRateChanged(int ms);
 
 public:
     /**

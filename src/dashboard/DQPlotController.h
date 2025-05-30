@@ -99,6 +99,7 @@ public:
     void update(uint64_t timeLowerBound, uint64_t timeUpperBound);
 
     void setTitle();
+
     bool isEmptyAfterReset();
 
 private:

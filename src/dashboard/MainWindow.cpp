@@ -73,10 +73,10 @@ MainWindow::MainWindow(QWidget *parent)
     auto adjustedTime = now - std::chrono::milliseconds(200);
     timeLowerBound = std::chrono::duration_cast<std::chrono::nanoseconds>(adjustedTime.time_since_epoch()).count();
 
-    // Connect polling rate changes
-    connect(sidebar, &Sidebar::onPollingRateChanged, this, [this](int ms) {
-        qDebug() << "MainWindow received polling rate:" << ms;
-        pollingRate = ms;
+    // Connect sampling rate changes
+    connect(sidebar, &Sidebar::onSamplingRateChanged, this, [this](int ms) {
+        qDebug() << "MainWindow received sampling rate:" << ms;
+        samplingRate = ms;
         QMetaObject::invokeMethod(updateTimer, [ms, this]() { updateTimer->setInterval(ms); }, Qt::QueuedConnection);
     });
 }
@@ -111,8 +111,8 @@ void MainWindow::reset()
 void MainWindow::updatePlots()
 {
     // Update time bounds
-    timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
-    uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(pollingRate)).count();
+    timeLowerBound += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(samplingRate)).count();
+    uint64_t timeUpperBound = timeLowerBound + std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(samplingRate)).count();
 
     auto system = Application::getInstance().getSystem();
     std::lock_guard<std::mutex> lock(plotDelMutex);

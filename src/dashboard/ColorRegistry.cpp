@@ -13,6 +13,7 @@ QColor ColorRegistry::getColorFor(const std::string &name)
     colorMap[name] = color;
     return color;
 }
+
 // Taken from
 // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 QColor ColorRegistry::generateDistinctColor(int index)

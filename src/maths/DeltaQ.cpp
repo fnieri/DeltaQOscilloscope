@@ -49,6 +49,7 @@ DeltaQ::DeltaQ(double binWidth, std::vector<Sample> &samples, int bins)
 void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
 {
 
+    double size = binWidth * bins;
     if (outcomeSamples.empty() || binWidth <= 0) {
         bins = 0;
         return;
@@ -77,7 +78,7 @@ void DeltaQ::calculateDeltaQ(std::vector<Sample> &outcomeSamples)
             continue;
         }
         if (bin >= bins) {
-            if (elapsed > binWidth * bins) {
+            if (elapsed > size) {
                 continue;
             }
             bin = bins - 1;
@@ -270,10 +271,10 @@ std::string DeltaQ::toString() const
     oss << "<";
 
     // Iterate through CDF values to construct the string
-    for (size_t i = 0; i < cdfValues.size(); ++i) {
-        const double bin = i * binWidth;
-        oss << "(" << std::fixed << std::setprecision(7) << bin << ", " << std::setprecision(7) << cdfValues[i] << ")";
-        if (i < cdfValues.size() - 1) {
+    for (size_t i = 0; i < pdfValues.size(); ++i) {
+        const double bin = (i + 1) * binWidth;
+        oss << "(" << std::fixed << std::setprecision(7) << bin << ", " << std::setprecision(7) << pdfValues[i] << ")";
+        if (i < pdfValues.size() - 1) {
             oss << ", ";
         }
     }

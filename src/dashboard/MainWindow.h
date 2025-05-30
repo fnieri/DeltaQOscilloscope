@@ -24,34 +24,34 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    QHBoxLayout *mainLayout;          ///< Main horizontal layout
+    QHBoxLayout *mainLayout; ///< Main horizontal layout
 
-    QScrollArea *scrollArea;          ///< Scroll area for plots
-    QGridLayout *plotLayout;          ///< Grid layout for plot arrangement
-    QWidget *plotContainer;           ///< Container widget for plots
+    QScrollArea *scrollArea; ///< Scroll area for plots
+    QGridLayout *plotLayout; ///< Grid layout for plot arrangement
+    QWidget *plotContainer; ///< Container widget for plots
 
-    QWidget *centralWidget;           ///< Central widget for main layout
+    QWidget *centralWidget; ///< Central widget for main layout
 
-    QThread *timerThread;             ///< Thread for update timer
-    QTimer *updateTimer;              ///< Timer for periodic updates
+    QThread *timerThread; ///< Thread for update timer
+    QTimer *updateTimer; ///< Timer for periodic updates
 
-    QWidget *sideContainer;           ///< Container for side panels
-    QVBoxLayout *sideLayout;          ///< Layout for side panels
-    QTabWidget *sideTabWidget;        ///< Tab widget for side panels
-    TriggersTab *triggersTab;         ///< Triggers configuration panel
-    Sidebar *sidebar;                 ///< Main sidebar control panel
+    QWidget *sideContainer; ///< Container for side panels
+    QVBoxLayout *sideLayout; ///< Layout for side panels
+    QTabWidget *sideTabWidget; ///< Tab widget for side panels
+    TriggersTab *triggersTab; ///< Triggers configuration panel
+    Sidebar *sidebar; ///< Main sidebar control panel
     ObservableSettings *observableSettings; ///< Observable settings panel
 
-    StubControlWidget *stubWidget;    ///< Stub control widget (placeholder)
-    QPushButton *addPlotButton;       ///< Button to add new plots
+    StubControlWidget *stubWidget; ///< Stub control widget (placeholder)
+    QPushButton *addPlotButton; ///< Button to add new plots
 
     QMap<DeltaQPlot *, QWidget *> plotContainers; ///< Map of plots to their containers
-    uint64_t timeLowerBound;          ///< Lower time bound for data updates
+    uint64_t timeLowerBound; ///< Lower time bound for data updates
 
-    std::mutex plotDelMutex;          ///< Mutex for plot deletion safety
-    std::mutex updateMutex;           ///< Mutex for update operations
+    std::mutex plotDelMutex; ///< Mutex for plot deletion safety
+    std::mutex updateMutex; ///< Mutex for update operations
 
-    int pollingRate {200};            ///< Current polling rate in milliseconds
+    int samplingRate {200}; ///< Current sampling rate in milliseconds
 
 public:
     MainWindow(QWidget *parent = nullptr);

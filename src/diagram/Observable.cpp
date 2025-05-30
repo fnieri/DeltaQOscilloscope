@@ -70,7 +70,7 @@ void Observable::updateSnapshot(uint64_t timeLowerBound, DeltaQ &deltaQ)
     observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
     observableSnapshot.addQTA(timeLowerBound, qta);
     if (!recording && (confidenceIntervalHistory.size() > MAX_DQ)) {
-        observableSnapshot.resizeTo(MAX_DQ); // Still useful for snapshot trim
+        observableSnapshot.resizeTo(MAX_DQ);
     }
 }
 
@@ -120,7 +120,7 @@ void Observable::setRecording(bool isRecording)
 {
     if (recording && !isRecording) {
         recording = isRecording;
-        observableSnapshot.resizeTo(30); // FIXME magic numbah
+        observableSnapshot.resizeTo(30); // FIXME magic numb
     }
     recording = isRecording;
 }
@@ -140,11 +140,11 @@ double Observable::setNewParameters(int newExp, int newNBins)
     nBins = newNBins;
     deltaTExp = newExp;
 
-    if (qta.perc_25 > newExp || qta.perc_50 > newExp || qta.perc_75 > newExp) {
+    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
+
+    if (qta.perc_25 > maxDelay || qta.perc_50 > maxDelay || qta.perc_75 > maxDelay) {
         qta = QTA::create(0, 0, 0, qta.cdfMax, false);
     }
-
-    maxDelay = DELTA_T_BASE * std::pow(2, deltaTExp) * nBins;
 
     if (binsChanged || expChanged) {
         observedInterval.setNumBins(nBins);
