@@ -98,8 +98,8 @@ void DeltaQPlot::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 
 void DeltaQPlot::removeSeries(QAbstractSeries *series)
 {
-    chart->removeSeries(series);
     auto name = series->name();
+    chart->removeSeries(series);
     legendPanel->removeEntry(name);
 }
 

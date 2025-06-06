@@ -102,6 +102,7 @@ void DQPlotController::addComponent(const std::string &name, bool isOutcome)
     } else {
         addExpressionSeries(name, system->hasProbe(name));
     }
+    setTitle();
 }
 
 std::vector<std::string> DQPlotController::getComponents()
@@ -258,8 +259,12 @@ void DQPlotController::removeComponent(const std::string &name)
 {
     if (outcomes.count(name)) {
         removeOutcomeSeries(name);
+    } else if (probes.count(name) || operators.count(name)) {
+        removeExpressionSeries(name, probes.count(name));
+    } else {
+        return;
     }
-    removeExpressionSeries(name, probes.count(name));
+    setTitle();
 }
 
 void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)

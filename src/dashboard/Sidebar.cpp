@@ -46,6 +46,12 @@ Sidebar::Sidebar(QWidget *parent)
 
     mainSplitter->addWidget(newPlotListWidget);
 
+    // Sampling rate section
+    samplingRateWidget = new SamplingRateWidget(this);
+    mainSplitter->addWidget(samplingRateWidget);
+
+    connect(samplingRateWidget, &SamplingRateWidget::onSamplingRateChanged, this, &Sidebar::handleSamplingRateChanged);
+
     // Current plot section (initially hidden)
     currentPlotWidget = new QWidget(this);
     currentPlotLayout = new QVBoxLayout(currentPlotWidget);
@@ -56,11 +62,6 @@ Sidebar::Sidebar(QWidget *parent)
     currentPlotLayout->addWidget(currentPlotLabel);
     mainSplitter->addWidget(currentPlotWidget);
 
-    // Sampling rate section
-    samplingRateWidget = new SamplingRateWidget(this);
-    mainSplitter->addWidget(samplingRateWidget);
-
-    connect(samplingRateWidget, &SamplingRateWidget::onSamplingRateChanged, this, &Sidebar::handleSamplingRateChanged);
     layout->addWidget(mainSplitter);
 }
 
