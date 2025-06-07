@@ -69,7 +69,7 @@ void Observable::updateSnapshot(uint64_t timeLowerBound, DeltaQ &deltaQ)
     }
     observableSnapshot.addObservedDeltaQ(timeLowerBound, deltaQ, observedInterval.getBounds());
     observableSnapshot.addQTA(timeLowerBound, qta);
-    if (!recording && (confidenceIntervalHistory.size() > MAX_DQ)) {
+    if (!recording && (observableSnapshot.getObservedSize() > MAX_DQ)) {
         observableSnapshot.resizeTo(MAX_DQ);
     }
 }

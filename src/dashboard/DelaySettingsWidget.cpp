@@ -7,6 +7,7 @@
 #include "../Application.h"
 #include <qlabel.h>
 #include <qpushbutton.h>
+#include <string>
 
 DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
     : QWidget(parent)
@@ -33,7 +34,7 @@ DelaySettingsWidget::DelaySettingsWidget(QWidget *parent)
 
     mainLayout->addLayout(settingsLayout);
 
-    maxDelayLabel = new QLabel("Max delay is: ");
+    maxDelayLabel = new QLabel("Bin width: \nMax delay: ");
     mainLayout->addWidget(maxDelayLabel);
 
     saveDelayButton = new QPushButton("Save delay");
@@ -103,7 +104,9 @@ double DelaySettingsWidget::getMaxDelayMs() const
 void DelaySettingsWidget::updateMaxDelay()
 {
     double delay = getMaxDelayMs();
-    maxDelayLabel->setText(QString("Max delay is: %1 ms").arg(delay, 0, 'f', 2));
+    std::string labelString = "Bin width: " + std::to_string((1 * std::pow(2.0, delaySlider->value()))) + "ms \n";
+    labelString += "Max delay is: " + std::to_string(delay) + "ms";
+    maxDelayLabel->setText(QString::fromStdString(labelString));
 }
 
 /**
