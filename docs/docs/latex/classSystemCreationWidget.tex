@@ -1,0 +1,78 @@
+\doxysection{System\+Creation\+Widget Class Reference}
+\hypertarget{classSystemCreationWidget}{}\label{classSystemCreationWidget}\index{SystemCreationWidget@{SystemCreationWidget}}
+
+
+A QWidget that allows users to create, edit, load, and save system definitions.  
+
+
+
+
+{\ttfamily \#include $<$System\+Creation\+Widget.\+h$>$}
+
+Inheritance diagram for System\+Creation\+Widget\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classSystemCreationWidget}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classSystemCreationWidget_a7d1a53b2207323e5747cdda8a61e6d2e}\label{classSystemCreationWidget_a7d1a53b2207323e5747cdda8a61e6d2e} 
+void {\bfseries system\+Updated} ()
+\begin{DoxyCompactList}\small\item\em Emitted when the system is successfully updated. \end{DoxyCompactList}\item 
+\Hypertarget{classSystemCreationWidget_aabb0c3bd370018b16b2f482dc2baaa8a}\label{classSystemCreationWidget_aabb0c3bd370018b16b2f482dc2baaa8a} 
+void {\bfseries system\+Saved} ()
+\begin{DoxyCompactList}\small\item\em Emitted when the system is successfully saved. \end{DoxyCompactList}\item 
+\Hypertarget{classSystemCreationWidget_a6381a803a8df988b3c0aec9f41700519}\label{classSystemCreationWidget_a6381a803a8df988b3c0aec9f41700519} 
+void {\bfseries system\+Loaded} ()
+\begin{DoxyCompactList}\small\item\em Emitted when a system is successfully loaded. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classSystemCreationWidget_ae5e2fb4409fbec06fe08e8f97cf96641}\label{classSystemCreationWidget_ae5e2fb4409fbec06fe08e8f97cf96641} 
+{\bfseries System\+Creation\+Widget} (QWidget \texorpdfstring{$\ast$}{*}parent=nullptr)
+\item 
+std\+::string \mbox{\hyperlink{classSystemCreationWidget_a8e584972fc1e8cb83b1b7843a1385ed5}{get\+System\+Text}} () const
+\begin{DoxyCompactList}\small\item\em Retrieves the current system text from the editor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classSystemCreationWidget_ae1311dc77dd2c5e8367682e2ddf2af90}{set\+System\+Text}} (const std\+::string \&text)
+\begin{DoxyCompactList}\small\item\em Sets the system text in the editor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A QWidget that allows users to create, edit, load, and save system definitions. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classSystemCreationWidget_a8e584972fc1e8cb83b1b7843a1385ed5}\index{SystemCreationWidget@{SystemCreationWidget}!getSystemText@{getSystemText}}
+\index{getSystemText@{getSystemText}!SystemCreationWidget@{SystemCreationWidget}}
+\doxysubsubsection{\texorpdfstring{getSystemText()}{getSystemText()}}
+{\footnotesize\ttfamily \label{classSystemCreationWidget_a8e584972fc1e8cb83b1b7843a1385ed5} 
+std\+::string System\+Creation\+Widget\+::get\+System\+Text (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Retrieves the current system text from the editor. 
+
+\begin{DoxyReturn}{Returns}
+The system text as a std\+::string. 
+\end{DoxyReturn}
+\Hypertarget{classSystemCreationWidget_ae1311dc77dd2c5e8367682e2ddf2af90}\index{SystemCreationWidget@{SystemCreationWidget}!setSystemText@{setSystemText}}
+\index{setSystemText@{setSystemText}!SystemCreationWidget@{SystemCreationWidget}}
+\doxysubsubsection{\texorpdfstring{setSystemText()}{setSystemText()}}
+{\footnotesize\ttfamily \label{classSystemCreationWidget_ae1311dc77dd2c5e8367682e2ddf2af90} 
+void System\+Creation\+Widget\+::set\+System\+Text (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{text}{}\end{DoxyParamCaption})}
+
+
+
+Sets the system text in the editor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em text} & The new system definition text. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/francy/\+Desktop/\+Real\+Time\+Delta\+QSD/src/dashboard/System\+Creation\+Widget.\+h\end{DoxyCompactItemize}

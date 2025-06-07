@@ -1,0 +1,47 @@
+\doxysection{Trigger\+Manager.\+h}
+\hypertarget{TriggerManager_8h_source}{}\label{TriggerManager_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/TriggerManager.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/TriggerManager.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}TriggerTypes.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}Triggers.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTriggerManager}{TriggerManager}}}
+\DoxyCodeLine{00014\ \{}
+\DoxyCodeLine{00015\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keyword}{struct\ }Trigger\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ TriggerType\ type;}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ TriggerDefs::Condition\ condition;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ TriggerDefs::Action\ action;}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ enabled;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ std::optional<int>\ sampleLimitValue;}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ Trigger(TriggerType\ t,\ TriggerDefs::Condition\ c,\ TriggerDefs::Action\ a,\ \textcolor{keywordtype}{bool}\ e\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00028\ \ \ \ \ \};}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTriggerManager_a0d23c0ba69661cd36f0f816da4f5505a}{addTrigger}}(TriggerType\ type,\ TriggerDefs::Condition\ condition,\ TriggerDefs::Action\ action,\ \textcolor{keywordtype}{bool}\ enabled\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00041\ \ \ \ \ std::vector<Trigger>\ \mbox{\hyperlink{classTriggerManager_a73b20ff782fb95b73583271f9f1c6ca2}{getTriggersByType}}(TriggerType\ type);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTriggerManager_a5b580b2986aa88345609f6f7af1568ed}{evaluate}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \&dq,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structQTA}{QTA}}\ \&qta,\ std::uint64\_t)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTriggerManager_a8d4b342fc06fa8dcea1205cba63de30f}{removeTriggersByType}}(TriggerType\ type);}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTriggerManager_a3bdb3db70bf91b8636ca3ca2aa676062}{clearAllTriggers}}();}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classTriggerManager_ae3a927174e6aa263b0b1ebf0ecb456c6}{setTriggersEnabled}}(TriggerType\ type,\ \textcolor{keywordtype}{bool}\ enabled);}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00072\ \ \ \ \ std::vector<Trigger>\ \mbox{\hyperlink{classTriggerManager_a6b89c193d3f0f0439f55b04b0a597600}{getAllTriggers}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00075\ \ \ \ \ std::vector<Trigger>\ triggers\_;}
+\DoxyCodeLine{00076\ \};}
+
+\end{DoxyCode}

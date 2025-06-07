@@ -1,0 +1,64 @@
+\doxysection{Snapshot.\+h}
+\hypertarget{Snapshot_8h_source}{}\label{Snapshot_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/Snapshot.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/Snapshot.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}ConfidenceInterval.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}DeltaQ.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}DeltaQRepr.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSnapshot_a55c0fc6ea6d789c91b83ac778200de54}{Snapshot}}}
+\DoxyCodeLine{00014\ \{}
+\DoxyCodeLine{00015\ \ \ \ \ std::string\ observableName;\ }
+\DoxyCodeLine{00016\ \ \ \ \ std::map<uint64\_t,\ DeltaQRepr>\ observedDeltaQs;\ }
+\DoxyCodeLine{00017\ \ \ \ \ std::map<uint64\_t,\ DeltaQRepr>\ calculatedDeltaQs;\ }
+\DoxyCodeLine{00018\ \ \ \ \ std::map<uint64\_t,\ QTA>\ QTAs;\ }
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00022\ \ \ \ \ \mbox{\hyperlink{classSnapshot_a55c0fc6ea6d789c91b83ac778200de54}{Snapshot}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ Observed\ DeltaQ\ Methods\ -\/-\/-\/}}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_abb6397043ca1553db7ee1f5adf52f317}{addObservedDeltaQ}}(std::uint64\_t\ timestamp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \&deltaQ,\ \textcolor{keyword}{const}\ std::vector<Bound>\ \&bounds);}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00037\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classSnapshot_ae716d6bcb27dd94719ae44f7793db4ce}{getOldestObservedDeltaQ}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_a4f2715e93c0ef706a7ee8b25ac1b757d}{removeOldestObservedDeltaQ}}();}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ Calculated\ DeltaQ\ Methods\ -\/-\/-\/}}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_ae81c5d8ee47cfffbaebcaee7ecd282f3}{addCalculatedDeltaQ}}(std::uint64\_t\ timestamp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \&deltaQ,\ \textcolor{keyword}{const}\ std::vector<Bound>\ \&bounds);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00055\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classSnapshot_af6e0f64cf013e428bc119fef058d8833}{getOldestCalculatedDeltaQ}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_a5034c26178bddfec66b9590ef4207389}{removeOldestCalculatedDeltaQ}}();}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ QTA\ Methods\ -\/-\/-\/}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_a2252b6473ad97281132378f855e60708}{addQTA}}(std::uint64\_t\ timestamp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structQTA}{QTA}}\ \&qta);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ Size\ Management\ -\/-\/-\/}}
+\DoxyCodeLine{00070\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{classSnapshot_a05670d0ada380982bb9ede69f4738f28}{getObservedSize}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00073\ \ \ \ \ std::size\_t\ \mbox{\hyperlink{classSnapshot_a56bb4a687609815a1e51f8a329512db3}{getCalculatedSize}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_abd810035383f57d16c2292e28c6d65a7}{resizeTo}}(\textcolor{keywordtype}{size\_t}\ size);}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ Name\ Management\ -\/-\/-\/}}
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSnapshot_a41082fcf717993030f0e5c8ac2c6a93e}{setName}}(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00089\ \ \ \ \ std::string\ \mbox{\hyperlink{classSnapshot_a74e0f53c5cd447d03492c1488257e28c}{getName}}()\ \&;}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/\ Data\ Retrieval\ -\/-\/-\/}}
+\DoxyCodeLine{00093\ \ \ \ \ std::vector<DeltaQRepr>\ \mbox{\hyperlink{classSnapshot_a530ba74111d3572be1c2037f7c0e5684}{getObservedDeltaQs}}()\ const\ \&;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00096\ \ \ \ \ std::vector<\mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}>\ \mbox{\hyperlink{classSnapshot_a9a453f694deaaa3746f703b1ac01da60}{getCalculatedDeltaQs}}()\ const\ \&;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00103\ \ \ \ \ std::optional<\mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}>\ \mbox{\hyperlink{classSnapshot_a5dc1747666a3f526a1ef5415feeea54d}{getObservedDeltaQAtTime}}(std::uint64\_t\ timestamp);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00110\ \ \ \ \ std::optional<\mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}>\ \mbox{\hyperlink{classSnapshot_a99b741a36cba3a16818ecc5af71dde4b}{getCalculatedDeltaQAtTime}}(std::uint64\_t\ timestamp);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00113\ \ \ \ \ std::vector<\mbox{\hyperlink{structQTA}{QTA}}>\ \mbox{\hyperlink{classSnapshot_ab29c31ec7927412126765c1de01837e3}{getQTAs}}()\ const\ \&;}
+\DoxyCodeLine{00114\ \};}
+
+\end{DoxyCode}

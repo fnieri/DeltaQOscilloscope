@@ -1,0 +1,53 @@
+\doxysection{DQPlot\+List.\+h}
+\hypertarget{DQPlotList_8h_source}{}\label{DQPlotList_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DQPlotList.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DQPlotList.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#ifndef\ DQ\_PLOT\_LIST\_H}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#define\ DQ\_PLOT\_LIST\_H}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}DQPlotController.h"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <QCheckBox>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <QListWidget>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <QPushButton>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <QVBoxLayout>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <QWidget>}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDQPlotController}{DQPlotController}};}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{class\ }DQPlotList\ :\ \textcolor{keyword}{public}\ QWidget}
+\DoxyCodeLine{00021\ \{}
+\DoxyCodeLine{00022\ \ \ \ \ Q\_OBJECT}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keyword}{explicit}\ DQPlotList(\mbox{\hyperlink{classDQPlotController}{DQPlotController}}\ *controller,\ QWidget\ *parent\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotList_aae7f5215a52ef06d7deeacf14109228a}{reset}}();}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classDQPlotList_ab9cdc305037386b6f95435c29dcbc4b5}{isEmptyAfterReset}}();}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotList_acf4eddb0b89019849153e9f2d7d8eced}{updateLists}}();}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00046\ \ \ \ \ \mbox{\hyperlink{classDQPlotList_a76b1a9fd1f9e18fb1d4fea29daae18a7}{\string~DQPlotList}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{keyword}{private}\ Q\_SLOTS:}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ onConfirmSelection();}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ onRemoveSelection();}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{void}\ addItemToList(\textcolor{keyword}{const}\ std::string\ \&name,\ \textcolor{keywordtype}{bool}\ isSelected,\ \textcolor{keyword}{const}\ QString\ \&category);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \mbox{\hyperlink{classDQPlotController}{DQPlotController}}\ *controller;\ }
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ QListWidget\ *selectedList;\ \ \ \ }
+\DoxyCodeLine{00071\ \ \ \ \ QListWidget\ *availableList;\ \ \ }
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ QPushButton\ *addButton;\ \ \ \ \ \ \ }
+\DoxyCodeLine{00074\ \ \ \ \ QPushButton\ *removeButton;\ \ \ \ }
+\DoxyCodeLine{00075\ \};}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ DQ\_PLOT\_LIST\_H}}
+
+\end{DoxyCode}

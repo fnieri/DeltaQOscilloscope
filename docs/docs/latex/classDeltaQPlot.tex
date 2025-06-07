@@ -1,0 +1,128 @@
+\doxysection{Delta\+QPlot Class Reference}
+\hypertarget{classDeltaQPlot}{}\label{classDeltaQPlot}\index{DeltaQPlot@{DeltaQPlot}}
+
+
+A class representing a \doxylink{classDeltaQ}{DeltaQ} chart view that allows visualization of probes over time.  
+
+
+
+
+{\ttfamily \#include $<$Delta\+QPlot.\+h$>$}
+
+Inheritance diagram for Delta\+QPlot\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classDeltaQPlot}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classDeltaQPlot_a46b8286413715f9b88ce1abcc7ba5a68}\label{classDeltaQPlot_a46b8286413715f9b88ce1abcc7ba5a68} 
+void {\bfseries plot\+Selected} (\mbox{\hyperlink{classDeltaQPlot}{Delta\+QPlot}} \texorpdfstring{$\ast$}{*}plot)
+\begin{DoxyCompactList}\small\item\em Emitted whenout QHBox this plot is selected by the user. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDeltaQPlot_ae2907808185b89a93062473baa981a3d}{Delta\+QPlot}} (const std\+::vector$<$ std\+::string $>$ \&selected\+Items, QWidget \texorpdfstring{$\ast$}{*}parent=nullptr)
+\begin{DoxyCompactList}\small\item\em Constructs a \doxylink{classDeltaQPlot}{Delta\+QPlot} with selected components. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a6ff45368bd924af5eb763968830a3e4d}\label{classDeltaQPlot_a6ff45368bd924af5eb763968830a3e4d} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+Delta\+QPlot} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classDeltaQPlot_ac915b1594c27729339b3714b7eddc2e8}{add\+Series}} (QLine\+Series \texorpdfstring{$\ast$}{*}series, const std\+::string \&name)
+\begin{DoxyCompactList}\small\item\em Adds a QLine\+Series to the chart. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a58e56e61a81c6cd8b9fb0bb7288325fe}\label{classDeltaQPlot_a58e56e61a81c6cd8b9fb0bb7288325fe} 
+void {\bfseries update} (uint64\+\_\+t time\+Lower\+Bound, uint64\+\_\+t time\+Upper\+Bound)
+\begin{DoxyCompactList}\small\item\em Updates the plot data using provided time range and bin width. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classDeltaQPlot_a633b38a2a57d8a933e05b0d83957554a}{remove\+Series}} (QAbstract\+Series \texorpdfstring{$\ast$}{*}series)
+\begin{DoxyCompactList}\small\item\em Removes a series from the chart. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a2b34d35677a8d29792e20535c9e6f482}\label{classDeltaQPlot_a2b34d35677a8d29792e20535c9e6f482} 
+void {\bfseries edit\+Plot} (const std\+::vector$<$ std\+::string $>$ \&selected\+Items)
+\begin{DoxyCompactList}\small\item\em Updates plot with new set of selected components. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a09683d01e62569d6b57933c3b4584145}\label{classDeltaQPlot_a09683d01e62569d6b57933c3b4584145} 
+std\+::vector$<$ std\+::string $>$ {\bfseries get\+Components} ()
+\begin{DoxyCompactList}\small\item\em Gets list of currently plotted component names. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a66b1f650b58293bc265c52ce95afbbb0}\label{classDeltaQPlot_a66b1f650b58293bc265c52ce95afbbb0} 
+bool {\bfseries is\+Empty\+After\+Reset} ()
+\item 
+\Hypertarget{classDeltaQPlot_a0da08720d40f01e57f50b103e66a78a2}\label{classDeltaQPlot_a0da08720d40f01e57f50b103e66a78a2} 
+void {\bfseries update\+Series} (QLine\+Series \texorpdfstring{$\ast$}{*}series, const QVector$<$ QPointF $>$ \&data)
+\begin{DoxyCompactList}\small\item\em Updates an existing series with new data points. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a70f51628543cf09843df2c24fcec90f4}\label{classDeltaQPlot_a70f51628543cf09843df2c24fcec90f4} 
+void {\bfseries update\+XRange} (double x\+Range)
+\item 
+\Hypertarget{classDeltaQPlot_a51bba97b85e1f562c06f8bf2b7ff6109}\label{classDeltaQPlot_a51bba97b85e1f562c06f8bf2b7ff6109} 
+\mbox{\hyperlink{classDQPlotList}{DQPlot\+List}} \texorpdfstring{$\ast$}{*} {\bfseries get\+Plot\+List} ()
+\begin{DoxyCompactList}\small\item\em Returns the associated plot list. \end{DoxyCompactList}\item 
+\Hypertarget{classDeltaQPlot_a776729758117b24c930780fcf28461cf}\label{classDeltaQPlot_a776729758117b24c930780fcf28461cf} 
+void {\bfseries set\+Title} (QString \&\&)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classDeltaQPlot_ac647d4bc5c215b6a7b570dd52daf7d49}\label{classDeltaQPlot_ac647d4bc5c215b6a7b570dd52daf7d49} 
+void {\bfseries mouse\+Press\+Event} (QMouse\+Event \texorpdfstring{$\ast$}{*}event) override
+\begin{DoxyCompactList}\small\item\em Handles mouse press events on the chart. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A class representing a \doxylink{classDeltaQ}{DeltaQ} chart view that allows visualization of probes over time. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classDeltaQPlot_ae2907808185b89a93062473baa981a3d}\index{DeltaQPlot@{DeltaQPlot}!DeltaQPlot@{DeltaQPlot}}
+\index{DeltaQPlot@{DeltaQPlot}!DeltaQPlot@{DeltaQPlot}}
+\doxysubsubsection{\texorpdfstring{DeltaQPlot()}{DeltaQPlot()}}
+{\footnotesize\ttfamily \label{classDeltaQPlot_ae2907808185b89a93062473baa981a3d} 
+Delta\+QPlot\+::\+Delta\+QPlot (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::string $>$ \&}]{selected\+Items}{, }\item[{QWidget \texorpdfstring{$\ast$}{*}}]{parent}{ = {\ttfamily nullptr}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs a \doxylink{classDeltaQPlot}{Delta\+QPlot} with selected components. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em selected\+Items} & List of selected component names. \\
+\hline
+{\em parent} & Parent widget. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classDeltaQPlot_ac915b1594c27729339b3714b7eddc2e8}\index{DeltaQPlot@{DeltaQPlot}!addSeries@{addSeries}}
+\index{addSeries@{addSeries}!DeltaQPlot@{DeltaQPlot}}
+\doxysubsubsection{\texorpdfstring{addSeries()}{addSeries()}}
+{\footnotesize\ttfamily \label{classDeltaQPlot_ac915b1594c27729339b3714b7eddc2e8} 
+void Delta\+QPlot\+::add\+Series (\begin{DoxyParamCaption}\item[{QLine\+Series \texorpdfstring{$\ast$}{*}}]{series}{, }\item[{const std\+::string \&}]{name}{}\end{DoxyParamCaption})}
+
+
+
+Adds a QLine\+Series to the chart. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em series} & Pointer to the line series. \\
+\hline
+{\em name} & Name of the series. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classDeltaQPlot_a633b38a2a57d8a933e05b0d83957554a}\index{DeltaQPlot@{DeltaQPlot}!removeSeries@{removeSeries}}
+\index{removeSeries@{removeSeries}!DeltaQPlot@{DeltaQPlot}}
+\doxysubsubsection{\texorpdfstring{removeSeries()}{removeSeries()}}
+{\footnotesize\ttfamily \label{classDeltaQPlot_a633b38a2a57d8a933e05b0d83957554a} 
+void Delta\+QPlot\+::remove\+Series (\begin{DoxyParamCaption}\item[{QAbstract\+Series \texorpdfstring{$\ast$}{*}}]{series}{}\end{DoxyParamCaption})}
+
+
+
+Removes a series from the chart. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em series} & Series to remove. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/francy/\+Desktop/\+Real\+Time\+Delta\+QSD/src/dashboard/Delta\+QPlot.\+h\end{DoxyCompactItemize}

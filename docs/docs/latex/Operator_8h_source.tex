@@ -1,0 +1,58 @@
+\doxysection{Operator.\+h}
+\hypertarget{Operator_8h_source}{}\label{Operator_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/Operator.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/Operator.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../maths/DeltaQ.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}Observable.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}OperatorType.h"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{class\ }Operator\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classObservable_a9576927f26a9268eb81600a2fb5edda0}{Observable}}}
+\DoxyCodeLine{00011\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ OperatorType\ type;}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \ \ \ \ std::vector<double>\ probabilities;\ }
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ std::vector<std::vector<std::shared\_ptr<Observable>>>\ causalLinks;\ }
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ \mbox{\hyperlink{classConfidenceInterval}{ConfidenceInterval}}\ calculatedInterval;}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ std::mutex\ calcMutex;}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \ std::deque<DeltaQ>\ calculatedDeltaQHistory;\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00025\ \ \ \ \ Operator(\textcolor{keyword}{const}\ std::string\ \&name,\ OperatorType);}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ \string~Operator();}
+\DoxyCodeLine{00034\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classOperator_afe44530c746a218a41b4355723285a51}{calculateCalculatedDeltaQ}}(uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00040\ \ \ \ \ \mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}\ \mbox{\hyperlink{classOperator_a97e30513dfcd7bae77d056e24f54eb54}{getCalculatedDeltaQRepr}}(uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{void}\ setProbabilities(\textcolor{keyword}{const}\ std::vector<double>\ \&);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00048\ \ \ \ \ std::vector<double>\ \mbox{\hyperlink{classOperator_ad8c6f76a6ea437929dbb4f4a740c039e}{getProbabilities}}()}
+\DoxyCodeLine{00049\ \ \ \ \ \{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ probabilities;}
+\DoxyCodeLine{00051\ \ \ \ \ \}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00057\ \ \ \ \ std::vector<std::shared\_ptr<Observable>>\ \mbox{\hyperlink{classOperator_af1b3ea5a121d0181a014fbae1014a179}{getChildren}}();}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{void}\ setCausalLinks(std::vector<std::vector<std::shared\_ptr<Observable>>>\ links)}
+\DoxyCodeLine{00060\ \ \ \ \ \{}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ causalLinks\ =\ links;}
+\DoxyCodeLine{00062\ \ \ \ \ \}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ std::vector<std::vector<std::shared\_ptr<Observable>>>\ getCausalLinks()}
+\DoxyCodeLine{00065\ \ \ \ \ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ causalLinks;}
+\DoxyCodeLine{00067\ \ \ \ \ \}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ OperatorType\ getType()}
+\DoxyCodeLine{00070\ \ \ \ \ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ type;}
+\DoxyCodeLine{00072\ \ \ \ \ \}}
+\DoxyCodeLine{00073\ \};}
+
+\end{DoxyCode}

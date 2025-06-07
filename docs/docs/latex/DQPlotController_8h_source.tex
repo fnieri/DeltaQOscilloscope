@@ -1,0 +1,102 @@
+\doxysection{DQPlot\+Controller.\+h}
+\hypertarget{DQPlotController_8h_source}{}\label{DQPlotController_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DQPlotController.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DQPlotController.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#ifndef\ DQPLOTCONTROLLER\_H}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ DQPLOTCONTROLLER\_H}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <qlineseries.h>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{comment}{//\ Project\ includes}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}../diagram/System.h"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}DeltaQPlot.h"{}}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ Qt\ includes}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <QString>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <QtCharts/QLineSeries>}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ C++\ includes}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{comment}{//\ All\ series\ pertaining\ to\ an\ outcome}}
+\DoxyCodeLine{00023\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structOutcomeSeries}{OutcomeSeries}}\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ QLineSeries\ *outcomeS;}
+\DoxyCodeLine{00025\ \ \ \ \ QLineSeries\ *lowerBoundS;}
+\DoxyCodeLine{00026\ \ \ \ \ QLineSeries\ *upperBoundS;}
+\DoxyCodeLine{00027\ \ \ \ \ QLineSeries\ *meanS;}
+\DoxyCodeLine{00028\ \ \ \ \ QLineSeries\ *qtaS;}
+\DoxyCodeLine{00029\ \};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{comment}{//\ All\ series\ pertaining\ to\ a\ probe}}
+\DoxyCodeLine{00032\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structExpressionSeries}{ExpressionSeries}}\ \{}
+\DoxyCodeLine{00033\ \ \ \ \ QLineSeries\ *obsS;}
+\DoxyCodeLine{00034\ \ \ \ \ QLineSeries\ *obsLowerBoundS;}
+\DoxyCodeLine{00035\ \ \ \ \ QLineSeries\ *obsUpperBoundS;}
+\DoxyCodeLine{00036\ \ \ \ \ QLineSeries\ *obsMeanS;}
+\DoxyCodeLine{00037\ \ \ \ \ QLineSeries\ *calcS;}
+\DoxyCodeLine{00038\ \ \ \ \ QLineSeries\ *calcLowerBoundS;}
+\DoxyCodeLine{00039\ \ \ \ \ QLineSeries\ *calcUpperBoundS;}
+\DoxyCodeLine{00040\ \ \ \ \ QLineSeries\ *calcMeanS;}
+\DoxyCodeLine{00041\ \ \ \ \ QLineSeries\ *qtaS;}
+\DoxyCodeLine{00042\ \};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDeltaQPlot}{DeltaQPlot}};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00050\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDQPlotController_a89bf5c26569fae7ebb27232c0b8d7351}{DQPlotController}}}
+\DoxyCodeLine{00051\ \{}
+\DoxyCodeLine{00052\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classDQPlotController_a89bf5c26569fae7ebb27232c0b8d7351}{DQPlotController}}(\mbox{\hyperlink{classDeltaQPlot}{DeltaQPlot}}\ *plot,\ \textcolor{keyword}{const}\ std::vector<std::string>\ \&selectedItems);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{classDQPlotController_abec8a458c63caf8daaf7ba3d8d375786}{\string~DQPlotController}}();}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classDQPlotController_a690b664ea29704eba61e4162db8ed5e9}{containsComponent}}(std::string\ name);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotController_a027e65a9e789ae280d375f11a25839b4}{editPlot}}(\textcolor{keyword}{const}\ std::vector<std::string>\ \&selectedItems);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotController_ad903623a44acdb898e51042573d0201b}{addComponent}}(\textcolor{keyword}{const}\ std::string\ \&name,\ \textcolor{keywordtype}{bool}\ isOutcome);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ QLineSeries\ *createAndAddLineSeries(\textcolor{keyword}{const}\ std::string\ \&legendName);}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keywordtype}{void}\ addOutcomeSeries(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordtype}{void}\ removeOutcomeSeries(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{void}\ addExpressionSeries(\textcolor{keyword}{const}\ std::string\ \&name,\ \textcolor{keywordtype}{bool}\ isProbe);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{keywordtype}{void}\ removeExpressionSeries(\textcolor{keyword}{const}\ std::string\ \&name,\ \textcolor{keywordtype}{bool}\ isProbe);}
+\DoxyCodeLine{00090\ \ \ \ \ std::vector<std::string>\ \mbox{\hyperlink{classDQPlotController_a1dc87904967252944fc6d9147fbc07fc}{getComponents}}();}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotController_ace8033c0eddc780e528419d8671c2831}{removeComponent}}(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDQPlotController_ab15a0b89c0d7a5700d32d9f071fcac23}{update}}(uint64\_t\ timeLowerBound,\ uint64\_t\ timeUpperBound);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \textcolor{keywordtype}{void}\ setTitle();}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordtype}{bool}\ isEmptyAfterReset();}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordtype}{double}\ updateOutcome(\mbox{\hyperlink{structOutcomeSeries}{OutcomeSeries}}\ \&,\ \textcolor{keyword}{const}\ std::shared\_ptr<Outcome>\ \&,\ uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keywordtype}{double}\ updateProbe(\mbox{\hyperlink{structExpressionSeries}{ExpressionSeries}}\ \&,\ std::shared\_ptr<Probe>\ \&,\ uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keywordtype}{double}\ updateOperator(\mbox{\hyperlink{structExpressionSeries}{ExpressionSeries}}\ \&,\ std::shared\_ptr<Operator>\ \&,\ uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordtype}{void}\ updateExpression(\mbox{\hyperlink{structExpressionSeries}{ExpressionSeries}}\ \&,\ \mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}\ \&\&,\ \mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}\ \&\&,\ \mbox{\hyperlink{structQTA}{QTA}}\ \&\&,\ \textcolor{keywordtype}{double}\ maxDelay);}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \mbox{\hyperlink{classDeltaQPlot}{DeltaQPlot}}\ *plot;}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ std::mutex\ updateMutex;}
+\DoxyCodeLine{00117\ \ \ \ \ std::mutex\ resetMutex;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ std::map<std::string,\ std::pair<OutcomeSeries,\ std::shared\_ptr<Outcome>>>\ outcomes;}
+\DoxyCodeLine{00120\ \ \ \ \ std::map<std::string,\ std::pair<ExpressionSeries,\ std::shared\_ptr<Probe>>>\ probes;}
+\DoxyCodeLine{00121\ \ \ \ \ std::map<std::string,\ std::pair<ExpressionSeries,\ std::shared\_ptr<Operator>>>\ operators;}
+\DoxyCodeLine{00122\ \};}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ DQPLOTCONTROLLER\_H}}
+
+\end{DoxyCode}
