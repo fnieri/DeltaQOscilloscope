@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['sendtoerlang_0',['sendToErlang',['../classServer.html#a05623910d340272a88d49dd87df97162',1,'Server']]],
+  ['server_1',['Server',['../classServer.html#a7d1fe6ba5f0fe9190a4f039662ea0e85',1,'Server']]],
+  ['setcurrentplotlist_2',['setCurrentPlotList',['../classSidebar.html#a464c187a85f8d840adba9cf85c3e5cdb',1,'Sidebar']]],
+  ['setname_3',['setName',['../classSnapshot.html#a41082fcf717993030f0e5c8ac2c6a93e',1,'Snapshot']]],
+  ['setnewparameters_4',['setNewParameters',['../classObservable.html#a557ca251a8c4a52f6b20741b7a64ac44',1,'Observable']]],
+  ['setqta_5',['setQTA',['../classObservable.html#aa1c9f2f66ddedf0d5908a0b7274907b9',1,'Observable']]],
+  ['setrecording_6',['setRecording',['../classObservable.html#ad5dd8bd84515793549e89788e2948e59',1,'Observable::setRecording()'],['../classSystem.html#acd5e4f4e922168944c3a187507b44fb0',1,'System::setRecording()']]],
+  ['setsnapshots_7',['setSnapshots',['../classSnapshotViewerWindow.html#afe9305769a4136eb8d2f771412a24cdd',1,'SnapshotViewerWindow']]],
+  ['setsystemtext_8',['setSystemText',['../classSystemCreationWidget.html#ae1311dc77dd2c5e8367682e2ddf2af90',1,'SystemCreationWidget']]],
+  ['settriggersenabled_9',['setTriggersEnabled',['../classTriggerManager.html#ae3a927174e6aa263b0b1ebf0ecb456c6',1,'TriggerManager']]],
+  ['sidebar_10',['Sidebar',['../classSidebar.html#a874f7f7907a44517ee9cf9ac2c1888d7',1,'Sidebar']]],
+  ['snapshot_11',['Snapshot',['../classSnapshot.html#a55c0fc6ea6d789c91b83ac778200de54',1,'Snapshot']]],
+  ['stop_12',['stop',['../classServer.html#a07c45a7e101a3926d8f9685c3c5d14e4',1,'Server']]],
+  ['systemloaded_13',['systemLoaded',['../classSystemCreationWidget.html#a6381a803a8df988b3c0aec9f41700519',1,'SystemCreationWidget']]],
+  ['systemsaved_14',['systemSaved',['../classSystemCreationWidget.html#aabb0c3bd370018b16b2f482dc2baaa8a',1,'SystemCreationWidget']]],
+  ['systemupdated_15',['systemUpdated',['../classSystemCreationWidget.html#a7d1a53b2207323e5747cdda8a61e6d2e',1,'SystemCreationWidget']]]
+];

@@ -1,0 +1,77 @@
+\doxysection{Delta\+QPlot.\+h}
+\hypertarget{DeltaQPlot_8h_source}{}\label{DeltaQPlot_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DeltaQPlot.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/DeltaQPlot.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#ifndef\ DELTAQPLOT\_H}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ DELTAQPLOT\_H}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}CustomLegendPanel.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <qboxlayout.h>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{comment}{//\ Qt\ includes}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <QChartView>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <QLineSeries>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <QToolButton>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <QValueAxis>}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ C++\ includes}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDQPlotController}{DQPlotController}};}
+\DoxyCodeLine{00019\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDQPlotList}{DQPlotList}};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00025\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classDeltaQPlot_ae2907808185b89a93062473baa981a3d}{DeltaQPlot}}\ :\ \textcolor{keyword}{public}\ QWidget}
+\DoxyCodeLine{00026\ \{}
+\DoxyCodeLine{00027\ \ \ \ \ Q\_OBJECT}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classDeltaQPlot_ae2907808185b89a93062473baa981a3d}{DeltaQPlot}}(\textcolor{keyword}{const}\ std::vector<std::string>\ \&selectedItems,\ QWidget\ *parent\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00040\ \ \ \ \ \mbox{\hyperlink{classDeltaQPlot_a6ff45368bd924af5eb763968830a3e4d}{\string~DeltaQPlot}}();}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_ac915b1594c27729339b3714b7eddc2e8}{addSeries}}(QLineSeries\ *series,\ \textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_a58e56e61a81c6cd8b9fb0bb7288325fe}{update}}(uint64\_t\ timeLowerBound,\ uint64\_t\ timeUpperBound);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_a633b38a2a57d8a933e05b0d83957554a}{removeSeries}}(QAbstractSeries\ *series);}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_a2b34d35677a8d29792e20535c9e6f482}{editPlot}}(\textcolor{keyword}{const}\ std::vector<std::string>\ \&selectedItems);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00068\ \ \ \ \ std::vector<std::string>\ \mbox{\hyperlink{classDeltaQPlot_a09683d01e62569d6b57933c3b4584145}{getComponents}}();}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{bool}\ isEmptyAfterReset();}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_a0da08720d40f01e57f50b103e66a78a2}{updateSeries}}(QLineSeries\ *series,\ \textcolor{keyword}{const}\ QVector<QPointF>\ \&data);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keywordtype}{void}\ updateXRange(\textcolor{keywordtype}{double}\ xRange);}
+\DoxyCodeLine{00081\ \ \ \ \ \mbox{\hyperlink{classDQPlotList}{DQPlotList}}\ *\mbox{\hyperlink{classDeltaQPlot_a51bba97b85e1f562c06f8bf2b7ff6109}{getPlotList}}();}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordtype}{void}\ setTitle(QString\ \&\&);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_ac647d4bc5c215b6a7b570dd52daf7d49}{mousePressEvent}}(QMouseEvent\ *event)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ Q\_SIGNALS:}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classDeltaQPlot_a46b8286413715f9b88ce1abcc7ba5a68}{plotSelected}}(\mbox{\hyperlink{classDeltaQPlot_ae2907808185b89a93062473baa981a3d}{DeltaQPlot}}\ *plot);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00099\ \ \ \ \ QHBoxLayout\ *layout;}
+\DoxyCodeLine{00100\ \ \ \ \ QToolButton\ *toggleButton;}
+\DoxyCodeLine{00101\ \ \ \ \ QChartView\ *chartView;}
+\DoxyCodeLine{00102\ \ \ \ \ QChart\ *chart;}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ QValueAxis\ *axisX;}
+\DoxyCodeLine{00105\ \ \ \ \ QValueAxis\ *axisY;}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ QLineSeries\ *operationSeries;}
+\DoxyCodeLine{00108\ \ \ \ \ \mbox{\hyperlink{classDQPlotController}{DQPlotController}}\ *controller;}
+\DoxyCodeLine{00109\ \ \ \ \ \mbox{\hyperlink{classDQPlotList}{DQPlotList}}\ *plotList;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \mbox{\hyperlink{classCustomLegendPanel}{CustomLegendPanel}}\ *legendPanel;}
+\DoxyCodeLine{00112\ \};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ DELTAQPLOT\_H}}
+
+\end{DoxyCode}

@@ -1,0 +1,112 @@
+\doxysection{Sidebar Class Reference}
+\hypertarget{classSidebar}{}\label{classSidebar}\index{Sidebar@{Sidebar}}
+
+
+Main sidebar widget containing plot management controls and system configuration.  
+
+
+
+
+{\ttfamily \#include $<$Sidebar.\+h$>$}
+
+Inheritance diagram for Sidebar\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classSidebar}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classSidebar_aaed598fcf476d20a2a28e7f847ad3315}\label{classSidebar_aaed598fcf476d20a2a28e7f847ad3315} 
+void {\bfseries add\+Plot\+Clicked} ()
+\begin{DoxyCompactList}\small\item\em Emitted when the "{}\+Add plot"{} button is clicked. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classSidebar_a274dc0923aa85e9064b04365cf3f00a2}{on\+Sampling\+Rate\+Changed}} (int milliseconds)
+\begin{DoxyCompactList}\small\item\em Emitted when sampling rate is changed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classSidebar_a874f7f7907a44517ee9cf9ac2c1888d7}{Sidebar}} (QWidget \texorpdfstring{$\ast$}{*}parent=nullptr)
+\begin{DoxyCompactList}\small\item\em Constructs a \doxylink{classSidebar}{Sidebar} widget. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classSidebar_a464c187a85f8d840adba9cf85c3e5cdb}{set\+Current\+Plot\+List}} (\mbox{\hyperlink{classDQPlotList}{DQPlot\+List}} \texorpdfstring{$\ast$}{*}current\+Plot\+List)
+\begin{DoxyCompactList}\small\item\em Sets the current plot list widget. \end{DoxyCompactList}\item 
+\Hypertarget{classSidebar_ac1e8c0c89121fb829e1239db2d65b44d}\label{classSidebar_ac1e8c0c89121fb829e1239db2d65b44d} 
+void {\bfseries hide\+Current\+Plot} ()
+\begin{DoxyCompactList}\small\item\em Hides the current plot management section. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{classNewPlotList}{New\+Plot\+List}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classSidebar_a4018db0813ffd0cc948563958f13eb69}{get\+Plot\+List}} () const
+\begin{DoxyCompactList}\small\item\em Gets the new plot list widget. \end{DoxyCompactList}\item 
+\Hypertarget{classSidebar_a73c1d9da61c19b5fdb2c10aeeae0ab68}\label{classSidebar_a73c1d9da61c19b5fdb2c10aeeae0ab68} 
+void {\bfseries clear\+On\+Add} ()
+\begin{DoxyCompactList}\small\item\em Clears new plot selection after plot creation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main sidebar widget containing plot management controls and system configuration. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classSidebar_a874f7f7907a44517ee9cf9ac2c1888d7}\index{Sidebar@{Sidebar}!Sidebar@{Sidebar}}
+\index{Sidebar@{Sidebar}!Sidebar@{Sidebar}}
+\doxysubsubsection{\texorpdfstring{Sidebar()}{Sidebar()}}
+{\footnotesize\ttfamily \label{classSidebar_a874f7f7907a44517ee9cf9ac2c1888d7} 
+Sidebar\+::\+Sidebar (\begin{DoxyParamCaption}\item[{QWidget \texorpdfstring{$\ast$}{*}}]{parent}{ = {\ttfamily nullptr}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs a \doxylink{classSidebar}{Sidebar} widget. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em parent} & The parent widget (optional). \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classSidebar_a4018db0813ffd0cc948563958f13eb69}\index{Sidebar@{Sidebar}!getPlotList@{getPlotList}}
+\index{getPlotList@{getPlotList}!Sidebar@{Sidebar}}
+\doxysubsubsection{\texorpdfstring{getPlotList()}{getPlotList()}}
+{\footnotesize\ttfamily \label{classSidebar_a4018db0813ffd0cc948563958f13eb69} 
+\mbox{\hyperlink{classNewPlotList}{New\+Plot\+List}} \texorpdfstring{$\ast$}{*} Sidebar\+::get\+Plot\+List (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Gets the new plot list widget. 
+
+\begin{DoxyReturn}{Returns}
+Pointer to the \doxylink{classNewPlotList}{New\+Plot\+List} widget. 
+\end{DoxyReturn}
+\Hypertarget{classSidebar_a274dc0923aa85e9064b04365cf3f00a2}\index{Sidebar@{Sidebar}!onSamplingRateChanged@{onSamplingRateChanged}}
+\index{onSamplingRateChanged@{onSamplingRateChanged}!Sidebar@{Sidebar}}
+\doxysubsubsection{\texorpdfstring{onSamplingRateChanged}{onSamplingRateChanged}}
+{\footnotesize\ttfamily \label{classSidebar_a274dc0923aa85e9064b04365cf3f00a2} 
+void Sidebar\+::on\+Sampling\+Rate\+Changed (\begin{DoxyParamCaption}\item[{int}]{milliseconds}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+
+
+Emitted when sampling rate is changed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em milliseconds} & The new sampling rate in milliseconds. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classSidebar_a464c187a85f8d840adba9cf85c3e5cdb}\index{Sidebar@{Sidebar}!setCurrentPlotList@{setCurrentPlotList}}
+\index{setCurrentPlotList@{setCurrentPlotList}!Sidebar@{Sidebar}}
+\doxysubsubsection{\texorpdfstring{setCurrentPlotList()}{setCurrentPlotList()}}
+{\footnotesize\ttfamily \label{classSidebar_a464c187a85f8d840adba9cf85c3e5cdb} 
+void Sidebar\+::set\+Current\+Plot\+List (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDQPlotList}{DQPlot\+List}} \texorpdfstring{$\ast$}{*}}]{current\+Plot\+List}{}\end{DoxyParamCaption})}
+
+
+
+Sets the current plot list widget. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+Plot\+List} & The \doxylink{classDQPlotList}{DQPlot\+List} widget to display. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/francy/\+Desktop/\+Real\+Time\+Delta\+QSD/src/dashboard/Sidebar.\+h\end{DoxyCompactItemize}

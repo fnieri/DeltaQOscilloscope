@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     plotLayout = new QGridLayout(plotContainer);
     scrollArea->setWidget(plotContainer);
     mainLayout->addWidget(scrollArea, 1);
-
+    plotContainer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     // Initialize side panels
     sidebar = new Sidebar(this);
     triggersTab = new TriggersTab(this);
@@ -193,6 +193,7 @@ void MainWindow::onAddPlotClicked()
     // Update UI state
     onPlotSelected(deltaQPlot);
     sidebar->clearOnAdd();
+    plotContainer->adjustSize();
 }
 
 /**
@@ -266,6 +267,7 @@ void MainWindow::onRemovePlot(DeltaQPlot *plot)
     }
 
     sidebar->hideCurrentPlot();
+    plotContainer->adjustSize();
 }
 
 /**

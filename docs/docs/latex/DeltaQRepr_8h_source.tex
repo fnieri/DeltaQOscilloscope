@@ -1,0 +1,72 @@
+\doxysection{Delta\+QRepr.\+h}
+\hypertarget{DeltaQRepr_8h_source}{}\label{DeltaQRepr_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/DeltaQRepr.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/maths/DeltaQRepr.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}ConfidenceInterval.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}DeltaQ.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{struct\ }DeltaQRepr\ \{}
+\DoxyCodeLine{00014\ \ \ \ \ std::uint64\_t\ time;}
+\DoxyCodeLine{00015\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ deltaQ;}
+\DoxyCodeLine{00016\ \ \ \ \ std::vector<Bound>\ bounds;}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ DeltaQRepr()}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ :\ time(0)}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ ,\ deltaQ()}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ ,\ bounds()}
+\DoxyCodeLine{00022\ \ \ \ \ \{}
+\DoxyCodeLine{00023\ \ \ \ \ \}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{comment}{//\ DeltaQRepr\ copy\ constructor}}
+\DoxyCodeLine{00026\ \ \ \ \ DeltaQRepr(\textcolor{keyword}{const}\ DeltaQRepr\ \&other)}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ :\ time(other.time)}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ ,\ deltaQ(other.deltaQ)}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ ,\ bounds(other.bounds)}
+\DoxyCodeLine{00030\ \ \ \ \ \{}
+\DoxyCodeLine{00031\ \ \ \ \ \}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{comment}{//\ DeltaQRepr\ move\ semantics}}
+\DoxyCodeLine{00034\ \ \ \ \ DeltaQRepr(DeltaQRepr\ \&\&other)\ noexcept}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ :\ time(other.time)}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ ,\ deltaQ(std::move(other.deltaQ))}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ ,\ bounds(std::move(other.bounds))}
+\DoxyCodeLine{00038\ \ \ \ \ \{}
+\DoxyCodeLine{00039\ \ \ \ \ \}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{comment}{//\ DeltaQRepr\ assignment\ operators}}
+\DoxyCodeLine{00042\ \ \ \ \ DeltaQRepr\ \&operator=(\textcolor{keyword}{const}\ DeltaQRepr\ \&other)}
+\DoxyCodeLine{00043\ \ \ \ \ \{}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{this}\ !=\ \&other)\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ time\ =\ other.time;}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ deltaQ\ =\ other.deltaQ;}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ bounds\ =\ other.bounds;}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00050\ \ \ \ \ \}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ DeltaQRepr\ \&operator=(DeltaQRepr\ \&\&other)\ \textcolor{keyword}{noexcept}}
+\DoxyCodeLine{00053\ \ \ \ \ \{}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{this}\ !=\ \&other)\ \{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ time\ =\ other.time;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ deltaQ\ =\ std::move(other.deltaQ);}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ bounds\ =\ std::move(other.bounds);}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00060\ \ \ \ \ \}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{comment}{//\ Constructor\ with\ parameters}}
+\DoxyCodeLine{00063\ \ \ \ \ DeltaQRepr(std::uint64\_t\ t,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \&dq,\ \textcolor{keyword}{const}\ std::vector<Bound>\ \&b)}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ :\ time(t)}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ ,\ deltaQ(dq)}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ ,\ bounds(b)}
+\DoxyCodeLine{00067\ \ \ \ \ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \}}
+\DoxyCodeLine{00069\ \};}
+
+\end{DoxyCode}

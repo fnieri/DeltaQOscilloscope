@@ -1,0 +1,51 @@
+\doxysection{QTAInput\+Widget.\+h}
+\hypertarget{QTAInputWidget_8h_source}{}\label{QTAInputWidget_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/QTAInputWidget.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/QTAInputWidget.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ QTAINPUTWIDGET\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ QTAINPUTWIDGET\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <QWidget>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <QLineEdit>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <QComboBox>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <QFormLayout>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <QLabel>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <QPushButton>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }QTAInputWidget\ :\ \textcolor{keyword}{public}\ QWidget}
+\DoxyCodeLine{00016\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ Q\_OBJECT}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{explicit}\ QTAInputWidget(QWidget\ *parent\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classQTAInputWidget_af2af0481cf1803d62a7e736dded2e493}{getPerc25}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classQTAInputWidget_a7bba1c3041f963e8a0734003a1c58968}{getPerc50}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classQTAInputWidget_af03850eb5f785ee195bfe0cd7e6e6b9b}{getPerc75}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classQTAInputWidget_a5ae1adc85b5beb3883f9fc78d8b6f597}{getCdfMax}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00050\ \ \ \ \ QString\ \mbox{\hyperlink{classQTAInputWidget_a5f0341da31c8d7b6504815722ee7c649}{getSelectedObservable}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{keyword}{public}\ Q\_SLOTS:}
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classQTAInputWidget_a2679f02d25396f1f2cf4cbeecffb0479}{populateComboBox}}();}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classQTAInputWidget_aab9a44e517d1c8678cdc04325a47458b}{loadObservableSettings}}();}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classQTAInputWidget_ab3069bc43016454305c08cfd67317994}{onSaveButtonClicked}}();}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00073\ \ \ \ \ QComboBox\ *observableComboBox;\ \ \ }
+\DoxyCodeLine{00074\ \ \ \ \ QLineEdit\ *perc25Edit;\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00075\ \ \ \ \ QLineEdit\ *perc50Edit;\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00076\ \ \ \ \ QLineEdit\ *perc75Edit;\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00077\ \ \ \ \ QLineEdit\ *cdfMaxEdit;\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00078\ \ \ \ \ QPushButton\ *saveButton;\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00079\ \ \ \ \ QLabel\ *qtaLabel;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00080\ \};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ QTAINPUTWIDGET\_H}}
+
+\end{DoxyCode}

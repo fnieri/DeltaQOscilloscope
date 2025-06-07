@@ -1,0 +1,70 @@
+\doxysection{Sidebar.\+h}
+\hypertarget{Sidebar_8h_source}{}\label{Sidebar_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/Sidebar.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/Sidebar.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SIDEBAR\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SIDEBAR\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}DQPlotList.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}NewPlotList.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}SamplingRateWidget.h"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}SystemCreationWidget.h"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <QComboBox>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <QLabel>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <QPushButton>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <QSpinBox>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <QSplitter>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <QTextEdit>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <QVBoxLayout>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <QWidget>}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <qboxlayout.h>}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00023\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSidebar_a874f7f7907a44517ee9cf9ac2c1888d7}{Sidebar}}\ :\ \textcolor{keyword}{public}\ QWidget}
+\DoxyCodeLine{00024\ \{}
+\DoxyCodeLine{00025\ \ \ \ \ Q\_OBJECT}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ QVBoxLayout\ *newPlotListLayout;\ }
+\DoxyCodeLine{00028\ \ \ \ \ QWidget\ *newPlotListWidget;\ }
+\DoxyCodeLine{00029\ \ \ \ \ QLabel\ *newPlotLabel;\ }
+\DoxyCodeLine{00030\ \ \ \ \ \mbox{\hyperlink{classNewPlotList}{NewPlotList}}\ *newPlotList;\ }
+\DoxyCodeLine{00031\ \ \ \ \ QPushButton\ *addNewPlotButton;\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ QWidget\ *currentPlotWidget;\ }
+\DoxyCodeLine{00034\ \ \ \ \ QVBoxLayout\ *currentPlotLayout;\ }
+\DoxyCodeLine{00035\ \ \ \ \ QLabel\ *currentPlotLabel;\ }
+\DoxyCodeLine{00036\ \ \ \ \ \mbox{\hyperlink{classDQPlotList}{DQPlotList}}\ *currentPlotList\ =\ \textcolor{keyword}{nullptr};\ }
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ QSplitter\ *mainSplitter;\ }
+\DoxyCodeLine{00039\ \ \ \ \ QVBoxLayout\ *layout;\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classSystemCreationWidget}{SystemCreationWidget}}\ *systemCreationWidget;\ }
+\DoxyCodeLine{00042\ \ \ \ \ \mbox{\hyperlink{classSamplingRateWidget}{SamplingRateWidget}}\ *samplingRateWidget;\ }
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ Q\_SIGNALS:}
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSidebar_aaed598fcf476d20a2a28e7f847ad3315}{addPlotClicked}}();}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSidebar_a274dc0923aa85e9064b04365cf3f00a2}{onSamplingRateChanged}}(\textcolor{keywordtype}{int}\ milliseconds);}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{keyword}{private}\ Q\_SLOTS:}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{void}\ onAddPlotClicked();}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{void}\ handleSamplingRateChanged(\textcolor{keywordtype}{int}\ ms);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classSidebar_a874f7f7907a44517ee9cf9ac2c1888d7}{Sidebar}}(QWidget\ *parent\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSidebar_a464c187a85f8d840adba9cf85c3e5cdb}{setCurrentPlotList}}(\mbox{\hyperlink{classDQPlotList}{DQPlotList}}\ *currentPlotList);}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSidebar_ac1e8c0c89121fb829e1239db2d65b44d}{hideCurrentPlot}}();}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00090\ \ \ \ \ \mbox{\hyperlink{classNewPlotList}{NewPlotList}}\ *\mbox{\hyperlink{classSidebar_a4018db0813ffd0cc948563958f13eb69}{getPlotList}}()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00091\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ newPlotList;}
+\DoxyCodeLine{00093\ \ \ \ \ \}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSidebar_a73c1d9da61c19b5fdb2c10aeeae0ab68}{clearOnAdd}}();}
+\DoxyCodeLine{00099\ \};}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

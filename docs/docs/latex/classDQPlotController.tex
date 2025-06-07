@@ -1,0 +1,67 @@
+\doxysection{DQPlot\+Controller Class Reference}
+\hypertarget{classDQPlotController}{}\label{classDQPlotController}\index{DQPlotController@{DQPlotController}}
+
+
+Controls the data management and update logic of \doxylink{classDeltaQPlot}{Delta\+QPlot}.  
+
+
+
+
+{\ttfamily \#include $<$DQPlot\+Controller.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classDQPlotController_a89bf5c26569fae7ebb27232c0b8d7351}\label{classDQPlotController_a89bf5c26569fae7ebb27232c0b8d7351} 
+{\bfseries DQPlot\+Controller} (\mbox{\hyperlink{classDeltaQPlot}{Delta\+QPlot}} \texorpdfstring{$\ast$}{*}plot, const std\+::vector$<$ std\+::string $>$ \&selected\+Items)
+\begin{DoxyCompactList}\small\item\em Constructor with associated plot and selected components. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_abec8a458c63caf8daaf7ba3d8d375786}\label{classDQPlotController_abec8a458c63caf8daaf7ba3d8d375786} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+DQPlot\+Controller} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_a690b664ea29704eba61e4162db8ed5e9}\label{classDQPlotController_a690b664ea29704eba61e4162db8ed5e9} 
+bool {\bfseries contains\+Component} (std\+::string name)
+\begin{DoxyCompactList}\small\item\em Checks if a component is already being plotted. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_a027e65a9e789ae280d375f11a25839b4}\label{classDQPlotController_a027e65a9e789ae280d375f11a25839b4} 
+void {\bfseries edit\+Plot} (const std\+::vector$<$ std\+::string $>$ \&selected\+Items)
+\begin{DoxyCompactList}\small\item\em Updates the plot according to a new list of selected components. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_ad903623a44acdb898e51042573d0201b}\label{classDQPlotController_ad903623a44acdb898e51042573d0201b} 
+void {\bfseries add\+Component} (const std\+::string \&name, bool is\+Outcome)
+\begin{DoxyCompactList}\small\item\em Adds a new component (probe or outcome) to the plot. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_ab8e7c5bc8726d66f82ad8e3844cea066}\label{classDQPlotController_ab8e7c5bc8726d66f82ad8e3844cea066} 
+QLine\+Series \texorpdfstring{$\ast$}{*} {\bfseries create\+And\+Add\+Line\+Series} (const std\+::string \&legend\+Name)
+\item 
+\Hypertarget{classDQPlotController_a70e0082948975c9f987ef1c6a8182416}\label{classDQPlotController_a70e0082948975c9f987ef1c6a8182416} 
+void {\bfseries add\+Outcome\+Series} (const std\+::string \&name)
+\item 
+\Hypertarget{classDQPlotController_a2c319a1386ba55665ed003c46c8c5f7c}\label{classDQPlotController_a2c319a1386ba55665ed003c46c8c5f7c} 
+void {\bfseries remove\+Outcome\+Series} (const std\+::string \&name)
+\item 
+\Hypertarget{classDQPlotController_a7728968e5766de3d91eb9cf8d3088c37}\label{classDQPlotController_a7728968e5766de3d91eb9cf8d3088c37} 
+void {\bfseries add\+Expression\+Series} (const std\+::string \&name, bool is\+Probe)
+\item 
+\Hypertarget{classDQPlotController_aa9584ad58aa66c401f87e3115fd4d170}\label{classDQPlotController_aa9584ad58aa66c401f87e3115fd4d170} 
+void {\bfseries remove\+Expression\+Series} (const std\+::string \&name, bool is\+Probe)
+\item 
+\Hypertarget{classDQPlotController_a1dc87904967252944fc6d9147fbc07fc}\label{classDQPlotController_a1dc87904967252944fc6d9147fbc07fc} 
+std\+::vector$<$ std\+::string $>$ {\bfseries get\+Components} ()
+\begin{DoxyCompactList}\small\item\em Returns a list of names of all currently plotted components. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_ace8033c0eddc780e528419d8671c2831}\label{classDQPlotController_ace8033c0eddc780e528419d8671c2831} 
+void {\bfseries remove\+Component} (const std\+::string \&name)
+\begin{DoxyCompactList}\small\item\em Removes a plotted component by name (const reference). \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_ab15a0b89c0d7a5700d32d9f071fcac23}\label{classDQPlotController_ab15a0b89c0d7a5700d32d9f071fcac23} 
+void {\bfseries update} (uint64\+\_\+t time\+Lower\+Bound, uint64\+\_\+t time\+Upper\+Bound)
+\begin{DoxyCompactList}\small\item\em Updates the data of all series based on provided time range and bin width. \end{DoxyCompactList}\item 
+\Hypertarget{classDQPlotController_ad2a27e063045a5d698fa33f1e94f4a3a}\label{classDQPlotController_ad2a27e063045a5d698fa33f1e94f4a3a} 
+void {\bfseries set\+Title} ()
+\item 
+\Hypertarget{classDQPlotController_ab67c1711a1779dbd71025a68f212c274}\label{classDQPlotController_ab67c1711a1779dbd71025a68f212c274} 
+bool {\bfseries is\+Empty\+After\+Reset} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Controls the data management and update logic of \doxylink{classDeltaQPlot}{Delta\+QPlot}. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/francy/\+Desktop/\+Real\+Time\+Delta\+QSD/src/dashboard/DQPlot\+Controller.\+h\end{DoxyCompactItemize}

@@ -1,6 +1,5 @@
 grammar DQGrammar;
 
-
 PROBE_ID: 's';
 BEHAVIOR_TYPE: 'f' | 'a' | 'p';
 NUMBER: [0-9]+('.'[0-9]+)?;
@@ -35,4 +34,3 @@ probability_list: NUMBER (',' NUMBER)+;
 component_list: component_chain (',' component_chain)+;
 
 outcome: IDENTIFIER;
-

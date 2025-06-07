@@ -1,0 +1,119 @@
+\doxysection{Trigger\+Manager Class Reference}
+\hypertarget{classTriggerManager}{}\label{classTriggerManager}\index{TriggerManager@{TriggerManager}}
+
+
+Manages triggers for an observable.  
+
+
+
+
+{\ttfamily \#include $<$Trigger\+Manager.\+h$>$}
+
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structTriggerManager_1_1Trigger}{Trigger}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classTriggerManager_a0d23c0ba69661cd36f0f816da4f5505a}{add\+Trigger}} (Trigger\+Type type, Trigger\+Defs\+::\+Condition condition, Trigger\+Defs\+::\+Action action, bool enabled=true)
+\begin{DoxyCompactList}\small\item\em Add a trigger for an observable,. \end{DoxyCompactList}\item 
+\Hypertarget{classTriggerManager_a73b20ff782fb95b73583271f9f1c6ca2}\label{classTriggerManager_a73b20ff782fb95b73583271f9f1c6ca2} 
+std\+::vector$<$ \mbox{\hyperlink{structTriggerManager_1_1Trigger}{Trigger}} $>$ {\bfseries get\+Triggers\+By\+Type} (Trigger\+Type type)
+\begin{DoxyCompactList}\small\item\em Get all triggers set for a type. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTriggerManager_a5b580b2986aa88345609f6f7af1568ed}{evaluate}} (const \mbox{\hyperlink{classDeltaQ}{DeltaQ}} \&dq, const \mbox{\hyperlink{structQTA}{QTA}} \&qta, std\+::uint64\+\_\+t) const
+\begin{DoxyCompactList}\small\item\em Evaluate a \doxylink{classDeltaQ}{DeltaQ} to see if a trigger should be fired. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTriggerManager_a8d4b342fc06fa8dcea1205cba63de30f}{remove\+Triggers\+By\+Type}} (Trigger\+Type type)
+\begin{DoxyCompactList}\small\item\em Remove triggers if their type matches the param type. \end{DoxyCompactList}\item 
+\Hypertarget{classTriggerManager_a3bdb3db70bf91b8636ca3ca2aa676062}\label{classTriggerManager_a3bdb3db70bf91b8636ca3ca2aa676062} 
+void {\bfseries clear\+All\+Triggers} ()
+\begin{DoxyCompactList}\small\item\em Remove all triggers. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classTriggerManager_ae3a927174e6aa263b0b1ebf0ecb456c6}{set\+Triggers\+Enabled}} (Trigger\+Type type, bool enabled)
+\begin{DoxyCompactList}\small\item\em Enable/\+Disable all triggers with a type. \end{DoxyCompactList}\item 
+\Hypertarget{classTriggerManager_a6b89c193d3f0f0439f55b04b0a597600}\label{classTriggerManager_a6b89c193d3f0f0439f55b04b0a597600} 
+std\+::vector$<$ \mbox{\hyperlink{structTriggerManager_1_1Trigger}{Trigger}} $>$ {\bfseries get\+All\+Triggers} () const
+\begin{DoxyCompactList}\small\item\em Get all triggers. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages triggers for an observable. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classTriggerManager_a0d23c0ba69661cd36f0f816da4f5505a}\index{TriggerManager@{TriggerManager}!addTrigger@{addTrigger}}
+\index{addTrigger@{addTrigger}!TriggerManager@{TriggerManager}}
+\doxysubsubsection{\texorpdfstring{addTrigger()}{addTrigger()}}
+{\footnotesize\ttfamily \label{classTriggerManager_a0d23c0ba69661cd36f0f816da4f5505a} 
+void Trigger\+Manager\+::add\+Trigger (\begin{DoxyParamCaption}\item[{Trigger\+Type}]{type}{, }\item[{Trigger\+Defs\+::\+Condition}]{condition}{, }\item[{Trigger\+Defs\+::\+Action}]{action}{, }\item[{bool}]{enabled}{ = {\ttfamily true}}\end{DoxyParamCaption})}
+
+
+
+Add a trigger for an observable,. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of the trigger \\
+\hline
+{\em condition} & The condition for the trigger to be fired \\
+\hline
+{\em action} & The action to perform when fired \\
+\hline
+{\em enabled} & It the trigger is enabled \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classTriggerManager_a5b580b2986aa88345609f6f7af1568ed}\index{TriggerManager@{TriggerManager}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!TriggerManager@{TriggerManager}}
+\doxysubsubsection{\texorpdfstring{evaluate()}{evaluate()}}
+{\footnotesize\ttfamily \label{classTriggerManager_a5b580b2986aa88345609f6f7af1568ed} 
+void Trigger\+Manager\+::evaluate (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classDeltaQ}{DeltaQ}} \&}]{dq}{, }\item[{const \mbox{\hyperlink{structQTA}{QTA}} \&}]{qta}{, }\item[{std\+::uint64\+\_\+t}]{}{}\end{DoxyParamCaption}) const}
+
+
+
+Evaluate a \doxylink{classDeltaQ}{DeltaQ} to see if a trigger should be fired. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em dq} & The \doxylink{classDeltaQ}{DeltaQ} to evaluate \\
+\hline
+{\em qta} & The qta to compare against to \\
+\hline
+{\em std\+::uint64\+\_\+t} & Keep the time to log it if the trigger fires \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classTriggerManager_a8d4b342fc06fa8dcea1205cba63de30f}\index{TriggerManager@{TriggerManager}!removeTriggersByType@{removeTriggersByType}}
+\index{removeTriggersByType@{removeTriggersByType}!TriggerManager@{TriggerManager}}
+\doxysubsubsection{\texorpdfstring{removeTriggersByType()}{removeTriggersByType()}}
+{\footnotesize\ttfamily \label{classTriggerManager_a8d4b342fc06fa8dcea1205cba63de30f} 
+void Trigger\+Manager\+::remove\+Triggers\+By\+Type (\begin{DoxyParamCaption}\item[{Trigger\+Type}]{type}{}\end{DoxyParamCaption})}
+
+
+
+Remove triggers if their type matches the param type. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & The trigger\textquotesingle{}s type\textquotesingle{} \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classTriggerManager_ae3a927174e6aa263b0b1ebf0ecb456c6}\index{TriggerManager@{TriggerManager}!setTriggersEnabled@{setTriggersEnabled}}
+\index{setTriggersEnabled@{setTriggersEnabled}!TriggerManager@{TriggerManager}}
+\doxysubsubsection{\texorpdfstring{setTriggersEnabled()}{setTriggersEnabled()}}
+{\footnotesize\ttfamily \label{classTriggerManager_ae3a927174e6aa263b0b1ebf0ecb456c6} 
+void Trigger\+Manager\+::set\+Triggers\+Enabled (\begin{DoxyParamCaption}\item[{Trigger\+Type}]{type}{, }\item[{bool}]{enabled}{}\end{DoxyParamCaption})}
+
+
+
+Enable/\+Disable all triggers with a type. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of trigger to enable/disable \\
+\hline
+{\em enabled} & \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/francy/\+Desktop/\+Real\+Time\+Delta\+QSD/src/maths/Trigger\+Manager.\+h\end{DoxyCompactItemize}

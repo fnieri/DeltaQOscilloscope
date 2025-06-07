@@ -1,0 +1,55 @@
+\doxysection{System\+Builder.\+h}
+\hypertarget{SystemBuilder_8h_source}{}\label{SystemBuilder_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/parser/SystemBuilder.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/parser/SystemBuilder.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ SYSTEMBUILDER\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ SYSTEMBUILDER\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../diagram/System.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}DQGrammarVisitor.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classSystemBuilderVisitor}{SystemBuilderVisitor}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classparser_1_1DQGrammarVisitor}{parser::DQGrammarVisitor}}}
+\DoxyCodeLine{00013\ \{}
+\DoxyCodeLine{00014\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00015\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Outcome>>\ outcomes;\ \ \ }
+\DoxyCodeLine{00016\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Operator>>\ operators;\ }
+\DoxyCodeLine{00017\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Probe>>\ probes;\ \ \ \ \ \ \ }
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ std::vector<std::string>\ definedProbes;\ }
+\DoxyCodeLine{00020\ \ \ \ \ \mbox{\hyperlink{classSystem}{System}}\ system;\ }
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \ std::string\ currentlyBuildingProbe;\ }
+\DoxyCodeLine{00023\ \ \ \ \ std::map<std::string,\ std::vector<std::string>>\ dependencies;\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ std::unordered\_map<std::string,\ std::vector<std::string>>\ definitionLinks;\ }
+\DoxyCodeLine{00026\ \ \ \ \ std::unordered\_map<std::string,\ std::vector<std::vector<std::string>>>\ operatorLinks;\ }
+\DoxyCodeLine{00027\ \ \ \ \ std::vector<std::string>\ systemLinks;\ }
+\DoxyCodeLine{00028\ \ \ \ \ std::unordered\_set<std::string>\ allNames;\ }
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keywordtype}{void}\ checkForCycles()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{bool}\ hasCycle(\textcolor{keyword}{const}\ std::string\&\ node,}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::set<std::string>\&\ visited,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::set<std::string>\&\ recursionStack)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00052\ \ \ \ \ \mbox{\hyperlink{classSystem}{System}}\ \mbox{\hyperlink{classSystemBuilderVisitor_a245bf34126c1fd8ebc60851f0e988044}{getSystem}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{comment}{//\ Visitor\ overrides\ from\ DQGrammarVisitor:}}
+\DoxyCodeLine{00055\ \ \ \ \ std::any\ \mbox{\hyperlink{classSystemBuilderVisitor_a58b554540fc6b3bb4637853b78fb8c6a}{visitStart}}(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1StartContext}{parser::DQGrammarParser::StartContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00056\ \ \ \ \ std::any\ visitDefinition(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1DefinitionContext}{parser::DQGrammarParser::DefinitionContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00057\ \ \ \ \ std::any\ visitSystem(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1SystemContext}{parser::DQGrammarParser::SystemContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00058\ \ \ \ \ std::any\ visitComponent(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1ComponentContext}{parser::DQGrammarParser::ComponentContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00059\ \ \ \ \ std::any\ visitBehaviorComponent(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1BehaviorComponentContext}{parser::DQGrammarParser::BehaviorComponentContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00060\ \ \ \ \ std::any\ visitProbeComponent(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1ProbeComponentContext}{parser::DQGrammarParser::ProbeComponentContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00061\ \ \ \ \ std::any\ visitProbability\_list(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1Probability__listContext}{parser::DQGrammarParser::Probability\_listContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00062\ \ \ \ \ std::any\ visitComponent\_list(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1Component__listContext}{parser::DQGrammarParser::Component\_listContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00063\ \ \ \ \ std::any\ visitOutcome(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1OutcomeContext}{parser::DQGrammarParser::OutcomeContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00064\ \ \ \ \ std::any\ visitComponent\_chain(\mbox{\hyperlink{classparser_1_1DQGrammarParser_1_1Component__chainContext}{parser::DQGrammarParser::Component\_chainContext}}\ *context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00065\ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ SYSTEMBUILDER\_H}}
+
+\end{DoxyCode}

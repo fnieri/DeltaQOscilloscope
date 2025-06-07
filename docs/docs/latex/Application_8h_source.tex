@@ -1,0 +1,58 @@
+\doxysection{Application.\+h}
+\hypertarget{Application_8h_source}{}\label{Application_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/Application.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/Application.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}diagram/Observable.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}diagram/System.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}server/Server.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <iostream>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structSystemDiff}{SystemDiff}}\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ std::vector<std::string>\ addedProbes;}
+\DoxyCodeLine{00014\ \ \ \ \ std::vector<std::string>\ removedProbes;}
+\DoxyCodeLine{00015\ \ \ \ \ std::vector<std::string>\ changedProbes;}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \ \ \ \ std::vector<std::string>\ addedOutcomes;}
+\DoxyCodeLine{00018\ \ \ \ \ std::vector<std::string>\ removedOutcomes;}
+\DoxyCodeLine{00019\ \ \ \ \ std::vector<std::string>\ changedOutcomes;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ std::vector<std::string>\ addedOperators;}
+\DoxyCodeLine{00022\ \ \ \ \ std::vector<std::string>\ removedOperators;}
+\DoxyCodeLine{00023\ \ \ \ \ std::vector<std::string>\ changedOperators;}
+\DoxyCodeLine{00024\ \};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{class\ }Application}
+\DoxyCodeLine{00027\ \{}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ std::shared\_ptr<System>\ system\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00030\ \ \ \ \ std::vector<std::function<void()>>\ observers;\ \textcolor{comment}{//\ List\ of\ functions\ to\ notify}}
+\DoxyCodeLine{00031\ \ \ \ \ \mbox{\hyperlink{classServer}{Server}}\ *server\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{bool}\ componentsDiffer(\textcolor{keyword}{const}\ std::shared\_ptr<Observable>\ \&a,\ \textcolor{keyword}{const}\ std::shared\_ptr<Observable>\ \&b);}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \ \ \mbox{\hyperlink{structSystemDiff}{SystemDiff}}\ diffWith(\mbox{\hyperlink{classSystem}{System}}\ \&newSystem);}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ Application();}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordtype}{void}\ notifyObservers();}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{static}\ Application\ \&getInstance();}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{void}\ setServer(\mbox{\hyperlink{classServer}{Server}}\ *);}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{void}\ setSystem(\mbox{\hyperlink{classSystem}{System}}\ newSystem);}
+\DoxyCodeLine{00043\ \ \ \ \ std::shared\_ptr<System>\ getSystem();}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{void}\ addObserver(std::function<\textcolor{keywordtype}{void}()>\ callback);}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{void}\ sendDelayChange(std::string\ \&,\ \textcolor{keywordtype}{double});}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{bool}\ startCppServer(\textcolor{keyword}{const}\ std::string\ \&\&,\ \textcolor{keywordtype}{int});}
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordtype}{void}\ stopCppServer();}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ setErlangEndpoint(\textcolor{keyword}{const}\ std::string\ \&\&,\ \textcolor{keywordtype}{int});}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{void}\ setStubRunning(\textcolor{keywordtype}{bool}\ running);}
+\DoxyCodeLine{00052\ \};}
+
+\end{DoxyCode}

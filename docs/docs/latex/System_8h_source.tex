@@ -1,0 +1,80 @@
+\doxysection{System.\+h}
+\hypertarget{System_8h_source}{}\label{System_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/System.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/System.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}../maths/DeltaQ.h"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}Observable.h"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}Operator.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}Outcome.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}Probe.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{class\ }System}
+\DoxyCodeLine{00017\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Outcome>>\ outcomes\ \{\};\ }
+\DoxyCodeLine{00019\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Operator>>\ operators\ \{\};\ }
+\DoxyCodeLine{00020\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Probe>>\ probes\ \{\};\ }
+\DoxyCodeLine{00021\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<Observable>>\ observables\ \{\};\ }
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ std::string\ systemDefinitionText;\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keywordtype}{bool}\ recordingTrigger\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00026\ \ \ \ \ std::map<uint64\_t,\ std::vector<Snapshot>>\ snapshots;}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00029\ \ \ \ \ System()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ std::shared\_ptr<Outcome>>\ \&getOutcomes();}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ std::shared\_ptr<Probe>>\ \&getProbes();}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ std::shared\_ptr<Operator>>\ \&getOperators();}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ std::shared\_ptr<Observable>>\ \&getObservables();}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordtype}{void}\ setOutcomes(std::unordered\_map<std::string,\ std::shared\_ptr<Outcome>>\ outcomesMap);}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keywordtype}{void}\ setOperators(std::unordered\_map<std::string,\ std::shared\_ptr<Operator>>\ operatorsMap);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{void}\ setProbes(std::unordered\_map<std::string,\ std::shared\_ptr<Probe>>\ probesMap);}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{bool}\ hasOutcome(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{bool}\ hasOperator(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ std::shared\_ptr<Outcome>\ getOutcome(\textcolor{keyword}{const}\ std::string\ \&outcomeName);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ std::shared\_ptr<Operator>\ getOperator(\textcolor{keyword}{const}\ std::string\ \&);}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{bool}\ hasProbe(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \ \ std::shared\_ptr<Probe>\ getProbe(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ std::shared\_ptr<Observable>\ getObservable(\textcolor{keyword}{const}\ std::string\ \&observableName);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{void}\ setSystemDefinitionText(std::string\ \&text);}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ std::string\ getSystemDefinitionText();}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordtype}{void}\ setObservableParameters(std::string\ \&,\ \textcolor{keywordtype}{int},\ \textcolor{keywordtype}{int});}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSystem_a5564174c141993648f708053dd4ddd06}{addSample}}(std::string\ \&componentName,\ \mbox{\hyperlink{structSample}{Sample}}\ \&sample);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSystem_acd5e4f4e922168944c3a187507b44fb0}{setRecording}}(\textcolor{keywordtype}{bool});}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordtype}{bool}\ isRecording()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classSystem_ad64cc7c83538a3d540a0ff09987c94b0}{getObservablesSnapshotAt}}(std::uint64\_t);}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00085\ \ \ \ \ std::map<std::uint64\_t,\ std::vector<Snapshot>>\ \mbox{\hyperlink{classSystem_a1f421a89e1e1c70f4057c84edb2ae958}{getAllSnapshots}}();}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00090\ \ \ \ \ std::vector<std::string>\ \mbox{\hyperlink{classSystem_aaf8be84403eaa2c761a13510e52073f6}{getAllComponentsName}}();}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classSystem_a039592b5c0ab1cbe2183990307348b66}{calculateDeltaQ}}();}
+\DoxyCodeLine{00097\ \};}
+
+\end{DoxyCode}

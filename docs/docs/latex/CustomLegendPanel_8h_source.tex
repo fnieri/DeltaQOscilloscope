@@ -1,0 +1,33 @@
+\doxysection{Custom\+Legend\+Panel.\+h}
+\hypertarget{CustomLegendPanel_8h_source}{}\label{CustomLegendPanel_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/CustomLegendPanel.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/dashboard/CustomLegendPanel.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <QVBoxLayout>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <QWidget>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <qscrollarea.h>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{class\ }CustomLegendPanel\ :\ \textcolor{keyword}{public}\ QWidget}
+\DoxyCodeLine{00013\ \{}
+\DoxyCodeLine{00014\ \ \ \ \ Q\_OBJECT}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{explicit}\ CustomLegendPanel(QWidget\ *parent\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCustomLegendPanel_a9b88d4665799181777170c98c42488d8}{addEntry}}(\textcolor{keyword}{const}\ QString\ \&name,\ \textcolor{keyword}{const}\ QColor\ \&color);}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCustomLegendPanel_ac8fbc880c44ff85922304a291c9d0432}{removeEntry}}(\textcolor{keyword}{const}\ QString\ \&name);}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classCustomLegendPanel_a3dfa7388bd33d8982ee7399d6410632e}{clear}}();}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00038\ \ \ \ \ std::map<QString,\ QWidget\ *>\ legendEntries;\ \ }
+\DoxyCodeLine{00039\ \ \ \ \ QVBoxLayout\ *mainLayout;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00040\ \ \ \ \ QVBoxLayout\ *legendLayout;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00041\ \ \ \ \ QScrollArea\ *scrollArea;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00042\ \ \ \ \ QWidget\ *scrollContent;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00043\ \};}
+
+\end{DoxyCode}

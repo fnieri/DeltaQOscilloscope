@@ -1,0 +1,97 @@
+\doxysection{Observable.\+h}
+\hypertarget{Observable_8h_source}{}\label{Observable_8h_source}\index{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/Observable.h@{/home/francy/Desktop/RealTimeDeltaQSD/src/diagram/Observable.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../maths/Snapshot.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}Sample.h"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}src/maths/TriggerManager.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <deque>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#define\ DELTA\_T\_BASE\ 0.001}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#define\ MAX\_DQ\ 30}}
+\DoxyCodeLine{00012\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classObservable_a9576927f26a9268eb81600a2fb5edda0}{Observable}}}
+\DoxyCodeLine{00013\ \{}
+\DoxyCodeLine{00014\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00015\ \ \ \ \ std::string\ name;}
+\DoxyCodeLine{00016\ \ \ \ \ std::deque<Sample>\ samples;}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keywordtype}{bool}\ sorted;}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ std::deque<DeltaQ>\ confidenceIntervalHistory;}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keywordtype}{double}\ maxDelay\ \{0.05\};}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{int}\ deltaTExp\ \{0\};\ \textcolor{comment}{//\ Exponent\ for\ dynamic\ binning}}
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keywordtype}{int}\ nBins\ \{50\};\ \textcolor{comment}{//\ Number\ of\ bins}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classTriggerManager}{TriggerManager}}\ triggerManager;}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{classConfidenceInterval}{ConfidenceInterval}}\ observedInterval;}
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{structQTA}{QTA}}\ qta;}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{classSnapshot}{Snapshot}}\ observableSnapshot;}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ std::mutex\ observedMutex;}
+\DoxyCodeLine{00032\ \ \ \ \ std::mutex\ samplesMutex;}
+\DoxyCodeLine{00033\ \ \ \ \ std::mutex\ paramMutex;}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{bool}\ recording\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ updateSnapshot(uint64\_t\ timeLowerBound,\ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \&deltaQ);}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classObservable_a9576927f26a9268eb81600a2fb5edda0}{Observable}}(\textcolor{keyword}{const}\ std::string\ \&name);}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classObservable_a9576927f26a9268eb81600a2fb5edda0}{\string~Observable}}()\ \{\ \};}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classObservable_aa4404651710fd4c7ca8d8116cf65b974}{addSample}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structSample}{Sample}}\ \&sample);}
+\DoxyCodeLine{00055\ \ \ \ \ std::vector<Sample>\ \mbox{\hyperlink{classObservable_ade00614403572816c522a5d8f3eda0b5}{getSamplesInRange}}(std::uint64\_t\ timeLowerBound,\ std::uint64\_t\ timeUpperBound);}
+\DoxyCodeLine{00060\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classObservable_ab81fcf163a6e51abb048a2f31e05429b}{getObservedDeltaQ}}(uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00065\ \ \ \ \ \mbox{\hyperlink{classDeltaQ}{DeltaQ}}\ \mbox{\hyperlink{classObservable_a0f6be2b45ed33c08a4d6f540fd9e53bc}{calculateObservedDeltaQ}}(uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00070\ \ \ \ \ \mbox{\hyperlink{structDeltaQRepr}{DeltaQRepr}}\ \mbox{\hyperlink{classObservable_a4a51545f8792fdb70ee9f19c88a17e6a}{getObservedDeltaQRepr}}(uint64\_t,\ uint64\_t);}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classObservable_a557ca251a8c4a52f6b20741b7a64ac44}{setNewParameters}}(\textcolor{keywordtype}{int}\ newExp,\ \textcolor{keywordtype}{int}\ newNBins);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordtype}{double}\ getBinWidth()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00079\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ DELTA\_T\_BASE\ *\ std::pow(2,\ deltaTExp);}
+\DoxyCodeLine{00081\ \ \ \ \ \}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordtype}{int}\ getNBins()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00084\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ nBins;}
+\DoxyCodeLine{00086\ \ \ \ \ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordtype}{double}\ getMaxDelay()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00089\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ maxDelay;}
+\DoxyCodeLine{00091\ \ \ \ \ \}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ QTA\ getQTA()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00094\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ qta;}
+\DoxyCodeLine{00096\ \ \ \ \ \}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordtype}{int}\ getDeltaTExp()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00099\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ deltaTExp;}
+\DoxyCodeLine{00101\ \ \ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keyword}{const}\ TriggerManager\ \&getTriggerManager()\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00104\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ triggerManager;}
+\DoxyCodeLine{00106\ \ \ \ \ \}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classObservable_ad5dd8bd84515793549e89788e2948e59}{setRecording}}(\textcolor{keywordtype}{bool});}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classObservable_aa1c9f2f66ddedf0d5908a0b7274907b9}{setQTA}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structQTA}{QTA}}\ \&);}
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classObservable_ae8b41d3ee667862500aa57e3b52c7643}{addTrigger}}(TriggerType\ type,\ TriggerDefs::Condition\ condition,\ TriggerDefs::Action\ action,\ \textcolor{keywordtype}{bool}\ enabled,\ std::optional<int>\ sampleLimit);}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classObservable_a2017872265f81d7fdbf6f320fa187ffe}{removeTrigger}}(TriggerType\ type);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00136\ \ \ \ \ \mbox{\hyperlink{classSnapshot}{Snapshot}}\ \mbox{\hyperlink{classObservable_a3a5c183d8f5504aeb437b6986c439904}{getSnapshot}}();}
+\DoxyCodeLine{00141\ \ \ \ \ [[nodiscard]]\ std::string\ \mbox{\hyperlink{classObservable_a15faed51eb549cdd2f3473e7c57c08f4}{getName}}()\ const\ \&;}
+\DoxyCodeLine{00142\ \};}
+
+\end{DoxyCode}
