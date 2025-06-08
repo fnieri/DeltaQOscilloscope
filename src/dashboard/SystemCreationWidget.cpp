@@ -1,5 +1,6 @@
 #include "SystemCreationWidget.h"
 #include "../Application.h"
+#include "../diagram/SystemUtils.h"
 #include "../parser/SystemParserInterface.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -66,8 +67,8 @@ void SystemCreationWidget::onUpdateSystem()
     try {
         auto system = SystemParserInterface::parseString(text);
         if (system.has_value()) {
-            Application::getInstance().setSystem(system.value());
             system->setSystemDefinitionText(text);
+            Application::getInstance().setSystem(system.value());
             Q_EMIT systemUpdated();
         }
     } catch (const std::exception &e) {
@@ -82,49 +83,67 @@ void SystemCreationWidget::saveSystemTo()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
-    QString filename = dialog.getSaveFileName(this, "Save file", "", "All files (* *.dq)");
+    QString filename = dialog.getSaveFileName(this, "Save file", "", "DQ System files (*.json *.dq)");
+    auto system = Application::getInstance().getSystem();
+
+    auto json = systemToJson(system);
 
     if (!filename.isEmpty()) {
-        std::string systemText = getSystemText();
-        auto system = SystemParserInterface::parseString(systemText);
+        auto system = Application::getInstance().getSystem();
+        auto json = systemToJson(system); // Convert system to nlohmann::json
 
-        if (system.has_value()) {
-            std::ofstream outFile(filename.toStdString());
-            if (outFile.is_open()) {
-                outFile << systemText;
-                outFile.close();
-                QMessageBox::information(this, "Success", "File saved successfully.");
-                Q_EMIT systemSaved();
-            } else {
-                QMessageBox::critical(this, "Error", "Could not open file for writing.");
-            }
+        std::ofstream outFile(filename.toStdString());
+        if (outFile.is_open()) {
+            outFile << json.dump(4); // Pretty-print with indent
+            outFile.close();
+            QMessageBox::information(this, "Success", "File saved successfully.");
+            Q_EMIT systemSaved();
         } else {
-            QMessageBox::warning(this, "Error", "System parsing failed. File not saved.");
+            QMessageBox::critical(this, "Error", "Could not open file for writing.");
         }
     }
 }
-
 /**
  * @brief Opens a dialog to load a system from a file, parses it, and updates the editor.
  */
 void SystemCreationWidget::loadSystem()
 {
     QFileDialog dialog(this);
-    std::string filename = dialog.getOpenFileName(this, "Select file", " ", "All files (* *.dq)").toStdString();
 
-    auto system = SystemParserInterface::parseFile(filename);
+    std::string filename = dialog.getOpenFileName(this, "Select file", " ", "DQ System files (*.json *.dq)").toStdString();
+    if (filename.empty())
+        return;
+
+    std::ifstream inFile(filename);
+    if (!inFile.is_open()) {
+        QMessageBox::critical(this, "Error", "Could not open file for reading.");
+        return;
+    }
+
+    nlohmann::json jsonData;
+    try {
+        inFile >> jsonData;
+    } catch (const std::exception &e) {
+        QMessageBox::critical(this, "Error", QString("Failed to parse system: ") + e.what());
+        return;
+    }
+
+    std::string systemDefinition = jsonData["definition"];
+    auto system = SystemParserInterface::parseString(systemDefinition); // This should return std::optional<System>
     if (system.has_value()) {
         Application::getInstance().setSystem(system.value());
-        std::ifstream file(filename);
-        std::string str;
-        std::string fileContents;
-        while (std::getline(file, str)) {
-            fileContents += str;
-            fileContents.push_back('\n');
-        }
 
-        system->setSystemDefinitionText(fileContents);
-        setSystemText(fileContents);
+        setSystemText(systemDefinition);
+
+        system->setSystemDefinitionText(systemDefinition);
+        for (auto &param : jsonData["parameters"]) {
+            std::string name = param["name"];
+            int n = param["n"];
+            int N = param["n"];
+            system->setObservableParameters(name, n, N);
+        }
         Q_EMIT systemLoaded();
+    } else {
+        QMessageBox::warning(this, "Error", "System parsing failed. JSON not loaded.");
     }
 }
