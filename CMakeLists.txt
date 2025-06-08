@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 
 set(CMAKE_CXX_COMPILER "g++")
-project(RealTimeDeltaQSD
+project(DQOscilloscope
         VERSION 0.1
         LANGUAGES CXX
         )
@@ -20,8 +20,10 @@ set(CMAKE_AUTOUIC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 include(cmake/CPM.cmake)
 include(cmake/AddFFTW.cmake)
+include(cmake/AddJson.cmake)
 
 add_subdirectory(src)
 add_subdirectory(tests)
