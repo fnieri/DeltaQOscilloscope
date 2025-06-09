@@ -58,7 +58,7 @@ add_library(${PREFIX}_parser
      SystemParserInterface.cpp
 )
 target_link_libraries(${PREFIX}_parser
-    PUBLIC antlr4-runtime
+    PRIVATE antlr4-runtime
 )
 
 target_include_directories(${PREFIX}_parser
@@ -66,16 +66,6 @@ target_include_directories(${PREFIX}_parser
     ${CMAKE_SOURCE_DIR}
     ${ANTLR_GENERATED_DIR}
     ${ANTLR4_INCLUDE_DIR}
-)
-
-add_executable(parser 
-    main.cpp
-)
-
-target_link_libraries(parser
-    PRIVATE
-    ${PREFIX}_parser
     antlr4-runtime
- ${PREFIX}_diagram
 )
 

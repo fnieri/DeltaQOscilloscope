@@ -33,10 +33,13 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
     chart->legend()->setVisible(false);
 
     axisX = new QValueAxis();
-    axisY = new QValueAxis();
-    axisY->setRange(-0.01, 1.0);
+    axisX->setTitleText("Delay (s)");
     axisX->setRange(0, 0.05);
     chart->addAxis(axisX, Qt::AlignBottom);
+
+    axisY = new QValueAxis();
+    axisY->setTitleText("ΔQ(x)");
+    axisY->setRange(-0.01, 1.0);
     chart->addAxis(axisY, Qt::AlignLeft);
 
     controller = new DQPlotController(this, selectedItems);
