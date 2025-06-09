@@ -5,6 +5,5 @@ add_library(${PREFIX}_server
 
 target_include_directories(${PREFIX}_server
     PUBLIC
-    ${CMAKE_SOURCE_DIR}
-        ${PREFIX}_diagram
+    ${PREFIX}_diagram
 )

@@ -48,7 +48,6 @@ target_link_libraries(${PREFIX}_dashboard
 
 target_include_directories(${PREFIX}_dashboard
         PUBLIC
-        ${CMAKE_SOURCE_DIR}         
         ${PREFIX}_parser 
 )
 

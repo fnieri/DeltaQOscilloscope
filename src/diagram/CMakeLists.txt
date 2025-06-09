@@ -22,16 +22,3 @@ target_link_libraries(${PREFIX}_diagram
         nlohmann_json
 )
 
-target_include_directories(${PREFIX}_diagram
-        PUBLIC
-        ${CMAKE_SOURCE_DIR}
-)
-
-add_executable(diagram
-        main.cpp
-)
-
-target_link_libraries(diagram
-        PRIVATE
-        ${PREFIX}_diagram
-)

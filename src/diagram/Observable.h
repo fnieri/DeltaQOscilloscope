@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../maths/Snapshot.h"
+#include "../maths/TriggerManager.h"
 #include "Sample.h"
-#include "src/maths/TriggerManager.h"
 #include <deque>
 #include <math.h>
 #include <mutex>
