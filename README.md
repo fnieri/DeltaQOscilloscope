@@ -10,19 +10,23 @@ This project is part of a master thesis.
 
 To build this project you need a few dependencies
 
- - FFTW3
  - ANTLR4
  - GTest
  - Qt6
 
- They need to be installed before compiling the project.
-
+They need to be installed before compiling the project.
+The rest of the dependencies will be added by [CPM](https://github.com/cpm-cmake/CPM.cmake) when building
 ### Build 
 
 To build you need to run the following commands from source
 ```bash
     make setup
     make build
+```
+After building, the oscilloscope will be put inside build/bin/ and can be run by
+```bash
+    ./DQOscilloscope
+    ./build/bin/DQOscilloscope # if at root 
 ```
 
 #### Tests
