@@ -35,7 +35,6 @@ add_library(${PREFIX}_dashboard
     TriggersTab.h
 )
 
-
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gyu Widgets Charts Graphs)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Charts Widgets Graphs)
 
