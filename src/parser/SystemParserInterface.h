@@ -1,13 +1,7 @@
 #pragma once
 
 #include "../diagram/System.h"
-#include "DQGrammarLexer.h"
-#include "DQGrammarParser.h"
-#include "SystemBuilder.h"
-#include "antlr4-runtime.h"
-#include <memory>
 #include <optional>
-#include <string>
 
 /**
  * @class SystemParserInterface
@@ -36,5 +30,5 @@ private:
      * @param input ANTLR input stream containing system definition.
      * @return Optional containing the parsed System if successful, nullopt otherwise.
      */
-    static std::optional<System> parseInternal(antlr4::ANTLRInputStream &input);
+    static std::optional<System> parseInternal(const std::string &input);
 };
