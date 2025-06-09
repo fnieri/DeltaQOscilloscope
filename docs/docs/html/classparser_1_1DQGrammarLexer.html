@@ -119,28 +119,6 @@ Inheritance diagram for parser::DQGrammarLexer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a9b6312eb8086ae4e78a349baf37eb4b9" id="r_a9b6312eb8086ae4e78a349baf37eb4b9"><td class="memItemLeft" align="right" valign="top"><a id="a9b6312eb8086ae4e78a349baf37eb4b9" name="a9b6312eb8086ae4e78a349baf37eb4b9"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
-&#160;&#160;<b>T__0</b> = 1
-, <b>T__1</b> = 2
-, <b>T__2</b> = 3
-, <b>T__3</b> = 4
-, <br />
-&#160;&#160;<b>T__4</b> = 5
-, <b>T__5</b> = 6
-, <b>T__6</b> = 7
-, <b>T__7</b> = 8
-, <br />
-&#160;&#160;<b>T__8</b> = 9
-, <b>T__9</b> = 10
-, <b>PROBE_ID</b> = 11
-, <b>BEHAVIOR_TYPE</b> = 12
-, <br />
-&#160;&#160;<b>NUMBER</b> = 13
-, <b>IDENTIFIER</b> = 14
-, <b>WS</b> = 15
-<br />
- }</td></tr>
-<tr class="separator:a9b6312eb8086ae4e78a349baf37eb4b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56b6cf512c071f7922355148f5081567" id="r_a56b6cf512c071f7922355148f5081567"><td class="memItemLeft" align="right" valign="top"><a id="a56b6cf512c071f7922355148f5081567" name="a56b6cf512c071f7922355148f5081567"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
 &#160;&#160;<b>T__0</b> = 1
 , <b>T__1</b> = 2
@@ -190,43 +168,15 @@ antlr4::atn::SerializedATNView&#160;</td><td class="memItemRight" valign="bottom
 <tr class="memitem:a96df8669efe8d9f0d8968f22b6d649d9" id="r_a96df8669efe8d9f0d8968f22b6d649d9"><td class="memItemLeft" align="right" valign="top"><a id="a96df8669efe8d9f0d8968f22b6d649d9" name="a96df8669efe8d9f0d8968f22b6d649d9"></a>
 const antlr4::atn::ATN &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getATN</b> () const override</td></tr>
 <tr class="separator:a96df8669efe8d9f0d8968f22b6d649d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5423b4f4c9d25558492dfcefb11f0df2" id="r_a5423b4f4c9d25558492dfcefb11f0df2"><td class="memItemLeft" align="right" valign="top"><a id="a5423b4f4c9d25558492dfcefb11f0df2" name="a5423b4f4c9d25558492dfcefb11f0df2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DQGrammarLexer</b> (antlr4::CharStream *input)</td></tr>
-<tr class="separator:a5423b4f4c9d25558492dfcefb11f0df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac07702d896f9fa85e475fde5e2f0c4bf" id="r_ac07702d896f9fa85e475fde5e2f0c4bf"><td class="memItemLeft" align="right" valign="top"><a id="ac07702d896f9fa85e475fde5e2f0c4bf" name="ac07702d896f9fa85e475fde5e2f0c4bf"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getGrammarFileName</b> () const override</td></tr>
-<tr class="separator:ac07702d896f9fa85e475fde5e2f0c4bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d064ec51094b513a538abc0a70f70e8" id="r_a4d064ec51094b513a538abc0a70f70e8"><td class="memItemLeft" align="right" valign="top"><a id="a4d064ec51094b513a538abc0a70f70e8" name="a4d064ec51094b513a538abc0a70f70e8"></a>
-const std::vector&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getRuleNames</b> () const override</td></tr>
-<tr class="separator:a4d064ec51094b513a538abc0a70f70e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aace004556343b826822dc8b5f0cd40e0" id="r_aace004556343b826822dc8b5f0cd40e0"><td class="memItemLeft" align="right" valign="top"><a id="aace004556343b826822dc8b5f0cd40e0" name="aace004556343b826822dc8b5f0cd40e0"></a>
-const std::vector&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getChannelNames</b> () const override</td></tr>
-<tr class="separator:aace004556343b826822dc8b5f0cd40e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75a28a958ee70b830d3cf8cfd45234af" id="r_a75a28a958ee70b830d3cf8cfd45234af"><td class="memItemLeft" align="right" valign="top"><a id="a75a28a958ee70b830d3cf8cfd45234af" name="a75a28a958ee70b830d3cf8cfd45234af"></a>
-const std::vector&lt; std::string &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getModeNames</b> () const override</td></tr>
-<tr class="separator:a75a28a958ee70b830d3cf8cfd45234af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e9f2cb97dec9a9c708a9159f6830b80" id="r_a6e9f2cb97dec9a9c708a9159f6830b80"><td class="memItemLeft" align="right" valign="top"><a id="a6e9f2cb97dec9a9c708a9159f6830b80" name="a6e9f2cb97dec9a9c708a9159f6830b80"></a>
-const antlr4::dfa::Vocabulary &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getVocabulary</b> () const override</td></tr>
-<tr class="separator:a6e9f2cb97dec9a9c708a9159f6830b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a5d586598ddd3caa6167f849192bcda" id="r_a3a5d586598ddd3caa6167f849192bcda"><td class="memItemLeft" align="right" valign="top"><a id="a3a5d586598ddd3caa6167f849192bcda" name="a3a5d586598ddd3caa6167f849192bcda"></a>
-antlr4::atn::SerializedATNView&#160;</td><td class="memItemRight" valign="bottom"><b>getSerializedATN</b> () const override</td></tr>
-<tr class="separator:a3a5d586598ddd3caa6167f849192bcda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96df8669efe8d9f0d8968f22b6d649d9" id="r_a96df8669efe8d9f0d8968f22b6d649d9"><td class="memItemLeft" align="right" valign="top"><a id="a96df8669efe8d9f0d8968f22b6d649d9" name="a96df8669efe8d9f0d8968f22b6d649d9"></a>
-const antlr4::atn::ATN &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getATN</b> () const override</td></tr>
-<tr class="separator:a96df8669efe8d9f0d8968f22b6d649d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a42ed4282d3adbc8fa185f2d0c3ca2dac" id="r_a42ed4282d3adbc8fa185f2d0c3ca2dac"><td class="memItemLeft" align="right" valign="top"><a id="a42ed4282d3adbc8fa185f2d0c3ca2dac" name="a42ed4282d3adbc8fa185f2d0c3ca2dac"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>initialize</b> ()</td></tr>
 <tr class="separator:a42ed4282d3adbc8fa185f2d0c3ca2dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42ed4282d3adbc8fa185f2d0c3ca2dac" id="r_a42ed4282d3adbc8fa185f2d0c3ca2dac"><td class="memItemLeft" align="right" valign="top"><a id="a42ed4282d3adbc8fa185f2d0c3ca2dac" name="a42ed4282d3adbc8fa185f2d0c3ca2dac"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>initialize</b> ()</td></tr>
-<tr class="separator:a42ed4282d3adbc8fa185f2d0c3ca2dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following files:<ul>
-<li>/home/francy/Desktop/RealTimeDeltaQSD/src/cmake-build-debug/parser/generated/<a class="el" href="cmake-build-debug_2parser_2generated_2DQGrammarLexer_8h_source.html">DQGrammarLexer.h</a></li>
-<li>/home/francy/Desktop/RealTimeDeltaQSD/src/parser/generated/<a class="el" href="parser_2generated_2DQGrammarLexer_8h_source.html">DQGrammarLexer.h</a></li>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>/home/francy/Desktop/RealTimeDeltaQSD/src/parser/generated/<a class="el" href="DQGrammarLexer_8h_source.html">DQGrammarLexer.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -109,27 +109,21 @@ $(function(){initNavTree('SystemParserInterface_8h_source.html',''); initResizab
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;../diagram/System.h&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;DQGrammarLexer.h&quot;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;DQGrammarParser.h&quot;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;SystemBuilder.h&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;antlr4-runtime.h&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;memory&gt;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span></div>
-<div class="foldopen" id="foldopen00016" data-start="{" data-end="};">
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html">   16</a></span><span class="keyword">class </span><a class="code hl_class" href="classSystemParserInterface.html">SystemParserInterface</a></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html#a0c3766709a10e2fb150a77c392d9e606">   24</a></span>    <span class="keyword">static</span> std::optional&lt;System&gt; <a class="code hl_function" href="classSystemParserInterface.html#a0c3766709a10e2fb150a77c392d9e606">parseFile</a>(<span class="keyword">const</span> std::string &amp;filename);</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html#a84a13878130044fa6c5f2f8ae3396327">   31</a></span>    <span class="keyword">static</span> std::optional&lt;System&gt; <a class="code hl_function" href="classSystemParserInterface.html#a84a13878130044fa6c5f2f8ae3396327">parseString</a>(<span class="keyword">const</span> std::string &amp;input);</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">static</span> std::optional&lt;System&gt; parseInternal(antlr4::ANTLRInputStream &amp;input);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>};</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span></div>
+<div class="foldopen" id="foldopen00010" data-start="{" data-end="};">
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html">   10</a></span><span class="keyword">class </span><a class="code hl_class" href="classSystemParserInterface.html">SystemParserInterface</a></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>{</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html#a0c3766709a10e2fb150a77c392d9e606">   18</a></span>    <span class="keyword">static</span> std::optional&lt;System&gt; <a class="code hl_function" href="classSystemParserInterface.html#a0c3766709a10e2fb150a77c392d9e606">parseFile</a>(<span class="keyword">const</span> std::string &amp;filename);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classSystemParserInterface.html#a84a13878130044fa6c5f2f8ae3396327">   25</a></span>    <span class="keyword">static</span> std::optional&lt;System&gt; <a class="code hl_function" href="classSystemParserInterface.html#a84a13878130044fa6c5f2f8ae3396327">parseString</a>(<span class="keyword">const</span> std::string &amp;input);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keyword">static</span> std::optional&lt;System&gt; parseInternal(<span class="keyword">const</span> std::string &amp;input);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>};</div>
 </div>
-<div class="ttc" id="aclassSystemParserInterface_html"><div class="ttname"><a href="classSystemParserInterface.html">SystemParserInterface</a></div><div class="ttdoc">Provides an interface for parsing system definitions from files or strings.</div><div class="ttdef"><b>Definition</b> SystemParserInterface.h:17</div></div>
+<div class="ttc" id="aclassSystemParserInterface_html"><div class="ttname"><a href="classSystemParserInterface.html">SystemParserInterface</a></div><div class="ttdoc">Provides an interface for parsing system definitions from files or strings.</div><div class="ttdef"><b>Definition</b> SystemParserInterface.h:11</div></div>
 <div class="ttc" id="aclassSystemParserInterface_html_a0c3766709a10e2fb150a77c392d9e606"><div class="ttname"><a href="classSystemParserInterface.html#a0c3766709a10e2fb150a77c392d9e606">SystemParserInterface::parseFile</a></div><div class="ttdeci">static std::optional&lt; System &gt; parseFile(const std::string &amp;filename)</div><div class="ttdoc">Parses a system definition from a file.</div></div>
 <div class="ttc" id="aclassSystemParserInterface_html_a84a13878130044fa6c5f2f8ae3396327"><div class="ttname"><a href="classSystemParserInterface.html#a84a13878130044fa6c5f2f8ae3396327">SystemParserInterface::parseString</a></div><div class="ttdeci">static std::optional&lt; System &gt; parseString(const std::string &amp;input)</div><div class="ttdoc">Parses a system definition from a string.</div></div>
 </div><!-- fragment --></div><!-- contents -->

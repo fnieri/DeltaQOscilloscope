@@ -1,6 +1,5 @@
 var dir_68267d1309a1af8e8297ef4c3efbcdba =
 [
-    [ "cmake-build-debug", "dir_020e4a53e97f78b22783b09a7c932b0c.html", "dir_020e4a53e97f78b22783b09a7c932b0c" ],
     [ "dashboard", "dir_654fa84e69ce24e2f1c127f154eeb7c2.html", "dir_654fa84e69ce24e2f1c127f154eeb7c2" ],
     [ "diagram", "dir_d7a6510a79d73d90710e072e0c2a375e.html", "dir_d7a6510a79d73d90710e072e0c2a375e" ],
     [ "maths", "dir_faad1d323dbeb8fa5608a69643a716c1.html", "dir_faad1d323dbeb8fa5608a69643a716c1" ],

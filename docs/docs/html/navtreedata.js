@@ -45,8 +45,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"Application_8h_source.html",
-"structQTA.html#aaed82987888e1ea521948857875800b5"
+"Application_8h_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
