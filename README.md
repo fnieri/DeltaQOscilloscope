@@ -11,11 +11,25 @@ This project is part of a master thesis.
 To build this project you need a few dependencies
 
  - ANTLR4
- - GTest
  - Qt6
 
 They need to be installed before compiling the project.
 The rest of the dependencies will be added by [CPM](https://github.com/cpm-cmake/CPM.cmake) when building
+
+#### Install Antlr4 
+```bash
+git clone https://github.com/antlr/antlr4.git
+cd antlr4/runtime/Cpp
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+make -j
+sudo make install
+```
+
+#### Install Qt6
+
+Visit [here](https://doc.qt.io/qt-6/get-and-install-qt.html).
+
 ### Build 
 
 To build you need to run the following commands from source
