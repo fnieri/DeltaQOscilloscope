@@ -19,6 +19,7 @@ add_library(${PREFIX}_maths
 target_include_directories(${PREFIX}_maths
         PUBLIC
         ${CMAKE_SOURCE_DIR}
+        ${PREFIX}_diagram
 )
 
 target_link_libraries(${PREFIX}_maths

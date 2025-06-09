@@ -1,5 +1,9 @@
 #include "SystemParserInterface.h"
+#include "SystemBuilder.h"
 #include "SystemErrorListener.h"
+#include "antlr4-runtime.h"
+#include <DQGrammarLexer.h>
+#include <DQGrammarParser.h>
 #include <exception>
 #include <fstream>
 #include <iostream>
@@ -25,9 +29,8 @@ std::optional<System> SystemParserInterface::parseFile(const std::string &filena
     buffer << file.rdbuf();
     std::string content = buffer.str();
 
-    antlr4::ANTLRInputStream input(content);
     try {
-        return parseInternal(input);
+        return parseInternal(content);
     } catch (std::exception &e) {
         throw std::invalid_argument(e.what());
     }
@@ -41,9 +44,8 @@ std::optional<System> SystemParserInterface::parseFile(const std::string &filena
  */
 std::optional<System> SystemParserInterface::parseString(const std::string &inputStr)
 {
-    antlr4::ANTLRInputStream input(inputStr);
     try {
-        return parseInternal(input);
+        return parseInternal(inputStr);
     } catch (std::exception &e) {
         throw std::invalid_argument(e.what());
     }
@@ -55,8 +57,10 @@ std::optional<System> SystemParserInterface::parseString(const std::string &inpu
  * @return Optional containing the parsed System if successful, nullopt on error.
  * @throws std::invalid_argument if parsing fails.
  */
-std::optional<System> SystemParserInterface::parseInternal(antlr4::ANTLRInputStream &input)
+std::optional<System> SystemParserInterface::parseInternal(const std::string &inputStr)
 {
+
+    antlr4::ANTLRInputStream input(inputStr);
     // Initialize lexer and parser
     parser::DQGrammarLexer lexer(&input);
     antlr4::CommonTokenStream tokens(&lexer);
