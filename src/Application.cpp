@@ -226,7 +226,3 @@ void Application::stopCppServer()
 {
     server->stopServer();
 }
-void Application::setErlangEndpoint(const std::string &&ip, int port)
-{
-    server->setErlangEndpoint(ip, port);
-}

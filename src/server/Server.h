@@ -14,106 +14,62 @@
 /**
  * @class Server
  * @brief TCP server for handling client connections and Erlang communication.
+ *
+ * Erlang connects inbound on a single socket. Span data flows Erlang → C++
+ * and commands (start_stub, stop_stub, set_timeout) flow C++ → Erlang on
+ * the same socket — no separate outbound connection needed.
  */
 class Server
 {
 public:
-    /**
-     * @brief Constructs a Server instance.
-     * @param port The TCP port to listen on.
-     */
     Server(int port);
-
-    /**
-     * @brief Destructor cleans up sockets and threads.
-     */
     ~Server();
 
     /**
-     * @brief Sends a command to the Erlang process.
-     * @param command The command string to send.
+     * @brief Sends a command to Erlang on the active connection.
+     * @param command The command string to send (newline appended automatically).
      */
     void sendToErlang(const std::string &command);
 
     bool startServer(const std::string &ip = "0.0.0.0", int port = 8080);
-
     void stopServer();
-
-    bool setErlangEndpoint(const std::string &ip, int port);
-
-    bool isServerRunning() const
-    {
-        return server_started;
-    }
-
-    /**
-     * @brief Stops the server and worker threads.
-     */
     void stop();
 
+    bool isServerRunning() const { return server_started; }
+
 private:
-    /**
-     * @brief Main server loop running in a separate thread.
-     */
     void run();
-
-    int server_fd; ///< Server socket file descriptor
-    int new_socket; ///< Client socket file descriptor
-    struct sockaddr_in address; ///< Server address structure
-    int port; ///< Listening port number
-
-    std::thread serverThread; ///< Thread for server operations
-
-    /**
-     * @brief Updates the system reference from Application.
-     */
+    void handleClient(int clientSocket);
+    void cleanupThreads();
     void updateSystem();
-
-    /**
-     * @brief Parses messages from Erlang.
-     * @param buffer The message buffer.
-     * @param len Length of the message.
-     */
     void parseErlangMessage(const char *buffer, int len);
 
-    std::shared_ptr<System> system; ///< Reference to the system being monitored
+    int server_fd = 0;
+    int new_socket = 0;
+    struct sockaddr_in address;
+    int port;
 
-    std::vector<std::thread> clientThreads; ///< Active client handler threads
-    std::mutex clientsMutex; ///< Mutex for client threads access
-    std::atomic<bool> running {false}; ///< Server running state flag
+    std::thread serverThread;
+    std::shared_ptr<System> system;
 
-    /**
-     * @brief Handles communication with a client.
-     * @param clientSocket The client socket file descriptor.
-     */
-    void handleClient(int clientSocket);
+    std::vector<std::thread> clientThreads;
+    std::mutex clientsMutex;
+    std::atomic<bool> running {false};
 
-    /**
-     * @brief Cleans up finished client threads.
-     */
-    void cleanupThreads();
+    // Socket of the currently connected Erlang client.
+    // Set when Erlang connects, cleared when it disconnects.
+    // sendToErlang writes on this socket; handleClient reads from it.
+    // TCP is full-duplex so concurrent read/write is safe.
+    int erlang_socket = -1;
+    std::mutex erlangMutex;
 
-    int erlang_socket = -1; ///< Socket for Erlang communication
-    std::mutex erlangMutex; ///< Mutex for Erlang socket operations
+    std::queue<std::pair<std::string, Sample>> sampleQueue;
+    std::mutex queueMutex;
+    std::condition_variable queueCond;
+    std::thread workerThread;
+    bool shutdownWorker = false;
 
-    /**
-     * @brief Establishes connection to Erlang.
-     * @return true if connection succeeded.
-     */
-    bool connectToErlang();
-
-    int client_socket; ///< Current client socket
-
-    // Asynchronous sample processing
-    std::queue<std::pair<std::string, Sample>> sampleQueue; ///< Sample processing queue
-    std::mutex queueMutex; ///< Mutex for queue access
-    std::condition_variable queueCond; ///< Condition variable for queue notifications
-    std::thread workerThread; ///< Worker thread for sample processing
-    bool shutdownWorker = false; ///< Flag to signal worker thread shutdown
-
-    std::string erlang_ip = "127.0.0.1"; ///< Erlang server IP
-    int erlang_port = 8081; ///< Erlang server port
-    std::string server_ip = "0.0.0.0"; ///< Current C++ server IP
+    std::string server_ip = "0.0.0.0";
     bool server_started = false;
 };
 

@@ -47,6 +47,5 @@ public:
     bool startCppServer(const std::string &&, int);
     void stopCppServer();
 
-    void setErlangEndpoint(const std::string &&, int);
     void setStubRunning(bool running);
 };
