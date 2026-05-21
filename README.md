@@ -1,51 +1,97 @@
-## How to build
+## DeltaQ Oscilloscope
 
-The DeltaQ oscilloscope is a C++ graphical interface to observe running Erlang programs, giving real time insights about the instrumented Erlang system under test. The oscilloscope needs to be paired with the dqsd_otel Erlang wrapper, which can be found [here](https://github.com/fnieri/dqsd_otel).
-
-The wrapper sends data about the execution of the Erlang system and the oscilloscope will perform real time statistical computations to give detailed insights about the running problem.
+The DeltaQ Oscilloscope is a C++ graphical interface to observe running Erlang programs, giving real-time insights about the instrumented system under test. It needs to be paired with the [dqsd_otel](https://github.com/fnieri/dqsd_otel) Erlang wrapper, which sends execution data over a TCP socket. The oscilloscope processes that data in real time and performs statistical computations to give detailed insights about the running system.
 
 This project is part of a master thesis.
 
-### Dependencies
+---
 
-To build this project you need a few dependencies
+## Dependencies
 
- - ANTLR4
- - Qt6
+The following must be installed before building. Everything else is fetched automatically by [CPM](https://github.com/cpm-cmake/CPM.cmake) at configure time.
 
-They need to be installed before compiling the project.
-The rest of the dependencies will be added by [CPM](https://github.com/cpm-cmake/CPM.cmake) when building
+| Dependency | Purpose |
+|---|---|
+| CMake ≥ 3.30 | Build system |
+| GCC / Clang (C++17) | Compiler |
+| Qt 6 | GUI framework |
+| ANTLR4 C++ runtime | Parser runtime (generated files are committed; only needed if you modify the grammar) |
 
-#### Install Antlr4 
+---
+
+## Installing dependencies
+
+### macOS (Homebrew)
+
 ```bash
-git clone https://github.com/antlr/antlr4.git
-cd antlr4/runtime/Cpp
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
-make -j
-sudo make install
+brew install cmake qt6 antlr4-cpp-runtime
 ```
 
-#### Install Qt6
+### Ubuntu / Debian
 
-Visit [here](https://doc.qt.io/qt-6/get-and-install-qt.html).
-
-### Build 
-
-To build you need to run the following commands from source
 ```bash
-    make setup
-    make build
-```
-After building, the oscilloscope will be put inside build/bin/ and can be run by
-```bash
-    ./DQOscilloscope
-    ./build/bin/DQOscilloscope # if at root 
+sudo apt install cmake g++ qt6-base-dev libantlr4-runtime-dev
 ```
 
-#### Tests
+### Fedora
 
-After building, you can run tests with
 ```bash
-    make test
+sudo dnf install cmake gcc-c++ qt6-qtbase-devel antlr4-cpp-runtime-devel
 ```
+
+### Windows
+
+Install [CMake](https://cmake.org/download/) and [Qt 6](https://doc.qt.io/qt-6/get-and-install-qt.html), then install the ANTLR4 C++ runtime via vcpkg:
+
+```bash
+vcpkg install antlr4
+```
+
+---
+
+## Building
+
+### 1. Configure
+
+**Linux** (Qt6 installed system-wide):
+```bash
+make setup
+```
+
+**macOS** (Homebrew):
+```bash
+make setup QT_PREFIX=$(brew --prefix qt6)
+```
+
+**Custom Qt path** (any platform):
+```bash
+make setup QT_PREFIX=/path/to/qt6
+```
+
+### 2. Compile
+
+```bash
+make build
+```
+
+The binary is placed at `build/bin/DQOscilloscope`.
+
+### 3. Run
+
+```bash
+./build/bin/DQOscilloscope
+```
+
+---
+
+## Tests
+
+```bash
+make test
+```
+
+---
+
+## Modifying the grammar
+
+The ANTLR-generated parser files are committed under `src/parser/generated/` so most contributors do not need the `antlr4` tool installed. If you change `src/parser/DQGrammar.g4`, regenerate them by re-running `make setup` with the `antlr4` tool available in your `PATH` — CMake will detect it and rebuild only the affected files.

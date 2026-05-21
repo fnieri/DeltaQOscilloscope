@@ -8,7 +8,8 @@ project(DQOscilloscope
 
         option(BUILD_SHARED_LIBS "Build libraries as shared as opposed to static" OFF)
 
-set(CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(PREFIX DQ)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -7,6 +7,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include <chrono>
 #include <iostream>

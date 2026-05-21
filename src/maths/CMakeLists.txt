@@ -17,8 +17,8 @@ add_library(${PREFIX}_maths
 )
 
 target_include_directories(${PREFIX}_maths
-        PUBLIC
-        ${PREFIX}_diagram
+    PUBLIC  ${PREFIX}_diagram
+    PRIVATE ${FFTW_SOURCE_DIR}/api
 )
 
 target_link_libraries(${PREFIX}_maths
