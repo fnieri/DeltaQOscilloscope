@@ -61,15 +61,15 @@ bool DQPlotController::isEmptyAfterReset()
     std::lock_guard<std::mutex> lock(resetMutex);
 
     for (auto it = outcomes.begin(); it != outcomes.end();) {
-        if (!system->hasOutcome(it->first)) { removeComponent(it->first); it = outcomes.erase(it); }
+        if (!system->hasOutcome(it->first)) { auto name = it->first; ++it; removeComponent(name); }
         else ++it;
     }
     for (auto it = probes.begin(); it != probes.end();) {
-        if (!system->hasProbe(it->first)) { removeComponent(it->first); it = probes.erase(it); }
+        if (!system->hasProbe(it->first)) { auto name = it->first; ++it; removeComponent(name); }
         else ++it;
     }
     for (auto it = operators.begin(); it != operators.end();) {
-        if (!system->hasOperator(it->first)) { removeComponent(it->first); it = operators.erase(it); }
+        if (!system->hasOperator(it->first)) { auto name = it->first; ++it; removeComponent(name); }
         else ++it;
     }
     return outcomes.empty() && probes.empty() && operators.empty();
