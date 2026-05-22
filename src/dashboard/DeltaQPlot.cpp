@@ -1,32 +1,39 @@
-
 #include "DeltaQPlot.h"
 #include "ColorRegistry.h"
 #include "CustomLegendPanel.h"
+#include "DQPlotController.h"
 #include "DQPlotList.h"
+#include <QAreaSeries>
 #include <QChartView>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLineSeries>
 #include <QMouseEvent>
-#include <QRandomGenerator>
 #include <QToolButton>
 #include <QVBoxLayout>
+
 DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *parent)
     : QWidget(parent)
 {
-
-    // Create legend panel and toggle
     legendPanel = new CustomLegendPanel(this);
+
     QToolButton *toggleButton = new QToolButton(this);
     toggleButton->setText("> Legend");
     toggleButton->setCheckable(true);
     toggleButton->setChecked(true);
-    toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-
     connect(toggleButton, &QToolButton::toggled, legendPanel, &QWidget::setVisible);
-    connect(toggleButton, &QToolButton::toggled, [toggleButton](bool checked) { toggleButton->setText(checked ? "^ Legend" : "> Legend"); });
+    connect(toggleButton, &QToolButton::toggled, [toggleButton](bool checked) {
+        toggleButton->setText(checked ? "^ Legend" : "> Legend");
+    });
 
-    // Create chart and view
+    QToolButton *boundsToggle = new QToolButton(this);
+    boundsToggle->setText("Bounds: Area");
+    boundsToggle->setCheckable(true);
+    boundsToggle->setChecked(true);
+    connect(boundsToggle, &QToolButton::toggled, [this, boundsToggle](bool checked) {
+        boundsToggle->setText(checked ? "Bounds: Area" : "Bounds: Lines");
+        controller->setBoundsAsArea(checked);
+    });
+
     chart = new QChart();
     chartView = new QChartView(chart, this);
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -44,28 +51,25 @@ DeltaQPlot::DeltaQPlot(const std::vector<std::string> &selectedItems, QWidget *p
 
     controller = new DQPlotController(this, selectedItems);
     plotList = new DQPlotList(controller, this);
-    // Right-side layout: toggle + legend
+
     QVBoxLayout *rightLayout = new QVBoxLayout();
     rightLayout->addWidget(toggleButton);
+    rightLayout->addWidget(boundsToggle);
     rightLayout->addWidget(legendPanel);
     rightLayout->addStretch();
 
-    // Main layout: chart + right side
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->addWidget(chartView, 1);
     mainLayout->addLayout(rightLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(5);
     setLayout(mainLayout);
-    chartView->setRenderHint(QPainter::Antialiasing);
 }
 
 DeltaQPlot::~DeltaQPlot()
 {
     delete controller;
-    controller = nullptr;
     delete plotList;
-    plotList = nullptr;
 }
 
 bool DeltaQPlot::isEmptyAfterReset()
@@ -94,26 +98,51 @@ void DeltaQPlot::addSeries(QLineSeries *series, const std::string &name)
     series->setVisible(true);
 }
 
+void DeltaQPlot::addAreaSeries(QAreaSeries *series, const std::string &name, const QColor &color)
+{
+    chart->addSeries(series);
+    series->setName(QString::fromStdString(name));
+    series->attachAxis(axisX);
+    series->attachAxis(axisY);
+
+    QColor fill = color;
+    fill.setAlphaF(0.15);
+    QColor border = color;
+    border.setAlphaF(0.5);
+
+    series->setBrush(QBrush(fill));
+    series->setPen(QPen(border, 1));
+    series->setVisible(true);
+
+    legendPanel->addEntry(QString::fromStdString(name), color);
+}
+
+void DeltaQPlot::removeSeries(QAbstractSeries *series)
+{
+    legendPanel->removeEntry(series->name());
+    chart->removeSeries(series);
+}
+
 void DeltaQPlot::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     controller->update(timeLowerBound, timeUpperBound);
 }
 
-void DeltaQPlot::removeSeries(QAbstractSeries *series)
-{
-    auto name = series->name();
-    chart->removeSeries(series);
-    legendPanel->removeEntry(name);
-}
-
-void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
-{
-    controller->editPlot(selectedItems);
-}
-
 void DeltaQPlot::updateSeries(QLineSeries *series, const QVector<QPointF> &data)
 {
     series->replace(data);
+}
+
+void DeltaQPlot::setSeriesVisible(QAbstractSeries *series, bool visible)
+{
+    series->setVisible(visible);
+    legendPanel->setEntryVisible(series->name(), visible);
+}
+
+void DeltaQPlot::updateAreaSeries(QAreaSeries *series, const QVector<QPointF> &upper, const QVector<QPointF> &lower)
+{
+    series->upperSeries()->replace(upper);
+    series->lowerSeries()->replace(lower);
 }
 
 void DeltaQPlot::updateXRange(double xRange)
@@ -129,6 +158,11 @@ std::vector<std::string> DeltaQPlot::getComponents()
 DQPlotList *DeltaQPlot::getPlotList()
 {
     return plotList;
+}
+
+void DeltaQPlot::editPlot(const std::vector<std::string> &selectedItems)
+{
+    controller->editPlot(selectedItems);
 }
 
 void DeltaQPlot::mousePressEvent(QMouseEvent *event)

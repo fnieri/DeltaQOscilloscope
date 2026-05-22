@@ -3,7 +3,7 @@
  {<<"chatterbox">>,{pkg,<<"ts_chatterbox">>,<<"0.15.1">>},2},
  {<<"ctx">>,{pkg,<<"ctx">>,<<"0.6.0">>},2},
  {<<"dqsd_otel">>,
-  {path,"../../dqsd_otel/",{mtime,<<"2026-05-21T23:09:11Z">>}},
+  {path,"../../dqsd_otel/",{mtime,<<"2026-05-21T23:39:21Z">>}},
   0},
  {<<"gproc">>,{pkg,<<"gproc">>,<<"0.9.1">>},2},
  {<<"grpcbox">>,{pkg,<<"grpcbox">>,<<"0.17.1">>},1},

@@ -47,7 +47,7 @@ worker_buffer(worker_1, Worker1, K, QueueLength) ->
         
         #{<<"probe_ctx">> := _} = CtxBaggage when QueueLength < K ->
             {WorkerCtx, WorkerPid} = dqsd_otel:start_span(<<"worker_1">>),
-            dqsd_otel:with_span(<<"worker_3">>, fun() -> ok end), 
+            dqsd_otel:with_span(<<"worker_1">>, fun() -> ok end), 
             B = maps:put(<<"worker_id">>, WorkerPid, CtxBaggage),
             Baggage = maps:put(<<"worker_ctx">>, WorkerCtx, B),
             
@@ -60,7 +60,7 @@ worker_buffer(worker_1, Worker1, K, QueueLength) ->
         #{<<"probe_ctx">> := _} = CtxBaggage when QueueLength >= K ->
             {WorkerCtx, WorkerPid} = dqsd_otel:start_span(<<"worker_1">>),
             Pid = maps:get(<<"probe_id">>, CtxBaggage, undefined), 
-            dqsd_otel:with_span(<<"worker_3">>, fun() -> ok end), 
+            dqsd_otel:with_span(<<"worker_1">>, fun() -> ok end), 
             dqsd_otel:fail_span(WorkerPid),
             dqsd_otel:fail_span(Pid),
             

@@ -28,6 +28,7 @@ public:
      * @param name The name of the entry to remove.
      */
     void removeEntry(const QString &name);
+    void setEntryVisible(const QString &name, bool visible);
 
     /**
      * @brief Clears all entries from the legend.

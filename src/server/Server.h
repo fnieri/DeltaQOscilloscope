@@ -44,8 +44,8 @@ private:
     void updateSystem();
     void parseErlangMessage(const char *buffer, int len);
 
-    int server_fd = 0;
-    int new_socket = 0;
+    int server_fd = -1;
+    int new_socket = -1;
     struct sockaddr_in address;
     int port;
 

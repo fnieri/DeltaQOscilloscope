@@ -39,7 +39,10 @@ Server::Server(int port)
 
 Server::~Server()
 {
-    close(server_fd);
+    if (server_fd >= 0) {
+        close(server_fd);
+        server_fd = -1;
+    }
     if (serverThread.joinable())
         serverThread.join();
     if (workerThread.joinable())
@@ -54,7 +57,7 @@ void Server::updateSystem()
 void Server::run()
 {
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == 0) {
+    if (server_fd < 0) {
         perror("Socket failed");
         return;
     }
@@ -118,8 +121,10 @@ void Server::run()
         clientThreads.emplace_back(&Server::handleClient, this, client_socket);
     }
 
-    close(server_fd);
-    server_fd = 0;
+    if (server_fd >= 0) {
+        close(server_fd);
+        server_fd = -1;
+    }
     cleanupThreads();
     server_started = false;
 }
@@ -148,9 +153,18 @@ void Server::stopServer()
     running = false;
     server_started = false;
 
-    if (server_fd > 0) {
+    // Close the Erlang client socket so handleClient()'s read() unblocks.
+    {
+        std::lock_guard<std::mutex> lock(erlangMutex);
+        if (erlang_socket >= 0) {
+            close(erlang_socket);
+            erlang_socket = -1;
+        }
+    }
+
+    if (server_fd >= 0) {
         close(server_fd);
-        server_fd = 0;
+        server_fd = -1;
     }
 
     if (serverThread.joinable())
@@ -192,7 +206,7 @@ void Server::handleClient(int clientSocket)
     while (running) {
         int valread = read(clientSocket, tempBuf, sizeof(tempBuf));
         if (valread <= 0) {
-            if (valread == 0 || errno == ECONNRESET)
+            if (valread == 0 || errno == ECONNRESET || errno == EBADF)
                 break;
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -216,9 +230,13 @@ void Server::handleClient(int clientSocket)
 
     {
         std::lock_guard<std::mutex> lock(erlangMutex);
-        erlang_socket = -1;
+        if (erlang_socket >= 0) {
+            close(erlang_socket);
+            erlang_socket = -1;
+        }
+        // If erlang_socket was already closed by stopServer(), clientSocket
+        // is the same fd and was already closed — don't double-close.
     }
-    close(clientSocket);
 }
 
 /**
