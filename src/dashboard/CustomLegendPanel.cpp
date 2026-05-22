@@ -53,6 +53,12 @@ void CustomLegendPanel::removeEntry(const QString &name)
 /**
  * @brief Clears all entries from the legend panel.
  */
+void CustomLegendPanel::setEntryVisible(const QString &name, bool visible)
+{
+    if (legendEntries.count(name))
+        legendEntries[name]->setVisible(visible);
+}
+
 void CustomLegendPanel::clear()
 {
     for (auto it = legendEntries.begin(); it != legendEntries.end();) {

@@ -1,21 +1,17 @@
-
 #include "DQPlotController.h"
 #include "../Application.h"
-#include <QMetaObject>
+#include "ColorRegistry.h"
+#include <QAreaSeries>
+#include <QLineSeries>
 #include <QVector>
-#include <QtConcurrent>
 #include <algorithm>
-#include <cstdlib>
-#include <qcontainerfwd.h>
-#include <qlineseries.h>
-using namespace std::chrono;
+
 DQPlotController::DQPlotController(DeltaQPlot *plot, const std::vector<std::string> &selectedItems)
     : plot(plot)
 {
     auto system = Application::getInstance().getSystem();
-    for (const auto &name : selectedItems) {
-        addComponent(name, (system->hasOutcome(name)));
-    }
+    for (const auto &name : selectedItems)
+        addComponent(name, system->hasOutcome(name));
     setTitle();
 }
 
@@ -26,474 +22,340 @@ DQPlotController::~DQPlotController()
     operators.clear();
 }
 
+// -----------------------------------------------------------------------
+// Bounds mode toggle
+// -----------------------------------------------------------------------
+
+void DQPlotController::applyBoundsModeToOutcome(OutcomeSeries &s)
+{
+    plot->setSeriesVisible(s.boundsArea,   boundsAsArea);
+    plot->setSeriesVisible(s.upperBoundS, !boundsAsArea);
+    plot->setSeriesVisible(s.lowerBoundS, !boundsAsArea);
+}
+
+void DQPlotController::applyBoundsModeToExpression(ExpressionSeries &s)
+{
+    plot->setSeriesVisible(s.obsBoundsArea,   boundsAsArea);
+    plot->setSeriesVisible(s.obsUpperBoundS, !boundsAsArea);
+    plot->setSeriesVisible(s.obsLowerBoundS, !boundsAsArea);
+    plot->setSeriesVisible(s.calcBoundsArea,   boundsAsArea);
+    plot->setSeriesVisible(s.calcUpperBoundS, !boundsAsArea);
+    plot->setSeriesVisible(s.calcLowerBoundS, !boundsAsArea);
+}
+
+void DQPlotController::setBoundsAsArea(bool useArea)
+{
+    boundsAsArea = useArea;
+    for (auto &[name, p] : outcomes)  applyBoundsModeToOutcome(p.first);
+    for (auto &[name, p] : probes)    applyBoundsModeToExpression(p.first);
+    for (auto &[name, p] : operators) applyBoundsModeToExpression(p.first);
+}
+
+// -----------------------------------------------------------------------
+// Component tracking
+// -----------------------------------------------------------------------
+
 bool DQPlotController::isEmptyAfterReset()
 {
     auto system = Application::getInstance().getSystem();
-
     std::lock_guard<std::mutex> lock(resetMutex);
 
     for (auto it = outcomes.begin(); it != outcomes.end();) {
-        if (!system->hasOutcome(it->first)) {
-            removeComponent(it->first);
-            it = outcomes.begin();
-        } else {
-            ++it;
-        }
+        if (!system->hasOutcome(it->first)) { removeComponent(it->first); it = outcomes.erase(it); }
+        else ++it;
     }
-
     for (auto it = probes.begin(); it != probes.end();) {
-        if (!system->hasProbe(it->first)) {
-            removeComponent(it->first);
-            it = probes.begin();
-        } else {
-            ++it;
-        }
+        if (!system->hasProbe(it->first)) { removeComponent(it->first); it = probes.erase(it); }
+        else ++it;
     }
     for (auto it = operators.begin(); it != operators.end();) {
-        if (!system->hasOperator(it->first)) {
-            removeComponent(it->first);
-            it = operators.begin();
-        } else {
-            ++it;
-        }
+        if (!system->hasOperator(it->first)) { removeComponent(it->first); it = operators.erase(it); }
+        else ++it;
     }
-    return (outcomes.empty() && probes.empty() && operators.empty());
+    return outcomes.empty() && probes.empty() && operators.empty();
 }
 
 bool DQPlotController::containsComponent(std::string name)
 {
-    return ((outcomes.find(name) != outcomes.end()) || (probes.find(name) != probes.end()) || (operators.find(name) != operators.end()));
+    return outcomes.count(name) || probes.count(name) || operators.count(name);
+}
+
+std::vector<std::string> DQPlotController::getComponents()
+{
+    std::vector<std::string> v;
+    v.reserve(outcomes.size() + probes.size() + operators.size());
+    for (const auto &kv : probes)    v.push_back(kv.first);
+    for (const auto &kv : outcomes)  v.push_back(kv.first);
+    for (const auto &kv : operators) v.push_back(kv.first);
+    return v;
 }
 
 void DQPlotController::setTitle()
 {
-    std::vector<std::string> existingItems = getComponents();
     std::string title = "Plot of: ";
-    for (const auto &name : existingItems) {
-        title += name + " ";
-    }
+    for (const auto &name : getComponents()) title += name + " ";
     plot->setTitle(QString::fromStdString(title));
 }
 
 void DQPlotController::editPlot(const std::vector<std::string> &selectedItems)
 {
-    std::vector<std::string> existingItems = getComponents();
-
-    for (const auto &name : existingItems) {
-        if (std::find(selectedItems.begin(), selectedItems.end(), name) == selectedItems.end()) {
+    for (const auto &name : getComponents())
+        if (std::find(selectedItems.begin(), selectedItems.end(), name) == selectedItems.end())
             removeComponent(name);
-        }
-    }
-    auto system = Application::getInstance().getSystem();
 
-    for (const auto &name : selectedItems) {
-        if (!containsComponent(name)) {
+    auto system = Application::getInstance().getSystem();
+    for (const auto &name : selectedItems)
+        if (!containsComponent(name))
             addComponent(name, system->hasOutcome(name));
-        }
-    }
     setTitle();
 }
 
 void DQPlotController::addComponent(const std::string &name, bool isOutcome)
 {
     auto system = Application::getInstance().getSystem();
-    if (isOutcome) {
-        addOutcomeSeries(name);
-    } else {
-        addExpressionSeries(name, system->hasProbe(name));
-    }
+    if (isOutcome) addOutcomeSeries(name);
+    else           addExpressionSeries(name, system->hasProbe(name));
     setTitle();
 }
 
-std::vector<std::string> DQPlotController::getComponents()
+void DQPlotController::removeComponent(const std::string &name)
 {
-    std::vector<std::string> components;
-    components.reserve(probes.size() + outcomes.size() + operators.size());
-
-    for (const auto &kv : probes) {
-        components.push_back(kv.first);
-    }
-    for (const auto &kv : outcomes) {
-        components.push_back(kv.first);
-    }
-    for (const auto &kv : operators) {
-        components.push_back(kv.first);
-    }
-    return components;
+    if      (outcomes.count(name))  removeOutcomeSeries(name);
+    else if (probes.count(name))    removeExpressionSeries(name, true);
+    else if (operators.count(name)) removeExpressionSeries(name, false);
+    else return;
+    setTitle();
 }
 
-QLineSeries *DQPlotController::createAndAddLineSeries(const std::string &legendName)
+// -----------------------------------------------------------------------
+// Series factory helpers
+// -----------------------------------------------------------------------
+
+QLineSeries *DQPlotController::createAndAddLineSeries(const std::string &name)
 {
-    auto series = new QLineSeries();
-    plot->addSeries(series, legendName);
-    return series;
+    auto *s = new QLineSeries();
+    plot->addSeries(s, name);
+    return s;
 }
+
+QAreaSeries *DQPlotController::createAndAddAreaSeries(const std::string &name, const QColor &color)
+{
+    auto *upper = new QLineSeries();
+    auto *lower = new QLineSeries();
+    auto *area  = new QAreaSeries(upper, lower);
+    plot->addAreaSeries(area, name, color);
+    return area;
+}
+
+// -----------------------------------------------------------------------
+// Add / remove series
+// -----------------------------------------------------------------------
 
 void DQPlotController::addOutcomeSeries(const std::string &name)
 {
     auto system = Application::getInstance().getSystem();
+    QColor base = ColorRegistry::getColorFor(name);
 
-    auto lowerBoundSeries = createAndAddLineSeries(name + "(O) lower bound");
-    auto upperBoundSeries = createAndAddLineSeries(name + "(O) upper bound");
-    auto outcomeSeries = createAndAddLineSeries(name + "(O) observed");
-    auto meanSeries = createAndAddLineSeries(name + "(O) mean");
-    auto qtaSeries = createAndAddLineSeries(name + "(O) qta");
+    auto *outcomeS    = createAndAddLineSeries(name + "(O) observed");
+    auto *boundsArea  = createAndAddAreaSeries(name + "(O) bounds", base);
+    auto *upperBoundS = createAndAddLineSeries(name + "(O) upper bound");
+    auto *lowerBoundS = createAndAddLineSeries(name + "(O) lower bound");
+    auto *meanS       = createAndAddLineSeries(name + "(O) mean");
+    auto *qtaS        = createAndAddLineSeries(name + "(O) qta");
 
-    OutcomeSeries series
-        = {.outcomeS = outcomeSeries, .lowerBoundS = lowerBoundSeries, .upperBoundS = upperBoundSeries, .meanS = meanSeries, .qtaS = qtaSeries};
-
-    outcomes[name] = {series, system->getOutcome(name)};
+    OutcomeSeries s = {outcomeS, boundsArea, upperBoundS, lowerBoundS, meanS, qtaS};
+    applyBoundsModeToOutcome(s);
+    outcomes[name] = {s, system->getOutcome(name)};
 }
 
 void DQPlotController::addExpressionSeries(const std::string &name, bool isProbe)
 {
     auto system = Application::getInstance().getSystem();
+    QColor base = ColorRegistry::getColorFor(name);
 
-    auto obsLowerBoundSeries = createAndAddLineSeries(name + "(O) lower bound");
-    auto obsUpperBoundSeries = createAndAddLineSeries(name + " (O) upper bound");
-    auto obsSeries = createAndAddLineSeries(name + "(O) observed");
-    auto obsMeanSeries = createAndAddLineSeries(name + " (O) mean");
+    auto *obsS            = createAndAddLineSeries(name + "(O) observed");
+    auto *obsBoundsArea   = createAndAddAreaSeries(name + "(O) bounds", base);
+    auto *obsUpperBoundS  = createAndAddLineSeries(name + "(O) upper bound");
+    auto *obsLowerBoundS  = createAndAddLineSeries(name + "(O) lower bound");
+    auto *obsMeanS        = createAndAddLineSeries(name + "(O) mean");
+    auto *calcS           = createAndAddLineSeries(name + "(C) calculated");
+    auto *calcBoundsArea  = createAndAddAreaSeries(name + "(C) bounds", base);
+    auto *calcUpperBoundS = createAndAddLineSeries(name + "(C) upper bound");
+    auto *calcLowerBoundS = createAndAddLineSeries(name + "(C) lower bound");
+    auto *calcMeanS       = createAndAddLineSeries(name + "(C) mean");
+    auto *qtaS            = createAndAddLineSeries(name + " qta");
 
-    auto qtaSeries = createAndAddLineSeries(name + " qta");
-
-    auto calcSeries = createAndAddLineSeries(name + "(C) calculated");
-    auto calcLowerBoundSeries = createAndAddLineSeries(name + "(C) lower bound");
-    auto calcUpperBoundSeries = createAndAddLineSeries(name + "(C) upper bound");
-    auto calcMeanSeries = createAndAddLineSeries(name + "(C) mean");
-
-    ExpressionSeries series = {
-        .obsS = obsSeries,
-        .obsLowerBoundS = obsLowerBoundSeries,
-        .obsUpperBoundS = obsUpperBoundSeries,
-        .obsMeanS = obsMeanSeries,
-        .calcS = calcSeries,
-        .calcLowerBoundS = calcLowerBoundSeries,
-        .calcUpperBoundS = calcUpperBoundSeries,
-        .calcMeanS = calcMeanSeries,
-        .qtaS = qtaSeries,
-    };
-    if (isProbe)
-        probes[name] = {series, system->getProbe(name)};
-    else
-        operators[name] = {series, system->getOperator(name)};
+    ExpressionSeries s = {obsS, obsBoundsArea, obsUpperBoundS, obsLowerBoundS, obsMeanS,
+                          calcS, calcBoundsArea, calcUpperBoundS, calcLowerBoundS, calcMeanS, qtaS};
+    applyBoundsModeToExpression(s);
+    if (isProbe) probes[name]    = {s, system->getProbe(name)};
+    else         operators[name] = {s, system->getOperator(name)};
 }
 
 void DQPlotController::removeOutcomeSeries(const std::string &name)
 {
-    OutcomeSeries series = outcomes[name].first;
-
-    plot->removeSeries(series.outcomeS);
-    delete series.outcomeS;
-    series.outcomeS = NULL;
-
-    plot->removeSeries(series.lowerBoundS);
-    delete series.lowerBoundS;
-    series.lowerBoundS = NULL;
-
-    plot->removeSeries(series.upperBoundS);
-    delete series.upperBoundS;
-    series.upperBoundS = NULL;
-
-    plot->removeSeries(series.meanS);
-    delete series.meanS;
-    series.meanS = NULL;
-
-    plot->removeSeries(series.qtaS);
-    delete series.qtaS;
-    series.qtaS = NULL;
-
+    auto &s = outcomes[name].first;
+    plot->removeSeries(s.outcomeS);   delete s.outcomeS;
+    plot->removeSeries(s.boundsArea); delete s.boundsArea;
+    plot->removeSeries(s.upperBoundS); delete s.upperBoundS;
+    plot->removeSeries(s.lowerBoundS); delete s.lowerBoundS;
+    plot->removeSeries(s.meanS);      delete s.meanS;
+    plot->removeSeries(s.qtaS);       delete s.qtaS;
     outcomes.erase(name);
 }
 
 void DQPlotController::removeExpressionSeries(const std::string &name, bool isProbe)
 {
-    ExpressionSeries series;
-    if (isProbe)
-        series = probes[name].first;
-    else
-        series = operators[name].first;
-
-    plot->removeSeries(series.obsLowerBoundS);
-    delete series.obsLowerBoundS;
-    series.obsLowerBoundS = NULL;
-
-    plot->removeSeries(series.obsUpperBoundS);
-    delete series.obsUpperBoundS;
-    series.obsUpperBoundS = NULL;
-
-    plot->removeSeries(series.obsS);
-    delete series.obsS;
-    series.obsS = NULL;
-
-    plot->removeSeries(series.obsMeanS);
-    delete series.obsMeanS;
-    series.obsMeanS = NULL;
-
-    plot->removeSeries(series.qtaS);
-    delete series.qtaS;
-    series.qtaS = NULL;
-
-    plot->removeSeries(series.calcS);
-    delete series.calcS;
-    series.calcS = NULL;
-
-    plot->removeSeries(series.calcLowerBoundS);
-    delete series.calcLowerBoundS;
-    series.calcLowerBoundS = NULL;
-
-    plot->removeSeries(series.calcUpperBoundS);
-    delete series.calcUpperBoundS;
-    series.calcUpperBoundS = NULL;
-
-    plot->removeSeries(series.calcMeanS);
-    delete series.calcMeanS;
-    series.calcMeanS = NULL;
-
-    if (isProbe)
-        probes.erase(name);
-    else
-        operators.erase(name);
+    auto &s = isProbe ? probes[name].first : operators[name].first;
+    plot->removeSeries(s.obsS);            delete s.obsS;
+    plot->removeSeries(s.obsBoundsArea);   delete s.obsBoundsArea;
+    plot->removeSeries(s.obsUpperBoundS);  delete s.obsUpperBoundS;
+    plot->removeSeries(s.obsLowerBoundS);  delete s.obsLowerBoundS;
+    plot->removeSeries(s.obsMeanS);        delete s.obsMeanS;
+    plot->removeSeries(s.calcS);           delete s.calcS;
+    plot->removeSeries(s.calcBoundsArea);  delete s.calcBoundsArea;
+    plot->removeSeries(s.calcUpperBoundS); delete s.calcUpperBoundS;
+    plot->removeSeries(s.calcLowerBoundS); delete s.calcLowerBoundS;
+    plot->removeSeries(s.calcMeanS);       delete s.calcMeanS;
+    plot->removeSeries(s.qtaS);            delete s.qtaS;
+    if (isProbe) probes.erase(name);
+    else         operators.erase(name);
 }
 
-void DQPlotController::removeComponent(const std::string &name)
-{
-    if (outcomes.count(name)) {
-        removeOutcomeSeries(name);
-    } else if (probes.count(name) || operators.count(name)) {
-        removeExpressionSeries(name, probes.count(name));
-    } else {
-        return;
-    }
-    setTitle();
-}
+// -----------------------------------------------------------------------
+// Update — runs on the GUI thread
+// -----------------------------------------------------------------------
 
 void DQPlotController::update(uint64_t timeLowerBound, uint64_t timeUpperBound)
 {
     std::lock_guard<std::mutex> lock(updateMutex);
-    double outcomeMax = 0;
+    double xMax = 0;
 
-    for (auto &[name, seriesOutcome] : outcomes) {
-        double outcomeRange = updateOutcome(seriesOutcome.first, seriesOutcome.second, timeLowerBound, timeUpperBound);
-        if (outcomeRange > outcomeMax) {
-            outcomeMax = outcomeRange;
-        }
-    }
+    for (auto &[name, p] : outcomes)
+        xMax = std::max(xMax, updateOutcome(p.first, p.second, timeLowerBound, timeUpperBound));
+    for (auto &[name, p] : probes)
+        if (p.second) xMax = std::max(xMax, updateProbe(p.first, p.second, timeLowerBound, timeUpperBound));
+    for (auto &[name, p] : operators)
+        if (p.second) xMax = std::max(xMax, updateOperator(p.first, p.second, timeLowerBound, timeUpperBound));
 
-    double probeMax = 0;
-    for (auto &[name, seriesProbe] : probes) {
-        if (seriesProbe.second) {
-            double probeRange = updateProbe(probes[name].first, probes[name].second, timeLowerBound, timeUpperBound);
-            if (probeRange > probeMax) {
-                probeMax = probeRange;
-            }
-        }
-    }
-
-    double operatorMax = 0;
-    for (auto &[name, seriesOp] : operators) {
-        if (seriesOp.second) {
-            double opRange = updateOperator(operators[name].first, operators[name].second, timeLowerBound, timeUpperBound);
-            if (opRange > operatorMax) {
-                operatorMax = opRange;
-            }
-        }
-    }
-    plot->updateXRange(std::max({outcomeMax, probeMax, operatorMax}));
+    plot->updateXRange(xMax);
 }
 
-double DQPlotController::updateOutcome(OutcomeSeries &series, const std::shared_ptr<Outcome> &outcome, uint64_t timeLowerBound, uint64_t timeUpperBound)
+// -----------------------------------------------------------------------
+// Data helpers
+// -----------------------------------------------------------------------
+
+static QVector<QPointF> buildCdfPoints(const DeltaQ &dq, const std::vector<Bound> &bounds,
+                                        QVector<QPointF> &upper, QVector<QPointF> &lower,
+                                        QVector<QPointF> &mean)
 {
-    auto ret = QtConcurrent::run([=]() {
-        double maxDelay = outcome->getMaxDelay();
-        DeltaQRepr repr = outcome->getObservedDeltaQRepr(timeLowerBound, timeUpperBound);
+    int    n        = dq.getBins();
+    double binWidth = dq.getBinWidth();
 
-        DeltaQ deltaQ = repr.deltaQ;
-        std::vector<Bound> bounds = repr.bounds;
-        int size = deltaQ.getBins();
-        double binWidth = deltaQ.getBinWidth();
+    QVector<QPointF> cdf;
+    cdf.reserve(n + 1);
+    upper.reserve(n + 1);
+    lower.reserve(n + 1);
+    mean.reserve(n + 1);
 
-        QVector<QPointF> deltaQData;
-        deltaQData.emplace_back(QPointF(0, 0));
-        deltaQData.reserve(size);
+    cdf.emplace_back(0.0, 0.0);
+    upper.emplace_back(0.0, 0.0);
+    lower.emplace_back(0.0, 0.0);
+    mean.emplace_back(0.0, 0.0);
 
-        QVector<QPointF> lowerBoundData;
-        lowerBoundData.emplace_back(QPointF(0, 0));
-        lowerBoundData.reserve(size);
-
-        QVector<QPointF> upperBoundData;
-        upperBoundData.emplace_back(QPointF(0, 0));
-        upperBoundData.reserve(size);
-
-        QVector<QPointF> meanData;
-        meanData.emplace_back(QPointF(0, 0));
-        meanData.reserve(size);
-
-        QVector<QPointF> qtaData;
-        auto qta = outcome->getQTA();
-        for (int i = 0; i < size; ++i) {
-            double x = binWidth * (i + 1);
-
-            deltaQData.emplace_back(QPointF(x, deltaQ.cdfAt(i)));
-            lowerBoundData.emplace_back(QPointF(x, bounds[i].lowerBound));
-            upperBoundData.emplace_back(QPointF(x, bounds[i].upperBound));
-            meanData.emplace_back(QPointF(x, bounds[i].mean));
-        }
-
-        if (qta.defined) {
-            qtaData.reserve(8);
-            qtaData.emplace_back(qta.perc_25, 0);
-            qtaData.emplace_back(qta.perc_25, 0.25);
-            qtaData.emplace_back(qta.perc_50, 0.25);
-            qtaData.emplace_back(qta.perc_50, 0.5);
-            qtaData.emplace_back(qta.perc_75, 0.5);
-            qtaData.emplace_back(qta.perc_75, 0.75);
-            qtaData.emplace_back(maxDelay, 0.75);
-            qtaData.emplace_back(maxDelay, qta.cdfMax);
-        }
-        QMetaObject::invokeMethod(
-            plot,
-            [=]() {
-                //        auto guiStart = high_resolution_clock::now();
-
-                plot->setUpdatesEnabled(false);
-
-                plot->updateSeries(series.outcomeS, deltaQData);
-                plot->updateSeries(series.lowerBoundS, lowerBoundData);
-                plot->updateSeries(series.upperBoundS, upperBoundData);
-                plot->updateSeries(series.meanS, meanData);
-                plot->updateSeries(series.qtaS, qtaData);
-
-                plot->setUpdatesEnabled(true);
-
-                //    auto guiEnd = high_resolution_clock::now();
-                //      qDebug() << "GUI update took" << duration_cast<microseconds>(guiEnd - guiStart).count() << "";
-            },
-            Qt::QueuedConnection);
-    });
-    ret.waitForFinished();
-    return outcome->getMaxDelay();
+    for (int i = 0; i < n; ++i) {
+        double x = binWidth * (i + 1);
+        cdf.emplace_back(x, dq.cdfAt(i));
+        upper.emplace_back(x, bounds[i].upperBound);
+        lower.emplace_back(x, bounds[i].lowerBound);
+        mean.emplace_back(x, bounds[i].mean);
+    }
+    return cdf;
 }
 
-double DQPlotController::updateOperator(ExpressionSeries &series, std::shared_ptr<Operator> &op, uint64_t timeLowerBound, uint64_t timeUpperBound)
+static QVector<QPointF> buildQtaPoints(const QTA &qta, double maxDelay)
 {
-    updateExpression(series, op->getObservedDeltaQRepr(timeLowerBound, timeUpperBound), op->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound),
-        op->getQTA(), op->getMaxDelay());
-
-    return op->getMaxDelay();
+    if (!qta.defined) return {};
+    QVector<QPointF> v;
+    v.reserve(8);
+    v.emplace_back(qta.perc_25, 0.0);
+    v.emplace_back(qta.perc_25, 0.25);
+    v.emplace_back(qta.perc_50, 0.25);
+    v.emplace_back(qta.perc_50, 0.5);
+    v.emplace_back(qta.perc_75, 0.5);
+    v.emplace_back(qta.perc_75, 0.75);
+    v.emplace_back(maxDelay,    0.75);
+    v.emplace_back(maxDelay,    qta.cdfMax);
+    return v;
 }
 
-double DQPlotController::updateProbe(ExpressionSeries &series, std::shared_ptr<Probe> &probe, uint64_t timeLowerBound, uint64_t timeUpperBound)
+double DQPlotController::updateOutcome(OutcomeSeries &s, const std::shared_ptr<Outcome> &outcome,
+                                        uint64_t lo, uint64_t hi)
 {
-    updateExpression(series, probe->getObservedDeltaQRepr(timeLowerBound, timeUpperBound), probe->getCalculatedDeltaQRepr(timeLowerBound, timeUpperBound),
-        probe->getQTA(), probe->getMaxDelay());
+    double maxDelay = outcome->getMaxDelay();
+    DeltaQRepr repr = outcome->getObservedDeltaQRepr(lo, hi);
+
+    QVector<QPointF> upper, lower, mean;
+    QVector<QPointF> cdf = buildCdfPoints(repr.deltaQ, repr.bounds, upper, lower, mean);
+    QVector<QPointF> qta = buildQtaPoints(outcome->getQTA(), maxDelay);
+
+    plot->setUpdatesEnabled(false);
+    plot->updateSeries(s.outcomeS, cdf);
+    plot->updateAreaSeries(s.boundsArea, upper, lower);
+    plot->updateSeries(s.upperBoundS, upper);
+    plot->updateSeries(s.lowerBoundS, lower);
+    plot->updateSeries(s.meanS, mean);
+    plot->updateSeries(s.qtaS,  qta);
+    plot->setUpdatesEnabled(true);
+
+    return maxDelay;
+}
+
+double DQPlotController::updateProbe(ExpressionSeries &s, std::shared_ptr<Probe> &probe,
+                                      uint64_t lo, uint64_t hi)
+{
+    updateExpression(s,
+        probe->getObservedDeltaQRepr(lo, hi),
+        probe->getCalculatedDeltaQRepr(lo, hi),
+        probe->getQTA(),
+        probe->getMaxDelay());
     return probe->getMaxDelay();
 }
 
-void DQPlotController::updateExpression(ExpressionSeries &series, DeltaQRepr &&obsRepr, DeltaQRepr &&calcRepr, QTA &&qta, double maxDelay)
+double DQPlotController::updateOperator(ExpressionSeries &s, std::shared_ptr<Operator> &op,
+                                         uint64_t lo, uint64_t hi)
 {
-    auto ret = QtConcurrent::run([=]() {
-        auto computeStart = high_resolution_clock::now();
+    updateExpression(s,
+        op->getObservedDeltaQRepr(lo, hi),
+        op->getCalculatedDeltaQRepr(lo, hi),
+        op->getQTA(),
+        op->getMaxDelay());
+    return op->getMaxDelay();
+}
 
-        DeltaQ obsDeltaQ = obsRepr.deltaQ;
-        std::vector<Bound> obsBounds = obsRepr.bounds;
-        DeltaQ calcDeltaQ = calcRepr.deltaQ;
-        std::vector<Bound> calcBounds = calcRepr.bounds;
-        int observedBins = obsDeltaQ.getBins();
-        double observedBinWidth = obsDeltaQ.getBinWidth();
+void DQPlotController::updateExpression(ExpressionSeries &s,
+                                         DeltaQRepr &&obs, DeltaQRepr &&calc,
+                                         QTA &&qta, double maxDelay)
+{
+    QVector<QPointF> obsUpper, obsLower, obsMean;
+    QVector<QPointF> obsCdf = buildCdfPoints(obs.deltaQ, obs.bounds, obsUpper, obsLower, obsMean);
 
-        // --- Prepare data ---
-        QVector<QPointF> obsDeltaQData;
-        obsDeltaQData.emplace_back(QPointF(0, 0));
-        obsDeltaQData.reserve(observedBins);
+    QVector<QPointF> calcUpper, calcLower, calcMean;
+    QVector<QPointF> calcCdf = buildCdfPoints(calc.deltaQ, calc.bounds, calcUpper, calcLower, calcMean);
 
-        QVector<QPointF> obsLowerBoundData;
-        obsLowerBoundData.emplace_back(QPointF(0, 0));
-        obsLowerBoundData.reserve(observedBins);
+    QVector<QPointF> qtaPoints = buildQtaPoints(qta, maxDelay);
 
-        QVector<QPointF> obsUpperBoundData;
-        obsUpperBoundData.emplace_back(QPointF(0, 0));
-        obsUpperBoundData.reserve(observedBins);
-
-        QVector<QPointF> obsMeanData;
-        obsMeanData.emplace_back(QPointF(0, 0));
-        obsMeanData.reserve(observedBins);
-
-        for (int i = 0; i < observedBins; ++i) {
-            double x = observedBinWidth * (i + 1);
-            obsDeltaQData.emplace_back(QPointF(x, obsDeltaQ.cdfAt(i)));
-            obsLowerBoundData.emplace_back(QPointF(x, obsBounds[i].lowerBound));
-            obsUpperBoundData.emplace_back(QPointF(x, obsBounds[i].upperBound));
-            obsMeanData.emplace_back(QPointF(x, obsBounds[i].mean));
-        }
-
-        QVector<QPointF> calcDeltaQData;
-        calcDeltaQData.emplace_back(QPointF(0, 0));
-        calcDeltaQData.reserve(observedBins);
-
-        QVector<QPointF> calcLowerBoundData;
-        calcLowerBoundData.emplace_back(QPointF(0, 0));
-        calcLowerBoundData.reserve(observedBins);
-
-        QVector<QPointF> calcUpperBoundData;
-        calcUpperBoundData.emplace_back(QPointF(0, 0));
-        calcUpperBoundData.reserve(observedBins);
-
-        QVector<QPointF> calcMeanData;
-        calcMeanData.emplace_back(QPointF(0, 0));
-        calcMeanData.reserve(observedBins);
-
-        QVector<QPointF> qtaData;
-
-        // Prepare calculatedDeltaQ data
-        int calculatedBins = calcDeltaQ.getBins();
-        double calculatedBinWidth = calcDeltaQ.getBinWidth();
-        for (int i = 0; i < calculatedBins; ++i) {
-            double x = calculatedBinWidth * (i + 1);
-            calcDeltaQData.emplace_back(QPointF(x, calcDeltaQ.cdfAt(i)));
-            calcLowerBoundData.emplace_back(QPointF(x, calcBounds[i].lowerBound));
-            calcUpperBoundData.emplace_back(QPointF(x, calcBounds[i].upperBound));
-            calcMeanData.emplace_back(QPointF(x, calcBounds[i].mean));
-        }
-        if (qta.defined) {
-            qtaData.reserve(8);
-            qtaData.emplace_back(qta.perc_25, 0);
-            qtaData.emplace_back(qta.perc_25, 0.25);
-            qtaData.emplace_back(qta.perc_50, 0.25);
-            qtaData.emplace_back(qta.perc_50, 0.5);
-            qtaData.emplace_back(qta.perc_75, 0.5);
-            qtaData.emplace_back(qta.perc_75, 0.75);
-            qtaData.emplace_back(maxDelay, 0.75);
-            qtaData.emplace_back(maxDelay, qta.cdfMax);
-        }
-        auto computeEnd = high_resolution_clock::now();
-        //   std::cout << "comp," << observedBins << "," << calculatedBins << "," << duration_cast<microseconds>(computeEnd - computeStart).count();
-
-        // --- Push results back to GUI thread ---
-
-        QMetaObject::invokeMethod(
-            plot,
-            [=]() {
-                auto guiStart = high_resolution_clock::now();
-
-                plot->setUpdatesEnabled(false);
-
-                plot->updateSeries(series.obsS, obsDeltaQData);
-                plot->updateSeries(series.obsLowerBoundS, obsLowerBoundData);
-                plot->updateSeries(series.obsUpperBoundS, obsUpperBoundData);
-                plot->updateSeries(series.obsMeanS, obsMeanData);
-
-                plot->updateSeries(series.calcS, calcDeltaQData);
-                plot->updateSeries(series.calcLowerBoundS, calcLowerBoundData);
-                plot->updateSeries(series.calcUpperBoundS, calcUpperBoundData);
-                plot->updateSeries(series.calcMeanS, calcMeanData);
-                plot->updateSeries(series.qtaS, qtaData);
-
-                plot->setUpdatesEnabled(true);
-
-                auto guiEnd = high_resolution_clock::now();
-                // std::cout << "gui," << observedBins << "," << calculatedBins << "," << duration_cast<microseconds>(guiEnd - guiStart).count();
-            },
-            Qt::QueuedConnection);
-    });
-    ret.waitForFinished();
+    plot->setUpdatesEnabled(false);
+    plot->updateSeries(s.obsS, obsCdf);
+    plot->updateAreaSeries(s.obsBoundsArea, obsUpper, obsLower);
+    plot->updateSeries(s.obsUpperBoundS, obsUpper);
+    plot->updateSeries(s.obsLowerBoundS, obsLower);
+    plot->updateSeries(s.obsMeanS, obsMean);
+    plot->updateSeries(s.calcS, calcCdf);
+    plot->updateAreaSeries(s.calcBoundsArea, calcUpper, calcLower);
+    plot->updateSeries(s.calcUpperBoundS, calcUpper);
+    plot->updateSeries(s.calcLowerBoundS, calcLower);
+    plot->updateSeries(s.calcMeanS, calcMean);
+    plot->updateSeries(s.qtaS, qtaPoints);
+    plot->setUpdatesEnabled(true);
 }
