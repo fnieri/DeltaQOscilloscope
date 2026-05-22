@@ -1,5 +1,5 @@
-{application, otel_getting_started, [
-    {description, "An OTP application"},
+{application, dqsd_sample, [
+    {description, "Sample Erlang application demonstrating dqsd_otel integration"},
     {vsn, "0.1.0"},
     {registered, []},
     {mod, {mm1k, []}},

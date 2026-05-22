@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%% @doc otel_getting_started top level supervisor.
+%% @doc dqsd_sample top level supervisor.
 %% @end
 %%%-------------------------------------------------------------------
 
