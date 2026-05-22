@@ -14,6 +14,7 @@ Observable::Observable(const std::string &name)
 
 void Observable::addSample(const Sample &sample)
 {
+    std::lock_guard<std::mutex> lock(samplesMutex);
     samples.emplace_back(sample);
     sorted = false;
 }
